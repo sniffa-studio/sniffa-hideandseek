@@ -2,6 +2,7 @@ package studio.sniffa.client.ui.title
 
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents
 import net.fabricmc.fabric.api.client.screen.v1.Screens
+import net.fabricmc.fabric.api.event.Event
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.components.AbstractWidget
@@ -15,6 +16,7 @@ import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.contents.TranslatableContents
 import net.minecraft.resources.Identifier
+import studio.sniffa.Hideandseek
 import studio.sniffa.client.Settings
 import studio.sniffa.client.ui.theme.Textures
 
@@ -24,8 +26,6 @@ object TitleScreenSkin {
 
     private const val OPTIONS = "menu.options"
     private const val QUIT = "menu.quit"
-
-    private const val ANCHOR = "menu.singleplayer"
 
     private const val FULL_WIDTH = 240
     private const val GAP = 6
@@ -39,10 +39,13 @@ object TitleScreenSkin {
 
     private const val STATUS_GAP = 10
 
+    private val AFTER_OTHER_MODS = Hideandseek.id("after_other_mods")
+
     private var statusY = 0
 
     fun install() {
-        ScreenEvents.AFTER_INIT.register { _, screen, _, _ ->
+        ScreenEvents.AFTER_INIT.addPhaseOrdering(Event.DEFAULT_PHASE, AFTER_OTHER_MODS)
+        ScreenEvents.AFTER_INIT.register(AFTER_OTHER_MODS) { _, screen, _, _ ->
             if (screen !is TitleScreen) return@register
             rebuild(screen)
             if (Settings.pingEventServer) EventStatus.refresh(EVENT_ADDRESS)
@@ -65,13 +68,12 @@ object TitleScreenSkin {
         val buttons = Screens.getButtons(screen)
 
         val anchorX = screen.width / 2 - FULL_WIDTH / 2
-        var anchorY = screen.height / 4 + 48
+        val anchorY = screen.height / 4 + 48
         var options: AbstractWidget? = null
         var quit: AbstractWidget? = null
 
         for (widget in buttons) {
             when (keyOf(widget)) {
-                ANCHOR -> anchorY = widget.y
                 OPTIONS -> options = widget
                 QUIT -> quit = widget
             }
