@@ -1,0 +1,17 @@
+{
+	"required": true,
+	"package": "studio.sniffa.client.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"EntityGlowMixin",
+		"TitleSplashMixin",
+		"WorldBorderRendererMixin",
+		"FlatHeadMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}

@@ -1,0 +1,49 @@
+{
+	"schemaVersion": 1,
+	"id": "hideandseek",
+	"version": "${version}",
+	"name": "Sniffa Hide & Seek",
+	"description": "Client mod for the Sniffa Studio Hide & Seek event. Without it you cannot join the event server.",
+	"authors": [
+		"Sniffa Studio"
+	],
+	"contact": {
+		"homepage": "https://sniffa.studio",
+		"sources": "https://github.com/sniffa-studio/sniffa-hideandseek",
+		"issues": "https://github.com/sniffa-studio/sniffa-hideandseek/issues"
+	},
+	"license": "MIT",
+	"icon": "assets/hideandseek/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"main": [
+			{
+				"value": "studio.sniffa.Hideandseek",
+				"adapter": "kotlin"
+			}
+		],
+		"client": [
+			{
+				"value": "studio.sniffa.client.HideandseekClient",
+				"adapter": "kotlin"
+			}
+		]
+	},
+	"accessWidener": "hideandseek.accesswidener",
+	"mixins": [
+		"hideandseek.mixins.json",
+		{
+			"config": "hideandseek.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~1.21.11",
+		"java": ">=21",
+		"fabric-api": "*",
+		"fabric-language-kotlin": "*",
+		"owo": "*",
+		"geckolib": "*"
+	}
+}

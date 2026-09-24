@@ -1,0 +1,54 @@
+{
+  "cue.round_opens": {
+    "category": "player",
+    "subtitle": "subtitles.hideandseek.round_opens",
+    "sounds": [{ "name": "hideandseek:round_opens", "stream": false }]
+  },
+  "cue.hunt_begins": {
+    "category": "player",
+    "subtitle": "subtitles.hideandseek.hunt_begins",
+    "sounds": [{ "name": "hideandseek:hunt_begins", "stream": false }]
+  },
+  "cue.seeker_wins": {
+    "category": "player",
+    "subtitle": "subtitles.hideandseek.seeker_wins",
+    "sounds": [{ "name": "hideandseek:seeker_wins", "stream": false }]
+  },
+  "cue.hiders_win": {
+    "category": "player",
+    "subtitle": "subtitles.hideandseek.hiders_win",
+    "sounds": [{ "name": "hideandseek:hiders_win", "stream": false }]
+  },
+  "cue.caught": {
+    "category": "player",
+    "subtitle": "subtitles.hideandseek.caught",
+    "sounds": [{ "name": "hideandseek:caught", "stream": false }]
+  },
+  "cue.spotted": {
+    "category": "player",
+    "subtitle": "subtitles.hideandseek.spotted",
+    "sounds": [{ "name": "hideandseek:spotted", "stream": false }]
+  },
+  "cue.radar_ping": {
+    "category": "player",
+    "subtitle": "subtitles.hideandseek.radar_ping",
+    "sounds": [{ "name": "hideandseek:radar_ping", "stream": false }]
+  },
+  "cue.tick": {
+    "category": "player",
+    "sounds": [{ "name": "hideandseek:tick", "stream": false }]
+  },
+  "cue.tick_last": {
+    "category": "player",
+    "sounds": [{ "name": "hideandseek:tick_last", "stream": false }]
+  },
+  "cue.jam": {
+    "category": "player",
+    "subtitle": "subtitles.hideandseek.jam",
+    "sounds": [{ "name": "hideandseek:jam", "stream": false }]
+  },
+  "cue.instrument": {
+    "category": "player",
+    "sounds": [{ "name": "hideandseek:instrument", "stream": false }]
+  }
+}
