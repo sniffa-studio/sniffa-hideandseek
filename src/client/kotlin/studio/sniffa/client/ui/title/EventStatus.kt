@@ -6,7 +6,6 @@ import net.minecraft.client.multiplayer.ServerStatusPinger
 import net.minecraft.network.chat.Component
 import net.minecraft.server.network.EventLoopGroupHolder
 import studio.sniffa.client.ui.theme.Palette
-import java.util.concurrent.CompletableFuture
 
 object EventStatus {
 
@@ -35,7 +34,7 @@ object EventStatus {
         gaveUp = false
 
         val transport = EventLoopGroupHolder.remote(client.options.useNativeTransport())
-        CompletableFuture.runAsync {
+        val worker = Thread({
             try {
                 ping.pingServer(data, {}, {}, transport)
             } catch (unreachable: Exception) {
@@ -44,7 +43,10 @@ object EventStatus {
             if (pinger !== ping) {
                 ping.removeAll()
             }
-        }
+        }, "sniffa event ping")
+        worker.contextClassLoader = EventStatus::class.java.classLoader
+        worker.isDaemon = true
+        worker.start()
     }
 
     fun tick() {
