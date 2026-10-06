@@ -29,6 +29,9 @@ object RoleHud {
     private const val CHIP_EDGE = 0x66FFFFFF
     private const val DIVIDER = 0x22FFFFFF
     private const val TRACK = 0x33FFFFFF
+    private const val POINTS_FROM = 0xFF4EC471.toInt()
+    private const val POINTS_TO = 0xFFA9F2C4.toInt()
+    private const val POINTS_LABEL = "Punkte"
 
     private data class Look(val title: String, val colour: Int, val key: Component?, val action: String, val ready: Boolean)
 
@@ -75,6 +78,11 @@ object RoleHud {
         RoundState.Clock.PAUSED -> "Pausiert · Sucher weg" to Palette.WARNING
     }
 
+    private fun clockPrefix(): String = when (RoundState.clock) {
+        RoundState.Clock.HUNT -> "seit "
+        else -> "noch "
+    }
+
     private fun clockColour(): Int = when {
         RoundState.clock == RoundState.Clock.PAUSED -> Palette.WARNING
         RoundState.clock == RoundState.Clock.HIDING && RoundState.clockSeconds <= FINAL_SECONDS -> Palette.ERROR
@@ -95,6 +103,9 @@ object RoleHud {
 
         val (phase, phaseColour) = phaseLabel()
         val clock = Component.literal(clock(RoundState.clockSeconds)).withStyle(ChatFormatting.BOLD)
+        val prefix = clockPrefix()
+        val clockWidth = font.width(prefix) + font.width(clock)
+        val points = RoundState.points?.let { "$it" }
 
         val hiderCount = remaining.toString()
         val hiderTotal = "/${RoundState.hidersAtStart.coerceAtLeast(remaining)} Verstecker"
@@ -106,11 +117,13 @@ object RoleHud {
             MIN_WIDTH,
             font.width(title),
             if (look.key == null) 0 else keyWidth + actionGap + font.width(look.action),
-            font.width(phase) + GAP + font.width(clock),
+            font.width(phase) + GAP + clockWidth,
             hidersWidth + GAP + seekersWidth,
+            points?.let { font.width(POINTS_LABEL) + GAP + font.width(it) } ?: 0,
         )
         val roleRows = if (look.key == null) 1 else 2
-        val height = PADDING * 2 + ROW_HEIGHT * roleRows + 5 + ROW_HEIGHT + BAR_HEIGHT + 5 + ROW_HEIGHT - 2
+        val pointsRows = if (points == null) 0 else 5 + ROW_HEIGHT
+        val height = PADDING * 2 + ROW_HEIGHT * roleRows + 5 + ROW_HEIGHT + BAR_HEIGHT + 5 + ROW_HEIGHT - 2 + pointsRows
         val width = ACCENT + PADDING * 2 + contentWidth
 
         val left = MARGIN
@@ -144,6 +157,7 @@ object RoleHud {
         row += 4
 
         graphics.drawString(font, phase, textLeft, row, phaseColour, true)
+        graphics.drawString(font, prefix, textRight - clockWidth, row, Palette.MUTED, true)
         graphics.drawString(font, clock, textRight - font.width(clock), row, clockColour(), true)
         row += ROW_HEIGHT
 
@@ -165,6 +179,24 @@ object RoleHud {
         val seekersLeft = textRight - seekersWidth
         graphics.fill(seekersLeft, pipTop, seekersLeft + PIP, pipTop + PIP, Palette.ERROR)
         graphics.drawString(font, seekerText, seekersLeft + PIP + 4, row, Palette.TEXT, true)
+
+        if (points != null) {
+            row += ROW_HEIGHT
+            graphics.fill(textLeft, row, textRight, row + 1, DIVIDER)
+            row += 4
+            graphics.drawString(font, POINTS_LABEL, textLeft, row, Palette.MUTED, true)
+            gradient(graphics, font, points, textRight - font.width(points), row, POINTS_FROM, POINTS_TO)
+        }
+    }
+
+    private fun gradient(graphics: GuiGraphics, font: Font, text: String, atX: Int, atY: Int, from: Int, to: Int) {
+        var x = atX
+        val last = (text.length - 1).coerceAtLeast(1)
+        text.forEachIndexed { index, character ->
+            val piece = character.toString()
+            graphics.drawString(font, piece, x, atY, blend(from, to, index.toFloat() / last), true)
+            x += font.width(piece)
+        }
     }
 
     private fun smoothed(now: Long): Float {
