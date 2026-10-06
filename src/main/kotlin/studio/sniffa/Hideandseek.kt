@@ -7,6 +7,7 @@ import net.minecraft.resources.Identifier
 import org.slf4j.LoggerFactory
 import studio.sniffa.net.payload.BearingPayload
 import studio.sniffa.net.payload.BorderPayload
+import studio.sniffa.net.payload.ClockPayload
 import studio.sniffa.net.payload.CooldownPayload
 import studio.sniffa.net.payload.CrewPayload
 import studio.sniffa.net.payload.GlowPayload
@@ -54,6 +55,7 @@ object Hideandseek : ModInitializer {
 
 		PayloadTypeRegistry.playS2C().register(BorderPayload.TYPE, BorderPayload.CODEC)
 		PayloadTypeRegistry.playS2C().register(RoundStatePayload.TYPE, RoundStatePayload.CODEC)
+		PayloadTypeRegistry.playS2C().register(ClockPayload.TYPE, ClockPayload.CODEC)
 		PayloadTypeRegistry.playS2C().register(SeekerStatePayload.TYPE, SeekerStatePayload.CODEC)
 		PayloadTypeRegistry.playS2C().register(RadarPayload.TYPE, RadarPayload.CODEC)
 		PayloadTypeRegistry.playS2C().register(ScanTagPayload.TYPE, ScanTagPayload.CODEC)
