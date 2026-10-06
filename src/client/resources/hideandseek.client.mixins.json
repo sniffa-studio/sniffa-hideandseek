@@ -6,7 +6,9 @@
 		"EntityGlowMixin",
 		"TitleSplashMixin",
 		"WorldBorderRendererMixin",
-		"FlatHeadMixin"
+		"FlatHeadMixin",
+		"CrewColourMixin",
+		"CrewNameMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -5,6 +5,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import studio.sniffa.client.radar.CrewView;
 import studio.sniffa.client.radar.GlowSight;
 import studio.sniffa.client.radar.ScanTags;
 
@@ -14,6 +15,11 @@ public abstract class EntityGlowMixin {
     @Inject(method = "isCurrentlyGlowing", at = @At("HEAD"), cancellable = true)
     private void hideandseek$outlineSonarContacts(CallbackInfoReturnable<Boolean> answer) {
         Entity self = (Entity) (Object) this;
+
+        if (CrewView.INSTANCE.knows(self)) {
+            answer.setReturnValue(true);
+            return;
+        }
 
         GlowSight glow = GlowSight.INSTANCE;
         if (glow.active() && glow.glowing(self)) {
