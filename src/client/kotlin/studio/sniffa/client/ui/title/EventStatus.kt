@@ -6,6 +6,7 @@ import net.minecraft.client.multiplayer.ServerStatusPinger
 import net.minecraft.network.chat.Component
 import net.minecraft.server.network.EventLoopGroupHolder
 import studio.sniffa.client.ui.theme.Palette
+import java.util.concurrent.CompletableFuture
 
 object EventStatus {
 
@@ -15,9 +16,11 @@ object EventStatus {
 
     private const val PATIENCE_MILLIS = 4_000L
 
+    @Volatile
     private var pinger: ServerStatusPinger? = null
     private var server: ServerData? = null
     private var startedAt = 0L
+    @Volatile
     private var gaveUp = false
 
     fun refresh(address: String) {
@@ -31,15 +34,16 @@ object EventStatus {
         startedAt = System.currentTimeMillis()
         gaveUp = false
 
-        try {
-            ping.pingServer(
-                data,
-                {},
-                {},
-                EventLoopGroupHolder.remote(client.options.useNativeTransport()),
-            )
-        } catch (unreachable: Exception) {
-            gaveUp = true
+        val transport = EventLoopGroupHolder.remote(client.options.useNativeTransport())
+        CompletableFuture.runAsync {
+            try {
+                ping.pingServer(data, {}, {}, transport)
+            } catch (unreachable: Exception) {
+                gaveUp = true
+            }
+            if (pinger !== ping) {
+                ping.removeAll()
+            }
         }
     }
 
