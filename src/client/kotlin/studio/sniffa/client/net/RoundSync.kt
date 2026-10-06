@@ -6,6 +6,7 @@ import studio.sniffa.client.state.AbilityCooldowns
 import studio.sniffa.client.state.RoundState
 import studio.sniffa.client.map.MapState
 import studio.sniffa.client.map.MapTexture
+import studio.sniffa.client.radar.CrewView
 import studio.sniffa.client.radar.GlowSight
 import studio.sniffa.client.radar.HeatMap
 import studio.sniffa.client.radar.CompassRose
@@ -17,6 +18,7 @@ import studio.sniffa.client.radar.ScanTags
 import studio.sniffa.client.ui.hud.ScanReadout
 import studio.sniffa.client.ui.hud.SpottedWarning
 import studio.sniffa.net.payload.CooldownPayload
+import studio.sniffa.net.payload.CrewPayload
 import studio.sniffa.net.payload.GlowPayload
 import studio.sniffa.net.payload.MapMetaPayload
 import studio.sniffa.net.payload.MapSlicePayload
@@ -96,6 +98,10 @@ object RoundSync {
             GlowSight.accept(payload.entityIds, payload.seconds)
         }
 
+        ClientPlayNetworking.registerGlobalReceiver(CrewPayload.TYPE) { payload, _ ->
+            CrewView.accept(payload.hiders, payload.seekers)
+        }
+
         ClientPlayNetworking.registerGlobalReceiver(MapMetaPayload.TYPE) { payload, _ ->
             MapState.onMeta(payload)
         }
@@ -120,6 +126,7 @@ object RoundSync {
             ScanPulse.forget()
             HeatMap.forget()
             GlowSight.forget()
+            CrewView.forget()
             MapState.forget()
             DangerZone.forget()
             HotCold.forget()

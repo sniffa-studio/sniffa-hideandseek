@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory
 import studio.sniffa.net.payload.BearingPayload
 import studio.sniffa.net.payload.BorderPayload
 import studio.sniffa.net.payload.CooldownPayload
+import studio.sniffa.net.payload.CrewPayload
 import studio.sniffa.net.payload.GlowPayload
 import studio.sniffa.net.payload.HandshakePayload
 import studio.sniffa.net.payload.MapMetaPayload
@@ -64,6 +65,7 @@ object Hideandseek : ModInitializer {
 		PayloadTypeRegistry.playS2C().register(RolePayload.TYPE, RolePayload.CODEC)
 		PayloadTypeRegistry.playS2C().register(SpottedPayload.TYPE, SpottedPayload.CODEC)
 		PayloadTypeRegistry.playS2C().register(GlowPayload.TYPE, GlowPayload.CODEC)
+		PayloadTypeRegistry.playS2C().register(CrewPayload.TYPE, CrewPayload.CODEC)
 		PayloadTypeRegistry.playS2C().register(PropPayload.TYPE, PropPayload.CODEC)
 		PayloadTypeRegistry.playS2C().register(CooldownPayload.TYPE, CooldownPayload.CODEC)
 		PayloadTypeRegistry.playS2C().register(MapMetaPayload.TYPE, MapMetaPayload.CODEC)
