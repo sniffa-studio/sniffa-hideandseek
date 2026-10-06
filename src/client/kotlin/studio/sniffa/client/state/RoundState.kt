@@ -6,7 +6,7 @@ object RoundState {
 
     enum class Phase { IDLE, HIDING, HUNT, ENDED }
 
-    enum class Role { SEEKER, HIDER, SPECTATOR }
+    enum class Role { SEEKER, HIDER, SPECTATOR, STAFF }
 
     @Volatile
     var phase: Phase = Phase.IDLE
@@ -32,7 +32,7 @@ object RoundState {
         get() = when (role) {
             Role.SEEKER -> Side.SEEKER
             Role.HIDER -> Side.HIDER
-            Role.SPECTATOR -> null
+            Role.SPECTATOR, Role.STAFF -> null
         }
 
     val running: Boolean get() = phase == Phase.HIDING || phase == Phase.HUNT

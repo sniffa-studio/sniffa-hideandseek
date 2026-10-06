@@ -2,6 +2,10 @@
 
 ## 1.0.1
 
+### Added
+
+- The crew opens the teleporter to the hiders with R (Teleporter öffnen in the controls).
+
 ### Fixed
 
 - The map opens again after a spot the server refuses, without the three second wait, and the pick
