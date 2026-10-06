@@ -7,12 +7,13 @@
 - The crew opens the teleporter to the hiders with R (Teleporter öffnen in the controls).
 - A small panel in the top left shows your role and which key opens your wheel, or the teleporter for the crew.
 - The crew and spectators see every hider glowing green and every seeker glowing red, with their names.
-- The top left panel shows the phase, the clock, a progress bar and how many hiders and seekers are left.
+- The top left panel shows the phase, how much hiding time is left or how long the hunt runs, a progress bar,
+  how many hiders and seekers are left, and your points.
 
 ### Changed
 
 - The "Hide & Seek · connected" line in the top left is gone.
-- The boss bar is gone, and the bottom right shows only your points.
+- The boss bar and the bottom right readout are gone, everything is in the top left panel.
 - Radar marks keep glowing for eight seconds after the wave reaches them.
 
 ### Fixed
