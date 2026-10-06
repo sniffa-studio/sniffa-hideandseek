@@ -5,6 +5,12 @@
 ### Added
 
 - The crew opens the teleporter to the hiders with R (Teleporter öffnen in the controls).
+- A small panel in the top left shows your role and which key opens your wheel, or the teleporter for the crew.
+
+### Changed
+
+- The "Hide & Seek · connected" line in the top left is gone.
+- Radar marks keep glowing for eight seconds after the wave reaches them.
 
 ### Fixed
 
