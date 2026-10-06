@@ -5,7 +5,6 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Font
 import net.minecraft.client.gui.GuiGraphics
 import studio.sniffa.client.state.RoundState
-import studio.sniffa.client.ui.theme.Palette
 
 object RoundHud {
 
@@ -25,26 +24,13 @@ object RoundHud {
     }
 
     private fun draw(graphics: GuiGraphics, font: Font) {
-        val points = RoundState.points
-        val remaining = "${RoundState.remainingHiders} übrig"
-        val time = clock(RoundState.elapsedSeconds)
-
-        val lines = if (points == null) 2 else 3
+        val points = RoundState.points ?: return
+        val text = pointsText(points)
 
         val right = graphics.guiWidth() - MARGIN
-        val bottom = graphics.guiHeight() - MARGIN
+        val row = graphics.guiHeight() - MARGIN - ROW_HEIGHT
 
-        var row = bottom - lines * ROW_HEIGHT
-        if (points != null) {
-            val text = pointsText(points)
-            gradient(graphics, font, text, right - font.width(text), row, POINTS_FROM, POINTS_TO)
-            row += ROW_HEIGHT
-        }
-
-        graphics.drawString(font, remaining, right - font.width(remaining), row, Palette.TEXT, true)
-        row += ROW_HEIGHT
-
-        graphics.drawString(font, time, right - font.width(time), row, Palette.MUTED, true)
+        gradient(graphics, font, text, right - font.width(text), row, POINTS_FROM, POINTS_TO)
     }
 
     private fun gradient(
@@ -67,8 +53,6 @@ object RoundHud {
     }
 
     private fun pointsText(points: Int): String = "$points Punkte"
-
-    private fun clock(seconds: Int): String = "%d:%02d".format(seconds / 60, seconds % 60)
 
     private fun blend(from: Int, to: Int, amount: Float): Int {
         val t = amount.coerceIn(0f, 1f)
