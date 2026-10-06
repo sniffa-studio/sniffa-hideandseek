@@ -17,13 +17,13 @@ import studio.sniffa.client.radar.ScanPulse
 import studio.sniffa.client.ui.hud.ScanReadout
 import studio.sniffa.client.ui.hud.SpottedWarning
 import studio.sniffa.client.ui.hud.RoundHud
-import studio.sniffa.client.ui.hud.StatusHud
+import studio.sniffa.client.ui.hud.RoleHud
 import studio.sniffa.client.ui.hud.ZoneWarning
 
 object HideandseekClient : ClientModInitializer {
 	override fun onInitializeClient() {
 		Handshake.install()
-		StatusHud.install()
+		RoleHud.install()
 		RoundHud.install()
 		ScanPulse.install()
 		HeatMap.install()

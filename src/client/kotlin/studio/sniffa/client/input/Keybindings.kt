@@ -48,6 +48,10 @@ object Keybindings {
         else -> null
     }
 
+    fun shopKey(): Component = openShop.translatedKeyMessage
+
+    fun watchKey(): Component = openWatch.translatedKeyMessage
+
     private fun watch(client: Minecraft) {
         val player = client.player ?: return
         if (client.screen != null) return
