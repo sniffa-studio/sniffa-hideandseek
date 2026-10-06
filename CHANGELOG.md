@@ -9,6 +9,7 @@
 - The crew and spectators see every hider glowing green and every seeker glowing red, with their names.
 - The top left panel shows the phase, how much hiding time is left or how long the hunt runs, a progress bar,
   how many hiders and seekers are left, and your points.
+- The ability wheel shows your points in its middle, also while you point at an ability.
 
 ### Changed
 
