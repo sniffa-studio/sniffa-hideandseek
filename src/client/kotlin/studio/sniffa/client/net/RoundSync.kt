@@ -17,6 +17,7 @@ import studio.sniffa.client.prop.Props
 import studio.sniffa.client.radar.ScanTags
 import studio.sniffa.client.ui.hud.ScanReadout
 import studio.sniffa.client.ui.hud.SpottedWarning
+import studio.sniffa.net.payload.ClockPayload
 import studio.sniffa.net.payload.CooldownPayload
 import studio.sniffa.net.payload.CrewPayload
 import studio.sniffa.net.payload.GlowPayload
@@ -48,6 +49,10 @@ object RoundSync {
                 AbilityCooldowns.forget()
                 ScanTags.forget()
             }
+        }
+
+        ClientPlayNetworking.registerGlobalReceiver(ClockPayload.TYPE) { payload, _ ->
+            RoundState.acceptClock(payload.state, payload.seconds, payload.progress, payload.hidersAtStart, payload.seekers)
         }
 
         ClientPlayNetworking.registerGlobalReceiver(SeekerStatePayload.TYPE) { payload, _ ->
