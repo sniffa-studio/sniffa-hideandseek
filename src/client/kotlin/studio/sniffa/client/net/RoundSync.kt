@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import studio.sniffa.client.state.AbilityCooldowns
 import studio.sniffa.client.state.RoundState
 import studio.sniffa.client.map.MapState
+import studio.sniffa.client.map.MapTexture
 import studio.sniffa.client.radar.GlowSight
 import studio.sniffa.client.radar.HeatMap
 import studio.sniffa.client.radar.CompassRose
@@ -39,7 +40,12 @@ object RoundSync {
 
     fun install() {
         ClientPlayNetworking.registerGlobalReceiver(RoundStatePayload.TYPE) { payload, _ ->
+            val before = RoundState.phase
             RoundState.accept(payload.phase, payload.elapsedSeconds, payload.remainingHiders)
+            if (RoundState.phase != before && RoundState.phase == RoundState.Phase.HIDING) {
+                AbilityCooldowns.forget()
+                ScanTags.forget()
+            }
         }
 
         ClientPlayNetworking.registerGlobalReceiver(SeekerStatePayload.TYPE) { payload, _ ->
@@ -122,6 +128,7 @@ object RoundSync {
             ScanTags.forget()
             Props.forget()
             AbilityCooldowns.forget()
+            MapTexture.forget()
             ScanReadout.forget()
             SpottedWarning.forget()
         }

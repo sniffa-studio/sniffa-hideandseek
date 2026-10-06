@@ -20,12 +20,15 @@ object BorderRenderer {
 
     private const val ZONE_TINT = 0xFFFC301E.toInt()
 
+    private const val RADIUS_STEPS = 4.0
+
     private class Layer {
         var mesh: BorderMesh? = null
 
         fun meshFor(ring: BorderZone.Ring): BorderMesh {
-            mesh?.let { if (it.matches(ring)) return it else it.close() }
-            return BorderMesh.build(ring).also { mesh = it }
+            val settled = ring.copy(radius = Math.round(ring.radius * RADIUS_STEPS) / RADIUS_STEPS)
+            mesh?.let { if (it.matches(settled)) return it else it.close() }
+            return BorderMesh.build(settled).also { mesh = it }
         }
 
         fun drop() {
