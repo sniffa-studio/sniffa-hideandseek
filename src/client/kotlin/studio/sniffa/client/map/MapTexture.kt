@@ -70,6 +70,14 @@ object MapTexture {
         return id
     }
 
+    fun forget() {
+        val existing = identifier ?: return
+        identifier = null
+        builtFor = 0
+        val minecraft = Minecraft.getInstance()
+        minecraft.execute { minecraft.textureManager.release(existing) }
+    }
+
     private fun shadeTable(palette: List<String>): IntArray {
         val table = IntArray(palette.size * 4)
         palette.forEachIndexed { index, key ->
