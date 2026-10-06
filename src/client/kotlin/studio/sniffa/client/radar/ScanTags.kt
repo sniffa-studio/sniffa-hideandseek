@@ -2,12 +2,13 @@ package studio.sniffa.client.radar
 
 import net.minecraft.client.Minecraft
 import net.minecraft.world.entity.Entity
+import java.util.concurrent.ConcurrentHashMap
 
 object ScanTags {
 
-    private const val HOLD_MILLIS = 2800f
+    private const val HOLD_MILLIS = 8_000L
 
-    private const val WAVE_PATIENCE_MILLIS = 1_000L
+    private const val LIFETIME_MILLIS = HOLD_MILLIS + 10_000L
 
     @Volatile
     private var marked: Set<Int> = emptySet()
@@ -15,13 +16,17 @@ object ScanTags {
     @Volatile
     private var markedAt = 0L
 
+    private val reachedAt = ConcurrentHashMap<Int, Long>()
+
     fun accept(entityIds: List<Int>) {
+        reachedAt.clear()
         marked = entityIds.toSet()
         markedAt = System.currentTimeMillis()
     }
 
     fun forget() {
         marked = emptySet()
+        reachedAt.clear()
     }
 
     fun glowing(entity: Entity): Boolean {
@@ -30,13 +35,15 @@ object ScanTags {
             return false
         }
 
-        val wave = ScanPulse.inFlight()
-        if (wave == null) {
-            if (System.currentTimeMillis() - markedAt > WAVE_PATIENCE_MILLIS) {
-                marked = emptySet()
-            }
+        val now = System.currentTimeMillis()
+        if (now - markedAt > LIFETIME_MILLIS) {
+            forget()
             return false
         }
+
+        reachedAt[entity.id]?.let { return now - it <= HOLD_MILLIS }
+
+        val wave = ScanPulse.inFlight() ?: return false
 
         val at = entity.position().add(0.0, entity.bbHeight / 2.0, 0.0)
         val distance = at.distanceTo(wave.origin).toFloat()
@@ -45,8 +52,9 @@ object ScanTags {
             return false
         }
 
-        val since = (wave.radius - distance) / wave.speed * 1000f
-        return since <= HOLD_MILLIS
+        val reached = now - ((wave.radius - distance) / wave.speed * 1000f).toLong()
+        reachedAt[entity.id] = reached
+        return now - reached <= HOLD_MILLIS
     }
 
     fun any(): Boolean = marked.isNotEmpty()
