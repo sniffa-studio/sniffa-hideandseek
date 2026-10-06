@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.1
+
+### Fixed
+
+- The map opens again after a spot the server refuses, without the three second wait, and the pick
+  circle on it now matches what the server accepts for a teleport.
+- The title screen no longer stalls while it looks up the event server.
+- The danger zone screen edge shows only for hiders.
+- The border wall is no longer rebuilt every frame while it moves.
+- Scan marks fade with their wave, and cooldowns start fresh with every round.
+- The map texture is released when you leave the server.
+
 ## 1.0.0 - 2026-09-24
 
 First release, for Minecraft 1.21.11 on Fabric.
