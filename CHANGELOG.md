@@ -6,6 +6,7 @@
 
 - The crew opens the teleporter to the hiders with R (Teleporter öffnen in the controls).
 - A small panel in the top left shows your role and which key opens your wheel, or the teleporter for the crew.
+- The crew and spectators see every hider glowing green and every seeker glowing red, with their names.
 
 ### Changed
 
