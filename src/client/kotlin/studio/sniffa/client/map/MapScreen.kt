@@ -25,7 +25,9 @@ class MapScreen(
 
     private var pressTravel = 0.0
 
-    private val openedAt = System.currentTimeMillis()
+    private val openedAt = System.currentTimeMillis().let { now ->
+        if (now - MapState.pickedAt < REOPEN_MILLIS) now - ARM_MILLIS else now
+    }
 
     private val waitingMillis: Long
         get() = (ARM_MILLIS - (System.currentTimeMillis() - openedAt)).coerceAtLeast(0L)
@@ -107,7 +109,8 @@ class MapScreen(
         }
 
         val allowed = BorderZone.current()?.let {
-            hypot(worldX - it.centerX, worldZ - it.centerZ) <= it.radius
+            val margin = if (zoneRadius != null) 0.0 else TELEPORT_MARGIN
+            hypot(floor(worldX) + 0.5 - it.centerX, floor(worldZ) + 0.5 - it.centerZ) <= it.radius - margin
         } ?: true
 
         val onScreen = if (zoneRadius != null) zoneRadius * scale else PICK_RADIUS
@@ -214,6 +217,7 @@ class MapScreen(
                 } else {
                     ClientPlayNetworking.send(MapTeleportPayload(worldX, worldZ))
                 }
+                MapState.pickedAt = System.currentTimeMillis()
                 onClose()
             }
             return true
@@ -278,6 +282,10 @@ class MapScreen(
         private const val PICK_REACH = 2.0
 
         private const val ARM_MILLIS = 3_000L
+
+        private const val REOPEN_MILLIS = 5_000L
+
+        private const val TELEPORT_MARGIN = 2.0
 
         private const val PICK_ALLOWED = 0xD84EC471.toInt()
         private const val PICK_REFUSED = 0xD8FC301E.toInt()
