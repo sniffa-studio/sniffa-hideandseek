@@ -139,6 +139,23 @@ class AbilityShopScreen : BaseOwoScreen<FlowLayout>() {
         }
 
         super.render(graphics, mouseX, mouseY, delta)
+
+        wheels.getOrNull(page)?.let { drawPoints(graphics, it) }
+    }
+
+    private fun drawPoints(graphics: GuiGraphics, wheel: AbilityWheel) {
+        if (!ShopSession.known) return
+
+        val text = ShopSession.points.toString()
+        val scale = if (metrics.size >= LARGE_WHEEL) LARGE_SCALE else 1f
+        val centerX = wheel.x() + metrics.size / 2f
+        val top = wheel.y() + metrics.size / 2f + metrics.hubSize / 2f + POINTS_GAP
+
+        graphics.pose().pushMatrix()
+        graphics.pose().translate(centerX, top)
+        graphics.pose().scale(scale, scale)
+        graphics.drawString(font, text, -font.width(text) / 2, 0, Palette.BRAND, true)
+        graphics.pose().popMatrix()
     }
 
     override fun keyPressed(event: KeyEvent): Boolean {
@@ -187,5 +204,11 @@ class AbilityShopScreen : BaseOwoScreen<FlowLayout>() {
         const val BLUR_QUALITY = 4f
 
         const val BLUR_SIZE = 9f
+
+        const val LARGE_WHEEL = 220
+
+        const val LARGE_SCALE = 1.5f
+
+        const val POINTS_GAP = 2f
     }
 }
