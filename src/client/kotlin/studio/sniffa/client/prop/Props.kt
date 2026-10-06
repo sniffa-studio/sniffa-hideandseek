@@ -4,9 +4,9 @@ import com.mojang.blaze3d.vertex.PoseStack
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents
 import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.LightTexture
-import net.minecraft.client.renderer.texture.OverlayTexture
 import net.minecraft.core.BlockPos
 import org.slf4j.LoggerFactory
+import software.bernie.geckolib.constant.DataTickets
 import software.bernie.geckolib.renderer.GeoObjectRenderer
 import software.bernie.geckolib.renderer.base.GeoRenderState
 import software.bernie.geckolib.renderer.base.RenderPassInfo
@@ -26,7 +26,13 @@ object Props {
 
         override fun adjustRenderPose(pass: RenderPassInfo<GeoRenderState.Impl>) {
         }
+
+        override fun addRenderData(animatable: Prop, relatedObject: Prop?, renderState: GeoRenderState.Impl, partialTick: Float) {
+            renderState.addGeckolibData(DataTickets.TICK, animatable.age * TICKS_PER_SECOND)
+        }
     }
+
+    private const val TICKS_PER_SECOND = 20.0
 
     fun accept(kind: String, x: Double, y: Double, z: Double, yaw: Float, seconds: Int) {
         val known = PropKind.byId(kind)
@@ -76,7 +82,7 @@ object Props {
                 context.commandQueue(),
                 context.worldState().cameraRenderState,
                 lightAt(level, prop),
-                OverlayTexture.NO_OVERLAY,
+                0,
             )
 
             matrices.popPose()
