@@ -8,6 +8,8 @@ object Palette {
 
     const val ERROR = 0xFFFC301E.toInt()
 
+    const val WARNING = 0xFFF2B33D.toInt()
+
     const val TEXT = 0xFFF2F2F2.toInt()
 
     const val WHEEL_TRACK = 0x8C0B120F.toInt()
