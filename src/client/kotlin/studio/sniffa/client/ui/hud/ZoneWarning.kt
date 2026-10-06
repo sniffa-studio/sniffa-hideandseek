@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import studio.sniffa.client.ui.theme.Palette
+import studio.sniffa.client.state.RoundState
 import studio.sniffa.client.zone.DangerZone
 
 object ZoneWarning {
@@ -17,6 +18,7 @@ object ZoneWarning {
             val minecraft = Minecraft.getInstance()
 
             if (minecraft.options.hideGui) return@register
+            if (RoundState.role != RoundState.Role.HIDER) return@register
             if (!DangerZone.caughtInside()) return@register
 
             draw(graphics, DangerZone.secondsLeft())

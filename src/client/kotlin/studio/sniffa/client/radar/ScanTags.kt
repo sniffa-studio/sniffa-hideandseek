@@ -7,11 +7,17 @@ object ScanTags {
 
     private const val HOLD_MILLIS = 2800f
 
+    private const val WAVE_PATIENCE_MILLIS = 1_000L
+
     @Volatile
     private var marked: Set<Int> = emptySet()
 
+    @Volatile
+    private var markedAt = 0L
+
     fun accept(entityIds: List<Int>) {
         marked = entityIds.toSet()
+        markedAt = System.currentTimeMillis()
     }
 
     fun forget() {
@@ -24,7 +30,13 @@ object ScanTags {
             return false
         }
 
-        val wave = ScanPulse.inFlight() ?: return false
+        val wave = ScanPulse.inFlight()
+        if (wave == null) {
+            if (System.currentTimeMillis() - markedAt > WAVE_PATIENCE_MILLIS) {
+                marked = emptySet()
+            }
+            return false
+        }
 
         val at = entity.position().add(0.0, entity.bbHeight / 2.0, 0.0)
         val distance = at.distanceTo(wave.origin).toFloat()

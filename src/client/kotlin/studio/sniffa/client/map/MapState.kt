@@ -23,6 +23,9 @@ object MapState {
     @Volatile
     private var armedZoneRadius: Int? = null
 
+    @Volatile
+    var pickedAt = 0L
+
     fun armZone(radius: Int) {
         armedZoneRadius = if (radius > 0) radius else null
     }
@@ -91,6 +94,7 @@ object MapState {
 
     fun forget() {
         armedZoneRadius = null
+        pickedAt = 0L
         synchronized(lock) {
             assembling = null
             slices = emptyArray()

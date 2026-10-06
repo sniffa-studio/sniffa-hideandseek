@@ -15,9 +15,11 @@ object EventStatus {
 
     private const val PATIENCE_MILLIS = 4_000L
 
+    @Volatile
     private var pinger: ServerStatusPinger? = null
     private var server: ServerData? = null
     private var startedAt = 0L
+    @Volatile
     private var gaveUp = false
 
     fun refresh(address: String) {
@@ -31,16 +33,20 @@ object EventStatus {
         startedAt = System.currentTimeMillis()
         gaveUp = false
 
-        try {
-            ping.pingServer(
-                data,
-                {},
-                {},
-                EventLoopGroupHolder.remote(client.options.useNativeTransport()),
-            )
-        } catch (unreachable: Exception) {
-            gaveUp = true
-        }
+        val transport = EventLoopGroupHolder.remote(client.options.useNativeTransport())
+        val worker = Thread({
+            try {
+                ping.pingServer(data, {}, {}, transport)
+            } catch (unreachable: Exception) {
+                gaveUp = true
+            }
+            if (pinger !== ping) {
+                ping.removeAll()
+            }
+        }, "sniffa event ping")
+        worker.contextClassLoader = EventStatus::class.java.classLoader
+        worker.isDaemon = true
+        worker.start()
     }
 
     fun tick() {
