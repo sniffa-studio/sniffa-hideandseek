@@ -12,7 +12,7 @@ object BorderPipeline {
 
     val RING: RenderPipeline = wall("border", "core/border", animated = true)
 
-    val ZONE: RenderPipeline = wall("zone", "core/zonewall")
+    val ZONE: RenderPipeline = wall("zone", "core/zonewall", animated = true)
 
     val SEAM: RenderPipeline = wall("seam", "core/borderseam", animated = true)
 
