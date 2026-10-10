@@ -38,15 +38,10 @@ const float SWEEP_CYCLES = 200.0;
 const float SWEEP_CELLS = 18.0;
 const float SWEEP_SHARPNESS = 10.0;
 const float SWEEP_STRENGTH = 0.9;
-const float SHRINK_SWEEP = -3.0;
-const float GROW_SWEEP = 2.0;
+const float SHRINK_SWEEP = -1.0;
 
-const float TICKS = 24000.0;
-const float FLICKER_TICKS = 3.0;
-const float FLICKER_SHARE = 0.2;
-const float FLICKER_DEPTH = 0.45;
-const float ALARM_CYCLES = 1200.0;
-const float ALARM_STRENGTH = 0.3;
+const float BREATH_CYCLES = 600.0;
+const float BREATH_STRENGTH = 0.25;
 
 const float NEAR_BLOCKS = 6.0;
 const float NEAR_FADE = 56.0;
@@ -70,6 +65,9 @@ const float REVEAL_EDGE = 0.08;
 const float REVEAL_TAIL = 0.3;
 const float REVEAL_FLASH = 14.0;
 const float REVEAL_FLASH_STRENGTH = 1.2;
+
+const float VISIBLE_FROM = 48.0;
+const float VISIBLE_TO = 96.0;
 
 const float FADE_FROM = 40.0;
 const float FADE_TO = 150.0;
@@ -171,9 +169,8 @@ void main() {
     float lit = step(1.0 - SPARK_SHARE, spark) * pulse(time * TWINKLE_CYCLES * 2.0 + spark * 7.0);
     float fill = mix(FILL_FAR, FILL + FILL_SPREAD * seed * twinkle + SPARK_STRENGTH * lit, legible);
 
-    float motion = TextureMat[0][3];
-    float shrinking = step(motion, -0.5);
-    float pace = shrinking > 0.5 ? SHRINK_SWEEP : (motion > 0.5 ? GROW_SWEEP : 1.0);
+    float shrinking = step(TextureMat[0][3], -0.5);
+    float pace = mix(1.0, SHRINK_SWEEP, shrinking);
 
     float sweep = pow(pulse(id.y / SWEEP_CELLS - time * SWEEP_CYCLES * pace + seed * 0.06), SWEEP_SHARPNESS);
     sweep *= SWEEP_STRENGTH * legible;
@@ -190,13 +187,12 @@ void main() {
 
     float standing = 1.0 - smoothstep(FADE_FROM, FADE_TO, abs(heightFromViewer));
     float near = 1.0 + NEAR_BOOST * (1.0 - smoothstep(NEAR_BLOCKS, NEAR_FADE, distanceFromViewer));
-    float flickerTick = floor(time * TICKS / FLICKER_TICKS);
-    float flicker = step(1.0 - FLICKER_SHARE, hash(id + vec2(flickerTick * 3.1, flickerTick * 1.7))) * shrinking;
-    float alarm = pulse(time * ALARM_CYCLES) * ALARM_STRENGTH * shrinking;
+    float breath = pulse(time * BREATH_CYCLES) * BREATH_STRENGTH * shrinking;
 
-    float strength = standing * near * shown * (1.0 - FLICKER_DEPTH * flicker);
+    float visible = 1.0 - smoothstep(VISIBLE_FROM, VISIBLE_TO, distanceFromViewer);
+    float strength = standing * near * shown * visible;
 
-    float lift = sweep + wave + flash + alarm;
+    float lift = sweep + wave + flash + breath;
 
     float body = (fill + HOT_FILL * hot) * (1.0 + lift) * strength;
     float shine = (bloom + rim) * legible * (1.0 + lift + HOT_LIGHT * hot) * strength;

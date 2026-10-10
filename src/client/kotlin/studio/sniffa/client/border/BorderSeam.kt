@@ -38,6 +38,7 @@ object BorderSeam {
     private const val MOVE_BLOCKS = 6.0
     private const val RADIUS_BLOCKS = 0.5
     private const val LEAF_DEPTH = 48
+    private const val REACH_BLOCKS = 96.0
 
     private var mesh: Mesh? = null
     private var builtFor: BorderZone.Ring? = null
@@ -87,7 +88,7 @@ object BorderSeam {
         val client = Minecraft.getInstance()
         val level = client.level ?: return null
 
-        val reach = client.options.renderDistance().get() * 16.0
+        val reach = minOf(client.options.renderDistance().get() * 16.0, REACH_BLOCKS)
         val samples = sample(level, ring, camera, reach)
 
         val pairs = samples.zipWithNext().count { (a, b) -> a != null && b != null }
