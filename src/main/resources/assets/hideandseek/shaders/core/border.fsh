@@ -6,6 +6,7 @@
 in vec2 wallCoord;
 in float heightFromViewer;
 in float distanceFromViewer;
+in float distanceToEye;
 
 out vec4 fragColor;
 
@@ -41,6 +42,25 @@ const float SWEEP_STRENGTH = 0.9;
 const float NEAR_BLOCKS = 6.0;
 const float NEAR_FADE = 56.0;
 const float NEAR_BOOST = 0.4;
+
+const float HOT_BLOCKS = 7.0;
+const float HOT_FILL = 0.3;
+const float HOT_LIGHT = 2.2;
+
+const int RIPPLES = 3;
+const float RIPPLE_SECONDS = 1.6;
+const float RIPPLE_SPEED = 9.0;
+const float RIPPLE_WIDTH = 1.4;
+const float RIPPLE_STRENGTH = 2.6;
+const float IMPACT_CELLS = 1.6;
+const float IMPACT_SECONDS = 0.35;
+
+const float REVEAL_BLOCKS = 60.0;
+const float REVEAL_JITTER = 0.25;
+const float REVEAL_EDGE = 0.08;
+const float REVEAL_TAIL = 0.3;
+const float REVEAL_FLASH = 14.0;
+const float REVEAL_FLASH_STRENGTH = 1.2;
 
 const float FADE_FROM = 40.0;
 const float FADE_TO = 150.0;
@@ -84,6 +104,29 @@ float pulse(float phase) {
     return 0.5 + 0.5 * sin(TAU * phase);
 }
 
+float ripples(vec2 centre, float around) {
+    float total = 0.0;
+
+    for (int slot = 0; slot < RIPPLES; slot++) {
+        vec3 ripple = TextureMat[slot].xyz;
+        if (ripple.z < 0.0 || ripple.z > RIPPLE_SECONDS) {
+            continue;
+        }
+
+        vec2 delta = centre - ripple.xy;
+        delta.x -= around * round(delta.x / around);
+        float reach = length(delta);
+
+        float fade = 1.0 - ripple.z / RIPPLE_SECONDS;
+        float ring = exp(-pow((reach - ripple.z * RIPPLE_SPEED) / RIPPLE_WIDTH, 2.0)) * fade;
+        float impact = exp(-reach / IMPACT_CELLS) * max(0.0, 1.0 - ripple.z / IMPACT_SECONDS);
+
+        total += ring + impact;
+    }
+
+    return total * RIPPLE_STRENGTH;
+}
+
 void main() {
     vec4 cell = hexCell(wallCoord);
     vec2 offset = cell.xy;
@@ -122,13 +165,25 @@ void main() {
     float sweep = pow(pulse(id.y / SWEEP_CELLS - time * SWEEP_CYCLES + seed * 0.06), SWEEP_SHARPNESS);
     sweep *= SWEEP_STRENGTH * legible;
 
+    float wave = ripples(cell.zw * HEX_STEP, columns * HEX_STEP.x) * legible;
+    float hot = TextureMat[3][1] * exp(-distanceToEye / HOT_BLOCKS);
+
+    float cellBlocks = TextureMat[3][3];
+    float cellHeight = heightFromViewer - (wallCoord.y - cell.w) * cellBlocks;
+    float rise = min(abs(cellHeight) / REVEAL_BLOCKS, 1.0) + seed * REVEAL_JITTER;
+    float revealed = TextureMat[3][2] * (1.0 + REVEAL_JITTER + REVEAL_EDGE + REVEAL_TAIL) - rise;
+    float shown = clamp(revealed / REVEAL_EDGE, 0.0, 1.0);
+    float flash = revealed > 0.0 ? exp(-revealed * REVEAL_FLASH) * REVEAL_FLASH_STRENGTH : 0.0;
+
     float standing = 1.0 - smoothstep(FADE_FROM, FADE_TO, abs(heightFromViewer));
     float near = 1.0 + NEAR_BOOST * (1.0 - smoothstep(NEAR_BLOCKS, NEAR_FADE, distanceFromViewer));
-    float strength = standing * near;
+    float strength = standing * near * shown;
 
-    float body = fill * (1.0 + sweep) * strength;
-    float shine = (bloom + rim) * legible * (1.0 + sweep) * strength;
-    float core = line * legible * (1.0 + 0.5 * sweep) * strength;
+    float lift = sweep + wave + flash;
+
+    float body = (fill + HOT_FILL * hot) * (1.0 + lift) * strength;
+    float shine = (bloom + rim) * legible * (1.0 + lift + HOT_LIGHT * hot) * strength;
+    float core = line * legible * (1.0 + 0.5 * sweep + wave + flash + HOT_LIGHT * hot) * strength;
 
     vec3 tint = ColorModulator.rgb;
     vec3 lineColour = mix(tint, vec3(1.0), LINE_WHITE);
