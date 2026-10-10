@@ -94,7 +94,7 @@ object BorderRenderer {
                 1f,
             ),
             offset,
-            Matrix4f(),
+            Matrix4f().m30(current.columns.toFloat()),
         )
 
         val indices = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS)
