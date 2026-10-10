@@ -52,15 +52,23 @@ object BorderZone {
     fun tint(): Int {
         move?.let {
             return when {
-                it.to < it.from -> BorderStatus.SHRINKING.color
-                it.to > it.from -> BorderStatus.GROWING.color
-                else -> BorderStatus.STATIONARY.color
+                it.to < it.from -> SHRINKING
+                it.to > it.from -> GROWING
+                else -> STATIONARY
             }
         }
 
-        val level = Minecraft.getInstance().level ?: return BorderStatus.STATIONARY.color
-        return level.worldBorder.status.color
+        val level = Minecraft.getInstance().level ?: return STATIONARY
+        return when (level.worldBorder.status) {
+            BorderStatus.SHRINKING -> SHRINKING
+            BorderStatus.GROWING -> GROWING
+            else -> STATIONARY
+        }
     }
+
+    private const val STATIONARY = 0x8B5CFF
+    private const val SHRINKING = 0xFF4F7A
+    private const val GROWING = 0x3FE0B0
 
     const val BOTTOM = -64.0
     const val TOP = 320.0
