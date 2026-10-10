@@ -92,13 +92,14 @@ object AbilityCatalog {
     val ELYTRA = Ability(
         id = "elytra",
         displayName = "Elytra",
-        description = "Elytra und zwei Raketen, bis du landest.",
+        description = "Elytra für die ganze Runde und zwei Raketen. Danach nur Raketen nachkaufen.",
         side = Side.SEEKER,
-        cost = 10,
+        cost = 15,
         cooldownSeconds = 60,
         icon = Items.ELYTRA,
         plannedModel = "Eigene Wings oder kleiner Jetpack",
         sprite = Hideandseek.id("ability/elytra"),
+        restockCost = 4,
     )
 
     val TELEPORT = Ability(

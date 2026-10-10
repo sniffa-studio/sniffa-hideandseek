@@ -17,6 +17,8 @@
 
 ### Changed
 
+- The elytra costs 15 points once and stays for the whole round; buying it again only refills two rockets for 4 points.
+- The wheel shows abilities you already bought as bought instead of their full price.
 - The "Hide & Seek · connected" line in the top left is gone.
 - The boss bar and the bottom right readout are gone, everything is in the top left panel.
 - Radar marks keep glowing for eight seconds after the wave reaches them.

@@ -13,4 +13,5 @@ data class Ability(
     val icon: Item,
     val plannedModel: String,
     val sprite: Identifier? = null,
+    val restockCost: Int = 0,
 )

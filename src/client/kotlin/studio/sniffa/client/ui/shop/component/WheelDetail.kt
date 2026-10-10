@@ -57,14 +57,20 @@ class WheelDetail : FlowLayout(
         val cooling = ShopSession.cooldownLeft(ability)
         val available = ShopSession.available(ability)
 
-        title.text(McText.literal("${ability.displayName}  —  ${ability.cost} Punkte"))
+        val price = ShopSession.price(ability)
+        val label = when {
+            ShopSession.restocking(ability) -> "Raketen  —  $price Punkte"
+            price == 0 -> "gekauft"
+            else -> "$price Punkte"
+        }
+        title.text(McText.literal("${ability.displayName}  —  $label"))
         title.color(Color.ofArgb(if (available) Palette.BRAND else Palette.ERROR))
         body.text(
             McText.literal(
                 when {
                     cooling > 0 -> "${ability.description}  (noch ${cooling}s)"
                     !ShopSession.canAfford(ability) ->
-                        "${ability.description}  (es fehlen ${ability.cost - ShopSession.points})"
+                        "${ability.description}  (es fehlen ${price - ShopSession.points})"
                     else -> ability.description
                 }
             )
