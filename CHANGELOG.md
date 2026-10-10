@@ -20,6 +20,8 @@
 - The "Hide & Seek · connected" line in the top left is gone.
 - The boss bar and the bottom right readout are gone, everything is in the top left panel.
 - Radar marks keep glowing for eight seconds after the wave reaches them.
+- The round card in the top left is cleaner: your role as a pill next to the phase, a big clock, a slim progress
+  bar, hiders, seekers and points on one line, and the key for your wheel as a small hint below the card.
 - The border is a glowing blue hex wall with smaller cells that twinkle and a light that sweeps up it.
   It turns pink while it shrinks and green while it grows, on the map as well.
 - The border builds itself up cell by cell when a round starts or when it first comes into view.
