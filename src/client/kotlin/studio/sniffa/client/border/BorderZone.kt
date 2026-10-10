@@ -49,21 +49,31 @@ object BorderZone {
         return Ring(border.centerX, border.centerZ, radius)
     }
 
-    fun tint(): Int {
+    enum class Motion { STATIONARY, SHRINKING, GROWING }
+
+    fun motion(): Motion {
         move?.let {
+            val running = System.currentTimeMillis() - it.startedAt < it.durationMillis
             return when {
-                it.to < it.from -> SHRINKING
-                it.to > it.from -> GROWING
-                else -> STATIONARY
+                !running -> Motion.STATIONARY
+                it.to < it.from -> Motion.SHRINKING
+                it.to > it.from -> Motion.GROWING
+                else -> Motion.STATIONARY
             }
         }
 
-        val level = Minecraft.getInstance().level ?: return STATIONARY
+        val level = Minecraft.getInstance().level ?: return Motion.STATIONARY
         return when (level.worldBorder.status) {
-            BorderStatus.SHRINKING -> SHRINKING
-            BorderStatus.GROWING -> GROWING
-            else -> STATIONARY
+            BorderStatus.SHRINKING -> Motion.SHRINKING
+            BorderStatus.GROWING -> Motion.GROWING
+            else -> Motion.STATIONARY
         }
+    }
+
+    fun tint(): Int = when (motion()) {
+        Motion.SHRINKING -> SHRINKING
+        Motion.GROWING -> GROWING
+        Motion.STATIONARY -> STATIONARY
     }
 
     private const val STATIONARY = 0x3A8DFF
