@@ -50,5 +50,15 @@
   "cue.instrument": {
     "category": "player",
     "sounds": [{ "name": "hideandseek:instrument", "stream": false }]
+  },
+  "cue.teleport": {
+    "category": "player",
+    "subtitle": "subtitles.hideandseek.teleport",
+    "sounds": [{ "name": "hideandseek:teleport", "stream": false }]
+  },
+  "cue.zone_opens": {
+    "category": "player",
+    "subtitle": "subtitles.hideandseek.zone_opens",
+    "sounds": [{ "name": "hideandseek:zone_opens", "stream": false }]
   }
 }

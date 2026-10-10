@@ -9,5 +9,7 @@
   "subtitles.hideandseek.caught": "Gefunden",
   "subtitles.hideandseek.spotted": "Ein Radar hat dich erfasst",
   "subtitles.hideandseek.radar_ping": "Radar sendet",
-  "subtitles.hideandseek.jam": "Störsender"
+  "subtitles.hideandseek.jam": "Störsender",
+  "subtitles.hideandseek.teleport": "Teleport",
+  "subtitles.hideandseek.zone_opens": "Gefahrenzone gesetzt"
 }
