@@ -1,5 +1,7 @@
 package studio.sniffa.client.border
 
+import com.mojang.blaze3d.buffers.GpuBuffer
+import com.mojang.blaze3d.pipeline.RenderPipeline
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.VertexFormat
 import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents
@@ -44,8 +46,14 @@ object BorderRenderer {
         WorldRenderEvents.END_MAIN.register(WorldRenderEvents.EndMain {
             val camera = Minecraft.getInstance().gameRenderer.mainCamera.position()
 
-            BorderZone.current()?.let {
-                draw(roundBorder, BorderPipeline.RING, it, BorderZone.tint(), camera, effects = true)
+            val ring = BorderZone.current()
+            if (ring == null) {
+                BorderSeam.drop()
+            } else {
+                draw(roundBorder, BorderPipeline.RING, ring, BorderZone.tint(), camera, effects = true)
+                BorderSeam.meshFor(ring, camera)?.let { seam ->
+                    pass(BorderPipeline.SEAM, seam.vertices, seam.indexCount, ring, BorderZone.tint(), camera, BorderSeam.uniforms(seam.reach))
+                }
             }
 
             val zone = DangerZone.current()
@@ -65,14 +73,26 @@ object BorderRenderer {
 
     private fun draw(
         layer: Layer,
-        pipeline: com.mojang.blaze3d.pipeline.RenderPipeline,
+        pipeline: RenderPipeline,
         ring: BorderZone.Ring,
         tint: Int,
         camera: Vec3,
         effects: Boolean = false,
     ) {
         val current = layer.meshFor(ring)
+        val extras = if (effects) BorderEffects.uniforms(ring, current.columns, camera) else Matrix4f()
+        pass(pipeline, current.vertices, current.indexCount, ring, tint, camera, extras)
+    }
 
+    private fun pass(
+        pipeline: RenderPipeline,
+        vertices: GpuBuffer,
+        indexCount: Int,
+        ring: BorderZone.Ring,
+        tint: Int,
+        camera: Vec3,
+        extras: Matrix4f,
+    ) {
         val client = Minecraft.getInstance()
 
         val weather = client.levelRenderer.weatherTarget
@@ -96,7 +116,7 @@ object BorderRenderer {
                 1f,
             ),
             offset,
-            if (effects) BorderEffects.uniforms(ring, current.columns, camera) else Matrix4f(),
+            extras,
         )
 
         val indices = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS)
@@ -111,9 +131,9 @@ object BorderRenderer {
             pass.setPipeline(pipeline)
             RenderSystem.bindDefaultUniforms(pass)
             pass.setUniform("DynamicTransforms", transform)
-            pass.setIndexBuffer(indices.getBuffer(current.indexCount), indices.type())
-            pass.setVertexBuffer(0, current.vertices)
-            pass.drawIndexed(0, 0, current.indexCount, 1)
+            pass.setIndexBuffer(indices.getBuffer(indexCount), indices.type())
+            pass.setVertexBuffer(0, vertices)
+            pass.drawIndexed(0, 0, indexCount, 1)
         }
     }
 }
