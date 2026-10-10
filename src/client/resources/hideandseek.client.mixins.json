@@ -8,8 +8,7 @@
 		"WorldBorderRendererMixin",
 		"FlatHeadMixin",
 		"CrewColourMixin",
-		"CrewNameMixin",
-		"WarpFovMixin"
+		"CrewNameMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
