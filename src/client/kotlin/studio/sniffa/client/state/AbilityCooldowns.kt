@@ -4,14 +4,20 @@ object AbilityCooldowns {
 
     private var readyAt: Map<String, Long> = emptyMap()
 
+    private val used = mutableSetOf<String>()
+
     fun accept(secondsLeft: Map<String, Int>) {
         val now = System.currentTimeMillis()
         readyAt = secondsLeft.mapValues { now + it.value * 1000L }
+        used += secondsLeft.filterValues { it > 0 }.keys
     }
 
     fun forget() {
         readyAt = emptyMap()
+        used.clear()
     }
+
+    fun owned(abilityId: String): Boolean = abilityId in used
 
     fun remaining(abilityId: String): Int {
         val left = leftMillis(abilityId)
