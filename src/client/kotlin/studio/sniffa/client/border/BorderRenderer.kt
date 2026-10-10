@@ -39,12 +39,13 @@ object BorderRenderer {
 
     fun install() {
         BorderPipeline.install()
+        BorderEffects.install()
 
         WorldRenderEvents.END_MAIN.register(WorldRenderEvents.EndMain {
             val camera = Minecraft.getInstance().gameRenderer.mainCamera.position()
 
             BorderZone.current()?.let {
-                draw(roundBorder, BorderPipeline.RING, it, BorderZone.tint(), camera)
+                draw(roundBorder, BorderPipeline.RING, it, BorderZone.tint(), camera, effects = true)
             }
 
             val zone = DangerZone.current()
@@ -68,6 +69,7 @@ object BorderRenderer {
         ring: BorderZone.Ring,
         tint: Int,
         camera: Vec3,
+        effects: Boolean = false,
     ) {
         val current = layer.meshFor(ring)
 
@@ -94,7 +96,7 @@ object BorderRenderer {
                 1f,
             ),
             offset,
-            Matrix4f().m30(current.columns.toFloat()),
+            if (effects) BorderEffects.uniforms(ring, current.columns, camera) else Matrix4f(),
         )
 
         val indices = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS)

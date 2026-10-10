@@ -28,9 +28,9 @@ class BorderMesh private constructor(
 
         private const val TAU = 2.0 * Math.PI
 
-        private const val CELL_BLOCKS = 2.0
+        const val CELL_BLOCKS = 2.0
 
-        private const val PERIOD_CELLS = 1.7320508
+        const val PERIOD_CELLS = 1.7320508
 
         fun build(ring: BorderZone.Ring): BorderMesh {
             val format = DefaultVertexFormat.POSITION_TEX
