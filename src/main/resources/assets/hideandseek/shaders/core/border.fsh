@@ -14,14 +14,14 @@ const float TAU = 6.2831853;
 const float LINE_PIXELS = 2.2;
 const float LINE_STRENGTH = 0.95;
 const float LINE_CELLS = 0.06;
-const float LINE_WHITE = 0.6;
+const float LINE_WHITE = 0.72;
 
 const float GLOW_PIXELS = 14.0;
 const float GLOW_STRENGTH = 0.34;
 const float GLOW_CELLS = 0.2;
 
-const float RIM_CELLS = 0.1;
-const float RIM_STRENGTH = 0.22;
+const float RIM_CELLS = 0.07;
+const float RIM_STRENGTH = 0.3;
 
 const float FILL = 0.15;
 const float FILL_FAR = 0.07;
@@ -113,7 +113,7 @@ void main() {
     float line = (1.0 - smoothstep(0.0, lineWidth, pixelsToEdge)) * LINE_STRENGTH;
     float bloom = (1.0 - smoothstep(0.0, GLOW_PIXELS, pixelsToEdge)) * (1.0 - smoothstep(0.0, GLOW_CELLS, toEdge));
     bloom *= GLOW_STRENGTH;
-    float rim = (1.0 - smoothstep(0.0, RIM_CELLS, toEdge)) * RIM_STRENGTH;
+    float rim = exp(-toEdge / RIM_CELLS) * RIM_STRENGTH;
 
     float twinkle = pulse(time * TWINKLE_CYCLES + seed);
     float lit = step(1.0 - SPARK_SHARE, spark) * pulse(time * TWINKLE_CYCLES * 2.0 + spark * 7.0);
