@@ -12,6 +12,7 @@ import kotlin.math.sin
 class BorderMesh private constructor(
     val vertices: GpuBuffer,
     val indexCount: Int,
+    val columns: Int,
     private val ring: BorderZone.Ring,
 ) : AutoCloseable {
 
@@ -27,9 +28,9 @@ class BorderMesh private constructor(
 
         private const val TAU = 2.0 * Math.PI
 
-        private const val CELL_BLOCKS = 8.0
+        const val CELL_BLOCKS = 2.0
 
-        private const val PERIOD_CELLS = 1.7320508
+        const val PERIOD_CELLS = 1.7320508
 
         fun build(ring: BorderZone.Ring): BorderMesh {
             val format = DefaultVertexFormat.POSITION_TEX
@@ -75,7 +76,7 @@ class BorderMesh private constructor(
                         GpuBuffer.USAGE_VERTEX,
                         it.vertexBuffer(),
                     )
-                    return BorderMesh(buffer, quads * 6, ring)
+                    return BorderMesh(buffer, quads * 6, tiles.toInt(), ring)
                 }
             }
         }

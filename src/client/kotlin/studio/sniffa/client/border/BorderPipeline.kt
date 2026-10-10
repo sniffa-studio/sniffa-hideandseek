@@ -10,21 +10,29 @@ import studio.sniffa.Hideandseek
 
 object BorderPipeline {
 
-    val RING: RenderPipeline = wall("border", "core/border")
+    val RING: RenderPipeline = wall("border", "core/border", animated = true)
 
     val ZONE: RenderPipeline = wall("zone", "core/zonewall")
 
-    private fun wall(name: String, fragment: String): RenderPipeline = RenderPipeline.builder()
-        .withLocation(Hideandseek.id("pipeline/$name"))
-        .withVertexShader(Hideandseek.id("core/border"))
-        .withFragmentShader(Hideandseek.id(fragment))
-        .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
-        .withUniform("Projection", UniformType.UNIFORM_BUFFER)
-        .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
-        .withBlend(BlendFunction.TRANSLUCENT)
-        .withCull(false)
-        .withDepthWrite(false)
-        .build()
+    private fun wall(name: String, fragment: String, animated: Boolean = false): RenderPipeline {
+        val builder = RenderPipeline.builder()
+            .withLocation(Hideandseek.id("pipeline/$name"))
+            .withVertexShader(Hideandseek.id("core/border"))
+            .withFragmentShader(Hideandseek.id(fragment))
+            .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
+            .withUniform("Projection", UniformType.UNIFORM_BUFFER)
+
+        if (animated) {
+            builder.withUniform("Globals", UniformType.UNIFORM_BUFFER)
+        }
+
+        return builder
+            .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
+            .withBlend(BlendFunction.TRANSLUCENT)
+            .withCull(false)
+            .withDepthWrite(false)
+            .build()
+    }
 
     fun install() {
         RenderPipelines.register(RING)

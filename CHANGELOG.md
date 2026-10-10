@@ -16,6 +16,10 @@
 - The "Hide & Seek · connected" line in the top left is gone.
 - The boss bar and the bottom right readout are gone, everything is in the top left panel.
 - Radar marks keep glowing for eight seconds after the wave reaches them.
+- The border is a glowing blue hex wall with smaller cells that twinkle and a light that sweeps up it.
+  It turns pink while it shrinks and green while it grows, on the map as well.
+- The border builds itself up cell by cell when a round starts or when it first comes into view.
+- The border lights up the closer you get to it, and sends a wave through its cells where anyone touches it.
 
 ### Fixed
 

@@ -9,6 +9,8 @@ in vec2 UV0;
 out vec2 wallCoord;
 
 out float heightFromViewer;
+out float distanceFromViewer;
+out float distanceToEye;
 
 void main() {
     vec3 pos = Position + ModelOffset;
@@ -16,4 +18,6 @@ void main() {
 
     wallCoord = UV0;
     heightFromViewer = pos.y;
+    distanceFromViewer = length(pos.xz);
+    distanceToEye = length(pos);
 }
