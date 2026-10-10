@@ -37,6 +37,15 @@ const float REACH = 4.0;
 const float IDLE_PULSE = 0.18;
 const float IDLE_SPEED = 2.2;
 
+const float HALO_REACH = 0.45;
+const float HALO_LIGHT = 0.35;
+
+const float PING_SECONDS = 2.2;
+const float PING_FROM = 0.4;
+const float PING_REACH = 1.25;
+const float PING_HALF_WIDTH = 0.05;
+const float PING_LIGHT = 0.22;
+
 float band(float offset, float halfWidth) {
     return 1.0 - smoothstep(halfWidth, halfWidth + SOFT, abs(offset));
 }
@@ -89,7 +98,13 @@ void main() {
     float head = band(across, HEAD_HALF_WIDTH * (1.0 - clamp(headAt, 0.0, 1.0)))
         * span(headAt, 0.0, 1.0, 0.12);
 
-    light += (needle * NEEDLE_LIGHT + head * HEAD_LIGHT) * live;
+    float halo = exp(-abs(radius - DIAL_RADIUS) / HALO_REACH) * focus * HALO_LIGHT;
+
+    float pingAt = fract(seconds / PING_SECONDS);
+    float pingRadius = mix(PING_FROM, DIAL_RADIUS * PING_REACH, pingAt);
+    float ping = band(radius - pingRadius, PING_HALF_WIDTH) * (1.0 - pingAt) * PING_LIGHT;
+
+    light += (needle * NEEDLE_LIGHT + head * HEAD_LIGHT + halo + ping) * live;
 
     if (light <= 0.004) {
         discard;

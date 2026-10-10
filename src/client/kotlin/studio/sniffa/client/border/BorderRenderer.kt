@@ -20,6 +20,9 @@ object BorderRenderer {
     private val roundBorder = Layer()
     private val dangerZone = Layer()
 
+    private val roundSeam = BorderSeam()
+    private val zoneSeam = BorderSeam()
+
     private const val ZONE_TINT = 0xFFFC301E.toInt()
 
     private const val RADIUS_STEPS = 4.0
@@ -48,25 +51,28 @@ object BorderRenderer {
 
             val ring = BorderZone.current()
             if (ring == null) {
-                BorderSeam.drop()
+                roundSeam.drop()
             } else {
-                draw(roundBorder, BorderPipeline.RING, ring, BorderZone.tint(), camera, effects = true)
-                BorderSeam.meshFor(ring, camera)?.let { seam ->
-                    pass(BorderPipeline.SEAM, seam.vertices, seam.indexCount, ring, BorderZone.tint(), camera, BorderSeam.uniforms(seam.reach))
+                draw(roundBorder, BorderPipeline.RING, ring, BorderZone.tint(), camera) {
+                    BorderEffects.uniforms(ring, it.columns, camera)
+                }
+                roundSeam.meshFor(ring, camera)?.let { seam ->
+                    pass(BorderPipeline.SEAM, seam.vertices, seam.indexCount, ring, BorderZone.tint(), camera, roundSeam.uniforms(seam.reach, BorderZone.motion()))
                 }
             }
 
             val zone = DangerZone.current()
             if (zone == null) {
                 dangerZone.drop()
+                zoneSeam.drop()
             } else {
-                draw(
-                    dangerZone,
-                    BorderPipeline.ZONE,
-                    BorderZone.Ring(zone.centerX, zone.centerZ, zone.radius),
-                    ZONE_TINT,
-                    camera,
-                )
+                val zoneRing = BorderZone.Ring(zone.centerX, zone.centerZ, zone.radius)
+                draw(dangerZone, BorderPipeline.ZONE, zoneRing, ZONE_TINT, camera) {
+                    zoneUniforms(it.columns)
+                }
+                zoneSeam.meshFor(zoneRing, camera)?.let { seam ->
+                    pass(BorderPipeline.SEAM, seam.vertices, seam.indexCount, zoneRing, ZONE_TINT, camera, zoneSeam.uniforms(seam.reach, BorderZone.Motion.STATIONARY))
+                }
             }
         })
     }
@@ -77,11 +83,17 @@ object BorderRenderer {
         ring: BorderZone.Ring,
         tint: Int,
         camera: Vec3,
-        effects: Boolean = false,
+        extras: (BorderMesh) -> Matrix4f,
     ) {
         val current = layer.meshFor(ring)
-        val extras = if (effects) BorderEffects.uniforms(ring, current.columns, camera) else Matrix4f()
-        pass(pipeline, current.vertices, current.indexCount, ring, tint, camera, extras)
+        pass(pipeline, current.vertices, current.indexCount, ring, tint, camera, extras(current))
+    }
+
+    private fun zoneUniforms(columns: Int): Matrix4f {
+        val values = FloatArray(16)
+        values[0] = DangerZone.secondsLeft().toFloat()
+        values[12] = columns.toFloat()
+        return Matrix4f().set(values)
     }
 
     private fun pass(

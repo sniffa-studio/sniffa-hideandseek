@@ -22,6 +22,13 @@ const float PULSE_SPEED = 2.1;
 
 const float INTENSITY = 0.95;
 
+const float CONTOUR_FROM = 0.08;
+const float CONTOUR_TO = 0.22;
+const float CONTOUR_LIGHT = 0.45;
+
+const float SCANLINE_PIXELS = 3.0;
+const float SCANLINE_DEPTH = 0.12;
+
 float wobble(vec3 p) {
     float coarse = sin(p.x) * sin(p.y * 1.3 + 1.7) * sin(p.z * 0.7 + 0.4);
     float fine = sin(p.x * 2.1 + p.z * 1.1) * sin(p.y * 1.9 - 0.6);
@@ -91,12 +98,15 @@ void main() {
     reading *= 1.0 + PULSE_DEPTH * sin(seconds * PULSE_SPEED);
     reading = clamp(reading, 0.0, 1.0);
 
-    float alpha = reading * INTENSITY * ColorModulator.a;
+    float contour = smoothstep(0.0, CONTOUR_FROM, reading) * (1.0 - smoothstep(CONTOUR_FROM, CONTOUR_TO, reading));
+    float scanline = 1.0 - SCANLINE_DEPTH * step(0.5, fract(gl_FragCoord.y / SCANLINE_PIXELS));
+
+    float alpha = max(reading, contour * CONTOUR_LIGHT) * INTENSITY * scanline * ColorModulator.a;
 
     if (alpha < 0.004) {
         discard;
     }
 
-    vec3 tint = heatColour(reading);
+    vec3 tint = mix(heatColour(reading), vec3(1.0), contour * CONTOUR_LIGHT);
     fragColor = vec4(tint * alpha, alpha);
 }

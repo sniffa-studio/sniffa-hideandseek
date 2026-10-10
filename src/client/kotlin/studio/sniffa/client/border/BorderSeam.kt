@@ -22,23 +22,25 @@ import kotlin.math.floor
 import kotlin.math.hypot
 import kotlin.math.sin
 
-object BorderSeam {
+class BorderSeam {
 
     class Mesh(val vertices: GpuBuffer, val indexCount: Int, val reach: Double)
 
     private class Sample(val x: Float, val z: Float, val inner: Vec3, val outer: Vec3, val ground: Float, val along: Float)
 
-    private const val STEP_BLOCKS = 1.0
-    private const val HEIGHT_BLOCKS = 1.6
-    private const val HALF_WIDTH = 1.2
-    private const val LIFT = 0.02f
-    private const val ACROSS = 2f
+    private companion object {
+        const val STEP_BLOCKS = 1.0
+        const val HEIGHT_BLOCKS = 1.6
+        const val HALF_WIDTH = 1.2
+        const val LIFT = 0.02f
+        const val ACROSS = 2f
 
-    private const val REBUILD_MILLIS = 1000L
-    private const val MOVE_BLOCKS = 6.0
-    private const val RADIUS_BLOCKS = 0.5
-    private const val LEAF_DEPTH = 48
-    private const val REACH_BLOCKS = 96.0
+        const val REBUILD_MILLIS = 1000L
+        const val MOVE_BLOCKS = 6.0
+        const val RADIUS_BLOCKS = 0.5
+        const val LEAF_DEPTH = 48
+        const val REACH_BLOCKS = 96.0
+    }
 
     private var mesh: Mesh? = null
     private var builtFor: BorderZone.Ring? = null
@@ -73,9 +75,9 @@ object BorderSeam {
         builtFor = null
     }
 
-    fun uniforms(reach: Double): Matrix4f {
+    fun uniforms(reach: Double, motion: BorderZone.Motion): Matrix4f {
         val values = FloatArray(16)
-        values[3] = when (BorderZone.motion()) {
+        values[3] = when (motion) {
             BorderZone.Motion.SHRINKING -> -1f
             BorderZone.Motion.GROWING -> 1f
             BorderZone.Motion.STATIONARY -> 0f

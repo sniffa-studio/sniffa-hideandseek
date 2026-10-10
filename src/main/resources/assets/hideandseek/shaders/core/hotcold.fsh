@@ -26,6 +26,10 @@ const float COLD_PRESENCE = 0.55;
 
 const float FROST_STRENGTH = 0.85;
 
+const float FLAME_DEPTH = 0.06;
+const float FLAME_TONGUES = 11.0;
+const float FLAME_SPEED = 2.6;
+
 const vec3 ICE = vec3(0.60, 0.85, 1.00);
 const vec3 EMBER = vec3(1.00, 0.32, 0.10);
 
@@ -44,8 +48,12 @@ void main() {
     float spread = length(fromCentre);
     float around = atan(fromCentre.y, fromCentre.x);
 
+    float flame = sin(around * FLAME_TONGUES + seconds * FLAME_SPEED) * 0.6
+                + sin(around * FLAME_TONGUES * 1.7 - seconds * FLAME_SPEED * 1.3) * 0.4;
+
     float edge = mix(OPEN_COLD, OPEN_HOT, warmth)
-               - SPIKE * chill * (shards(around, seconds) * 0.5 + 0.5);
+               - SPIKE * chill * (shards(around, seconds) * 0.5 + 0.5)
+               - FLAME_DEPTH * warmth * (flame * 0.5 + 0.5);
 
     float softness = mix(SOFT_COLD, SOFT_HOT, warmth);
     float frame = smoothstep(edge, edge + softness, spread);
