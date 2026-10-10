@@ -20,6 +20,9 @@ object BorderRenderer {
     private val roundBorder = Layer()
     private val dangerZone = Layer()
 
+    private val roundSeam = BorderSeam()
+    private val zoneSeam = BorderSeam()
+
     private const val ZONE_TINT = 0xFFFC301E.toInt()
 
     private const val RADIUS_STEPS = 4.0
@@ -48,28 +51,27 @@ object BorderRenderer {
 
             val ring = BorderZone.current()
             if (ring == null) {
-                BorderSeam.drop()
+                roundSeam.drop()
             } else {
                 draw(roundBorder, BorderPipeline.RING, ring, BorderZone.tint(), camera) {
                     BorderEffects.uniforms(ring, it.columns, camera)
                 }
-                BorderSeam.meshFor(ring, camera)?.let { seam ->
-                    pass(BorderPipeline.SEAM, seam.vertices, seam.indexCount, ring, BorderZone.tint(), camera, BorderSeam.uniforms(seam.reach))
+                roundSeam.meshFor(ring, camera)?.let { seam ->
+                    pass(BorderPipeline.SEAM, seam.vertices, seam.indexCount, ring, BorderZone.tint(), camera, roundSeam.uniforms(seam.reach, BorderZone.motion()))
                 }
             }
 
             val zone = DangerZone.current()
             if (zone == null) {
                 dangerZone.drop()
+                zoneSeam.drop()
             } else {
-                draw(
-                    dangerZone,
-                    BorderPipeline.ZONE,
-                    BorderZone.Ring(zone.centerX, zone.centerZ, zone.radius),
-                    ZONE_TINT,
-                    camera,
-                ) {
+                val zoneRing = BorderZone.Ring(zone.centerX, zone.centerZ, zone.radius)
+                draw(dangerZone, BorderPipeline.ZONE, zoneRing, ZONE_TINT, camera) {
                     zoneUniforms(it.columns)
+                }
+                zoneSeam.meshFor(zoneRing, camera)?.let { seam ->
+                    pass(BorderPipeline.SEAM, seam.vertices, seam.indexCount, zoneRing, ZONE_TINT, camera, zoneSeam.uniforms(seam.reach, BorderZone.Motion.STATIONARY))
                 }
             }
         })
