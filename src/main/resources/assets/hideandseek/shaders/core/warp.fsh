@@ -5,66 +5,77 @@ in vec4 tint;
 
 out vec4 fragColor;
 
-const float TAU = 6.2831853;
+const float CELLS_ACROSS = 18.0;
 
-const float FLASH_AT = 0.12;
-const float FLASH_WIDTH = 0.09;
-const float FLASH_STRENGTH = 0.55;
+const float SPEED = 1.35;
+const float JITTER = 0.18;
+const float DISSOLVE = 0.14;
 
-const float STREAKS = 96.0;
-const float STREAK_SHARE = 0.5;
-const float STREAK_WIDTH = 0.16;
-const float STREAK_LENGTH = 0.55;
-const float STREAK_STRENGTH = 0.85;
-const float STREAK_FROM = 1.7;
-const float STREAK_TO = 0.2;
-const float STREAK_JITTER = 0.3;
+const float COVER = 0.72;
+const float SHADE = 0.22;
 
-const float RIM_FROM = 0.55;
-const float RIM_TO = 1.45;
-const float RIM_STRENGTH = 0.55;
+const float OUTLINE = 0.05;
+const float OUTLINE_STRENGTH = 0.45;
+const float SPARK = 0.9;
+const float SPARK_WIDTH = 0.05;
 
-const float FADE_FROM = 0.55;
+const vec2 HEX_STEP = vec2(1.7320508, 1.0);
+const vec2 HEX_HALF = vec2(0.8660254, 0.5);
 
-const float WHITE = 0.6;
+vec4 hexCell(vec2 p) {
+    vec2 centreA = round(p / HEX_STEP);
+    vec2 centreB = round((p - HEX_HALF) / HEX_STEP) + 0.5;
 
-float hash(float n) {
-    return fract(sin(n * 12.9898) * 43758.5453);
+    vec2 offsetA = p - centreA * HEX_STEP;
+    vec2 offsetB = p - centreB * HEX_STEP;
+
+    return dot(offsetA, offsetA) < dot(offsetB, offsetB)
+        ? vec4(offsetA, centreA * HEX_STEP)
+        : vec4(offsetB, centreB * HEX_STEP);
+}
+
+float hash(vec2 id) {
+    vec3 p = fract(vec3(id.xyx) * vec3(0.1031, 0.1030, 0.0973));
+    p += dot(p, p.yzx + 33.33);
+    return fract((p.x + p.y) * p.z);
 }
 
 void main() {
     float t = tint.a;
 
     vec2 size = 1.0 / max(fwidth(shapeCoord), vec2(1.0e-6));
-    vec2 p = (shapeCoord - 0.5) * size / (0.5 * min(size.x, size.y));
+    float cell = min(size.x, size.y) / CELLS_ACROSS;
+    vec2 pixel = (shapeCoord - 0.5) * size;
 
-    float r = length(p);
-    float turn = atan(p.y, p.x) / TAU + 0.5;
+    vec4 hex = hexCell(pixel / cell);
+    vec2 offset = hex.xy;
+    vec2 centre = hex.zw * cell;
 
-    float bin = floor(turn * STREAKS);
-    float within = abs(fract(turn * STREAKS) - 0.5) * 2.0;
-    float seed = hash(bin);
+    float reach = 0.5 * length(size);
+    float fromMiddle = length(centre) / reach;
 
-    float thin = 1.0 - smoothstep(0.0, STREAK_WIDTH + 0.25 * seed, within);
-    float lit = step(1.0 - STREAK_SHARE, seed);
+    float local = t * SPEED - fromMiddle - hash(hex.zw) * JITTER;
+    float left = 1.0 - smoothstep(0.0, DISSOLVE, local);
 
-    float front = mix(STREAK_FROM, STREAK_TO, smoothstep(0.0, 0.7, t)) + seed * STREAK_JITTER;
-    float tail = front + STREAK_LENGTH * (0.6 + 0.8 * seed);
-    float along = smoothstep(front, front + 0.05, r) * (1.0 - smoothstep(tail - 0.25, tail, r));
+    vec2 folded = abs(offset);
+    float toEdge = 0.5 - max(folded.y, dot(folded, HEX_HALF));
+    float shrink = 0.5 * (1.0 - left);
+    float inside = smoothstep(shrink, shrink + 0.02, toEdge);
+    float outline = (1.0 - smoothstep(0.0, OUTLINE, abs(toEdge - shrink))) * step(0.001, left);
 
-    float fade = 1.0 - smoothstep(FADE_FROM, 1.0, t);
-    float streak = thin * lit * along * STREAK_STRENGTH * fade;
+    float spark = exp(-pow((local - DISSOLVE * 0.5) / SPARK_WIDTH, 2.0)) * SPARK;
 
-    float flash = exp(-pow((t - FLASH_AT) / FLASH_WIDTH, 2.0)) * FLASH_STRENGTH;
-    float rim = smoothstep(RIM_FROM, RIM_TO, r) * RIM_STRENGTH * fade;
+    float body = inside * left * COVER;
+    float rim = outline * (OUTLINE_STRENGTH * left + spark);
 
-    float alpha = clamp(streak + rim + flash, 0.0, 1.0);
+    float alpha = clamp(body + rim, 0.0, 1.0);
 
     if (alpha < 0.004) {
         discard;
     }
 
-    vec3 colour = mix(tint.rgb, vec3(1.0), clamp(flash * 1.5 + streak * WHITE, 0.0, 1.0));
+    vec3 deep = tint.rgb * SHADE;
+    vec3 colour = mix(deep, mix(tint.rgb, vec3(1.0), 0.35), clamp(rim / max(alpha, 1.0e-3), 0.0, 1.0));
 
     fragColor = vec4(colour, alpha);
 }
