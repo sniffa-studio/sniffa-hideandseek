@@ -12,8 +12,8 @@ object Warp {
 
     private const val JUMP_BLOCKS = 12.0
 
-    private const val HOLD_MILLIS = 120L
-    private const val OPEN_MILLIS = 380L
+    private const val HOLD_MILLIS = 350L
+    private const val OPEN_MILLIS = 1000L
 
     private const val SOFT_EDGE = 8
 

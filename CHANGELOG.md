@@ -6,8 +6,8 @@
 
 - When you are caught the screen greys out with a big GEFANGEN, who caught you and your place, before the server
   lets you go.
-- After teleporting, swapping or any other jump of more than twelve blocks the screen goes black for a moment and
-  splits open from the middle.
+- After teleporting, swapping or any other jump of more than twelve blocks the screen stays black for a moment and
+  slowly splits open from the middle.
 - The crew opens the teleporter to the hiders with R (Teleporter öffnen in the controls).
 - A small panel in the top left shows your role and which key opens your wheel, or the teleporter for the crew.
 - The crew and spectators see every hider glowing green and every seeker glowing red, with their names.
