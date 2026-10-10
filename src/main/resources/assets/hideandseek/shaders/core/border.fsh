@@ -38,6 +38,15 @@ const float SWEEP_CYCLES = 200.0;
 const float SWEEP_CELLS = 18.0;
 const float SWEEP_SHARPNESS = 10.0;
 const float SWEEP_STRENGTH = 0.9;
+const float SHRINK_SWEEP = -3.0;
+const float GROW_SWEEP = 2.0;
+
+const float TICKS = 24000.0;
+const float FLICKER_TICKS = 3.0;
+const float FLICKER_SHARE = 0.2;
+const float FLICKER_DEPTH = 0.45;
+const float ALARM_CYCLES = 1200.0;
+const float ALARM_STRENGTH = 0.3;
 
 const float NEAR_BLOCKS = 6.0;
 const float NEAR_FADE = 56.0;
@@ -162,7 +171,11 @@ void main() {
     float lit = step(1.0 - SPARK_SHARE, spark) * pulse(time * TWINKLE_CYCLES * 2.0 + spark * 7.0);
     float fill = mix(FILL_FAR, FILL + FILL_SPREAD * seed * twinkle + SPARK_STRENGTH * lit, legible);
 
-    float sweep = pow(pulse(id.y / SWEEP_CELLS - time * SWEEP_CYCLES + seed * 0.06), SWEEP_SHARPNESS);
+    float motion = TextureMat[0][3];
+    float shrinking = step(motion, -0.5);
+    float pace = shrinking > 0.5 ? SHRINK_SWEEP : (motion > 0.5 ? GROW_SWEEP : 1.0);
+
+    float sweep = pow(pulse(id.y / SWEEP_CELLS - time * SWEEP_CYCLES * pace + seed * 0.06), SWEEP_SHARPNESS);
     sweep *= SWEEP_STRENGTH * legible;
 
     float wave = ripples(cell.zw * HEX_STEP, columns * HEX_STEP.x) * legible;
@@ -177,9 +190,13 @@ void main() {
 
     float standing = 1.0 - smoothstep(FADE_FROM, FADE_TO, abs(heightFromViewer));
     float near = 1.0 + NEAR_BOOST * (1.0 - smoothstep(NEAR_BLOCKS, NEAR_FADE, distanceFromViewer));
-    float strength = standing * near * shown;
+    float flickerTick = floor(time * TICKS / FLICKER_TICKS);
+    float flicker = step(1.0 - FLICKER_SHARE, hash(id + vec2(flickerTick * 3.1, flickerTick * 1.7))) * shrinking;
+    float alarm = pulse(time * ALARM_CYCLES) * ALARM_STRENGTH * shrinking;
 
-    float lift = sweep + wave + flash;
+    float strength = standing * near * shown * (1.0 - FLICKER_DEPTH * flicker);
+
+    float lift = sweep + wave + flash + alarm;
 
     float body = (fill + HOT_FILL * hot) * (1.0 + lift) * strength;
     float shine = (bloom + rim) * legible * (1.0 + lift + HOT_LIGHT * hot) * strength;

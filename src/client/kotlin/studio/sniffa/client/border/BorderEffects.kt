@@ -91,6 +91,12 @@ object BorderEffects {
 
         val wall = abs(ring.radius - hypot(camera.x - ring.centerX, camera.z - ring.centerZ))
 
+        values[3] = when (BorderZone.motion()) {
+            BorderZone.Motion.SHRINKING -> -1f
+            BorderZone.Motion.GROWING -> 1f
+            BorderZone.Motion.STATIONARY -> 0f
+        }
+
         values[12] = columns.toFloat()
         values[13] = (1.0 - ((wall - CLOSE_FROM) / (CLOSE_TO - CLOSE_FROM)).coerceIn(0.0, 1.0)).toFloat()
         values[14] = ((now - revealFrom).toDouble() / REVEAL_MILLIS).coerceIn(0.0, 1.0).toFloat()

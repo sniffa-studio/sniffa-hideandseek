@@ -20,6 +20,8 @@
   It turns pink while it shrinks and green while it grows, on the map as well.
 - The border builds itself up cell by cell when a round starts or when it first comes into view.
 - The border lights up the closer you get to it, and sends a wave through its cells where anyone touches it.
+- While the border shrinks, its light runs down the wall three times as fast, cells flicker and the whole wall pulses.
+- A glowing line runs along the ground where the border meets the terrain.
 
 ### Fixed
 
@@ -28,6 +30,7 @@
 - The title screen no longer stalls while it looks up the event server.
 - The danger zone screen edge shows only for hiders.
 - The border wall is no longer rebuilt every frame while it moves.
+- The border turns blue again once it has finished shrinking or growing.
 - Scan marks fade with their wave, and cooldowns start fresh with every round.
 - The map texture is released when you leave the server.
 
