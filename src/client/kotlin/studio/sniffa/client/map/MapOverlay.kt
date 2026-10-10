@@ -30,6 +30,8 @@ object MapOverlay {
 
     val VIGNETTE: RenderPipeline = pipeline("vignette", "core/vignette")
 
+    val WARP: RenderPipeline = pipeline("warp", "core/warp")
+
     private fun pipeline(name: String, fragment: String): RenderPipeline = RenderPipeline.builder()
         .withLocation(Hideandseek.id("pipeline/map_$name"))
         .withVertexShader(Hideandseek.id("core/mapoverlay"))
@@ -49,6 +51,7 @@ object MapOverlay {
         RenderPipelines.register(SHEET)
         RenderPipelines.register(ROSE)
         RenderPipelines.register(VIGNETTE)
+        RenderPipelines.register(WARP)
     }
 
     fun circle(
