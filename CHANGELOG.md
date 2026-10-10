@@ -4,8 +4,8 @@
 
 ### Added
 
-- Teleporting, swapping or any other jump of more than twelve blocks plays a short warp: a blue flash, light
-  streaks rushing to the centre and the view pulling in and springing back.
+- Teleporting, swapping or any other jump of more than twelve blocks plays a short warp: the screen is covered by
+  a blue honeycomb that dissolves cell by cell from the middle outward, while the view pulls in slightly.
 - The crew opens the teleporter to the hiders with R (Teleporter öffnen in the controls).
 - A small panel in the top left shows your role and which key opens your wheel, or the teleporter for the crew.
 - The crew and spectators see every hider glowing green and every seeker glowing red, with their names.
