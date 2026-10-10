@@ -6,12 +6,18 @@ import net.minecraft.client.gui.GuiGraphics
 import studio.sniffa.client.ui.theme.Palette
 import studio.sniffa.client.state.RoundState
 import studio.sniffa.client.zone.DangerZone
+import kotlin.math.PI
+import kotlin.math.sin
 
 object ZoneWarning {
 
     private const val FROM_BOTTOM = 96
 
     private const val EDGE_STRENGTH = 0.32f
+    private const val PULSE_DEPTH = 0.25f
+    private const val CALM_PERIOD_MILLIS = 1600.0
+    private const val URGENT_PERIOD_MILLIS = 500.0
+    private const val URGENT_SECONDS = 10
 
     fun install() {
         HudRenderCallback.EVENT.register { graphics, _ ->
@@ -26,7 +32,9 @@ object ZoneWarning {
     }
 
     private fun draw(graphics: GuiGraphics, secondsLeft: Int) {
-        Vignette.draw(graphics, Palette.ERROR, EDGE_STRENGTH)
+        val period = if (secondsLeft <= URGENT_SECONDS) URGENT_PERIOD_MILLIS else CALM_PERIOD_MILLIS
+        val beat = (0.5 + 0.5 * sin(System.currentTimeMillis() / period * 2.0 * PI)).toFloat()
+        Vignette.draw(graphics, Palette.ERROR, EDGE_STRENGTH * (1f - PULSE_DEPTH + PULSE_DEPTH * beat))
 
         val font = Minecraft.getInstance().font
 
