@@ -17,6 +17,7 @@ import studio.sniffa.client.radar.ScanPulse
 import studio.sniffa.client.ui.hud.ScanReadout
 import studio.sniffa.client.ui.hud.SpottedWarning
 import studio.sniffa.client.ui.hud.RoleHud
+import studio.sniffa.client.ui.hud.CaughtScreen
 import studio.sniffa.client.ui.hud.Warp
 import studio.sniffa.client.ui.hud.ZoneWarning
 
@@ -34,6 +35,7 @@ object HideandseekClient : ClientModInitializer {
 		SpottedWarning.install()
 		ZoneWarning.install()
 		Warp.install()
+		CaughtScreen.install()
 		Keybindings.install()
 		BorderSync.install()
 		RoundSync.install()
