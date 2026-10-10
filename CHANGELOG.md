@@ -20,7 +20,8 @@
   It turns pink while it shrinks and green while it grows, on the map as well.
 - The border builds itself up cell by cell when a round starts or when it first comes into view.
 - The border lights up the closer you get to it, and sends a wave through its cells where anyone touches it.
-- While the border shrinks, its light runs down the wall three times as fast, cells flicker and the whole wall pulses.
+- While the border shrinks, its light runs calmly down the wall and the whole wall breathes slowly.
+- The border shows only within about 96 blocks of you and fades out from 48 blocks, instead of across the whole map.
 - A glowing line runs along the ground where the border meets the terrain.
 
 ### Fixed
