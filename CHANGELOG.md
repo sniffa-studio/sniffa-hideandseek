@@ -4,6 +4,8 @@
 
 ### Added
 
+- When you are caught the screen greys out with a big GEFANGEN, who caught you and your place, before the server
+  lets you go.
 - After teleporting, swapping or any other jump of more than twelve blocks the screen goes black for a moment and
   splits open from the middle.
 - The crew opens the teleporter to the hiders with R (Teleporter öffnen in the controls).

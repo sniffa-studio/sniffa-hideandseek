@@ -29,6 +29,7 @@ import studio.sniffa.net.payload.ScanTagPayload
 import studio.sniffa.net.payload.ScanWavePayload
 import studio.sniffa.net.payload.SeekerStatePayload
 import studio.sniffa.net.payload.ZoneArmPayload
+import studio.sniffa.net.payload.CaughtPayload
 import studio.sniffa.net.payload.ZonePayload
 import studio.sniffa.net.payload.ZonePickPayload
 import studio.sniffa.protocol.Protocol
@@ -73,6 +74,7 @@ object Hideandseek : ModInitializer {
 		PayloadTypeRegistry.playS2C().register(MapMetaPayload.TYPE, MapMetaPayload.CODEC)
 		PayloadTypeRegistry.playS2C().register(MapSlicePayload.TYPE, MapSlicePayload.CODEC)
 		PayloadTypeRegistry.playS2C().register(ZoneArmPayload.TYPE, ZoneArmPayload.CODEC)
+		PayloadTypeRegistry.playS2C().register(CaughtPayload.TYPE, CaughtPayload.CODEC)
 		PayloadTypeRegistry.playS2C().register(ZonePayload.TYPE, ZonePayload.CODEC)
 
 		Cues.install()
