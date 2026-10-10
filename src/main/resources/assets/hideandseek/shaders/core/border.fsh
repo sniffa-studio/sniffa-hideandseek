@@ -66,6 +66,9 @@ const float REVEAL_TAIL = 0.3;
 const float REVEAL_FLASH = 14.0;
 const float REVEAL_FLASH_STRENGTH = 1.2;
 
+const float VISIBLE_FROM = 48.0;
+const float VISIBLE_TO = 96.0;
+
 const float FADE_FROM = 40.0;
 const float FADE_TO = 150.0;
 
@@ -186,7 +189,8 @@ void main() {
     float near = 1.0 + NEAR_BOOST * (1.0 - smoothstep(NEAR_BLOCKS, NEAR_FADE, distanceFromViewer));
     float breath = pulse(time * BREATH_CYCLES) * BREATH_STRENGTH * shrinking;
 
-    float strength = standing * near * shown;
+    float visible = 1.0 - smoothstep(VISIBLE_FROM, VISIBLE_TO, distanceFromViewer);
+    float strength = standing * near * shown * visible;
 
     float lift = sweep + wave + flash + breath;
 

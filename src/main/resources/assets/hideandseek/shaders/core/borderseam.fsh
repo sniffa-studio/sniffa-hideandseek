@@ -26,7 +26,7 @@ const float SHRINK_PACE = -1.0;
 const float BREATH_CYCLES = 600.0;
 const float BREATH_STRENGTH = 0.25;
 
-const float FADE_SHARE = 0.7;
+const float FADE_SHARE = 0.5;
 
 float pulse(float phase) {
     return 0.5 + 0.5 * sin(TAU * phase);
