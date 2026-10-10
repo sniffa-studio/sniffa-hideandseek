@@ -4,6 +4,7 @@
 
 ### Added
 
+- Own sounds for a teleport or swap and for a danger zone being placed.
 - When you are caught the screen greys out with a big GEFANGEN, who caught you and your place, before the server
   lets you go.
 - After teleporting, swapping or any other jump of more than twelve blocks the screen stays black for a moment and
