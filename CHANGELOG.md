@@ -4,8 +4,8 @@
 
 ### Added
 
-- Teleporting, swapping or any other jump of more than twelve blocks plays a short portal effect: the nether portal
-  shimmer over the screen fading out, portal particles pulled in around you and a slight pull of the view.
+- After teleporting, swapping or any other jump of more than twelve blocks the screen goes black for a moment and
+  splits open from the middle.
 - The crew opens the teleporter to the hiders with R (Teleporter öffnen in the controls).
 - A small panel in the top left shows your role and which key opens your wheel, or the teleporter for the crew.
 - The crew and spectators see every hider glowing green and every seeker glowing red, with their names.
