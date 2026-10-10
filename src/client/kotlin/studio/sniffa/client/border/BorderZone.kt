@@ -66,7 +66,7 @@ object BorderZone {
         }
     }
 
-    private const val STATIONARY = 0x8B5CFF
+    private const val STATIONARY = 0x3A8DFF
     private const val SHRINKING = 0xFF4F7A
     private const val GROWING = 0x3FE0B0
 
