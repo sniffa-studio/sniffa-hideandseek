@@ -35,6 +35,8 @@ object RangeBar {
 
     private const val EASING = 9f
 
+    private const val CLOCK_WRAP_MILLIS = 3_600_000L
+
     private val PIPELINE: RenderPipeline = RenderPipeline.builder()
         .withLocation(Hideandseek.id("pipeline/range"))
         .withVertexShader(Hideandseek.id("core/range"))
@@ -129,7 +131,7 @@ object RangeBar {
         val padUnits = PAD.toFloat() / HEIGHT
 
         val parameters = Matrix4f()
-            .m00(shownFill).m02(unitsX).m03(unitsY)
+            .m00(shownFill).m01((now % CLOCK_WRAP_MILLIS) / 1000f).m02(unitsX).m03(unitsY)
             .m10(left).m11(bottom).m12(right).m13(top)
             .m20(padUnits)
 

@@ -18,6 +18,10 @@ const float GLOW_STRENGTH = 0.40;
 
 const float HEAD_REACH = 1.6;
 
+const float SHEEN_SECONDS = 2.4;
+const float SHEEN_WIDTH = 0.08;
+const float SHEEN_STRENGTH = 0.45;
+
 float capsule(vec2 p, vec2 from, vec2 to, float radius) {
     vec2 toPoint = p - from;
     vec2 along = to - from;
@@ -67,6 +71,10 @@ void main() {
 
     float headGlow = (1.0 - smoothstep(0.0, HEAD_REACH / max(span, 1.0e-5), fill - atX)) * step(atX, fill);
     body = mix(body, MINT, headGlow * 0.8);
+
+    float sweep = fract(TextureMat[0].y / SHEEN_SECONDS) * 1.4 - 0.2;
+    float sheen = exp(-pow((atX - sweep * fill) / SHEEN_WIDTH, 2.0)) * filled * SHEEN_STRENGTH;
+    body = mix(body, MINT, sheen);
 
     vec3 tint = mix(TRACK, body, filled);
     float alpha = inside * mix(TRACK_ALPHA, 1.0, filled);
