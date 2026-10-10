@@ -22,6 +22,11 @@
 - The border lights up the closer you get to it, and sends a wave through its cells where anyone touches it.
 - While the border shrinks, its light runs calmly down the wall and the whole wall breathes slowly.
 - The border shows only within about 96 blocks of you and fades out from 48 blocks, instead of across the whole map.
+- The danger zone wall shows moving warning stripes with glowing edges, a ground line, fades out with distance
+  like the border and pulses faster in its last ten seconds.
+- The red warning edge on screen is a soft rounded glow with a honeycomb rim, and it pulses inside the danger zone.
+- The range bar has a sheen running along it, the compass needle a soft halo and a rolling ping, heat bodies a
+  bright outline with thermal scanlines, and the hot edge of the hot and cold frame flickers like flames.
 - A glowing line runs along the ground where the border meets the terrain.
 
 ### Fixed
