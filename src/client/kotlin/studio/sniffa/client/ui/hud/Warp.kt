@@ -15,11 +15,9 @@ object Warp {
 
     private const val TINT = 0x3A8DFF
 
-    private const val PULL = 0.2f
-    private const val PULL_AT = 0.2f
-    private const val SPRING = 0.05f
-    private const val SPRING_AT = 0.55f
-    private const val SPREAD = 0.12f
+    private const val PULL = 0.07f
+    private const val PULL_AT = 0.15f
+    private const val SPREAD = 0.15f
 
     private var last: Vec3? = null
     private var lastLevel: ClientLevel? = null
@@ -46,12 +44,8 @@ object Warp {
 
     fun fovScale(): Float {
         val t = progress() ?: return 1f
-        return 1f - PULL * bump(t, PULL_AT) + SPRING * bump(t, SPRING_AT)
-    }
-
-    private fun bump(t: Float, at: Float): Float {
-        val off = (t - at) / SPREAD
-        return exp(-off * off)
+        val off = (t - PULL_AT) / SPREAD
+        return 1f - PULL * exp(-off * off)
     }
 
     private fun progress(): Float? {
