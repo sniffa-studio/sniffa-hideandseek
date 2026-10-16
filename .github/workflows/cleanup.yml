@@ -1,0 +1,22 @@
+name: cleanup
+on:
+  push:
+    branches: [chore/artifact-cleanup]
+
+permissions:
+  actions: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const repo = { owner: context.repo.owner, repo: context.repo.repo }
+            const all = await github.paginate(github.rest.actions.listArtifactsForRepo, { ...repo, per_page: 100 })
+            all.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            for (const artifact of all.slice(1)) {
+              await github.rest.actions.deleteArtifact({ ...repo, artifact_id: artifact.id })
+            }
+            core.info(`deleted ${Math.max(all.length - 1, 0)} of ${all.length}`)
