@@ -31,6 +31,7 @@ import studio.sniffa.net.payload.SeekerStatePayload
 import studio.sniffa.net.payload.ZoneArmPayload
 import studio.sniffa.net.payload.CaughtPayload
 import studio.sniffa.net.payload.ZonePayload
+import studio.sniffa.net.payload.CinemaPayload
 import studio.sniffa.net.payload.ZonePickPayload
 import studio.sniffa.protocol.Protocol
 import studio.sniffa.sound.Cues
@@ -76,6 +77,7 @@ object Hideandseek : ModInitializer {
 		PayloadTypeRegistry.playS2C().register(ZoneArmPayload.TYPE, ZoneArmPayload.CODEC)
 		PayloadTypeRegistry.playS2C().register(CaughtPayload.TYPE, CaughtPayload.CODEC)
 		PayloadTypeRegistry.playS2C().register(ZonePayload.TYPE, ZonePayload.CODEC)
+		PayloadTypeRegistry.playS2C().register(CinemaPayload.TYPE, CinemaPayload.CODEC)
 
 		Cues.install()
 
