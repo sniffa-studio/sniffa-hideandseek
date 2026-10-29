@@ -10,7 +10,8 @@
 		"CrewColourMixin",
 		"CrewNameMixin",
 		"CinemaCameraMixin",
-		"CinemaHudMixin"
+		"CinemaHudMixin",
+		"CinemaCrowdMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -176,7 +176,7 @@ object Cinema {
 
         val caption = playing.captions.lastOrNull { it.at <= now } ?: return
         val shown = ((now - caption.at) / CAPTION_FADE_MILLIS).coerceIn(0f, 1f) * fade
-        val headline = "#${caption.place + 1}  ${caption.name}"
+        val headline = caption.name
         val centreY = height - bar / 2f
 
         graphics.pose().pushMatrix()
