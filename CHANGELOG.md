@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.2
+
+### Changed
+
+- The rank and role badges in the tab list and above heads come with the mod, so the event server no longer sends a
+  resource pack and joining is faster.
+- Protocol 2: the event server only lets in 1.0.2 and newer.
+
 ## 1.0.1
 
 ### Added

@@ -1,0 +1,220 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/seeker.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua413"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/hider.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua415"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/admin.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua437"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/staff.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua438"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/creator.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua439"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/ogg.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua43a"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/flaggen.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua43b"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/mlg.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua43c"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/parkour.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua43d"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/chaos.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua43e"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/eisboot.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua43f"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/1vs1.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua440"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/1vsmob.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua441"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/replica.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua442"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/redlight.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua443"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/bogen.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua444"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/buntchaos.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua445"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/simonsagt.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua446"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/sumo.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua447"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/manual.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua448"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/director.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua457"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/team.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua458"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/streamer.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua459"
+      ]
+    },
+    {
+      "type": "bitmap",
+      "file": "hideandseek:font/badges/kandidat.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": [
+        "\ua45a"
+      ]
+    }
+  ]
+}
