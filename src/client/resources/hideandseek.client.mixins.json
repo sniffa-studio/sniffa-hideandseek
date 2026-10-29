@@ -8,7 +8,9 @@
 		"WorldBorderRendererMixin",
 		"FlatHeadMixin",
 		"CrewColourMixin",
-		"CrewNameMixin"
+		"CrewNameMixin",
+		"CinemaCameraMixin",
+		"CinemaHudMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
