@@ -117,7 +117,7 @@ object HeatMap {
 
         val seconds = elapsed / 1000f
 
-        val parameters = Matrix4f()
+        val parameters = Matrix4f().zero()
             .m00(radius).m01(seconds)
 
         warm.forEachIndexed { slot, body ->
@@ -129,7 +129,7 @@ object HeatMap {
         }
 
         val transform = RenderSystem.getDynamicUniforms().writeTransform(
-            Matrix4f(),
+            Matrix4f(RenderSystem.getModelViewMatrix()),
             Vector4f(1f, 1f, 1f, strength),
             Vector3f(),
             parameters,
