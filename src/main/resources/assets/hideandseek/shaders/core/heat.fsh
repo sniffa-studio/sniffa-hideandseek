@@ -86,7 +86,7 @@ void main() {
 
         float through = sqrt(edge * edge - miss * miss) / edge;
 
-        through *= 1.0 + INNER_BLOTCH * wobble(nearest * INNER_SCALE + drift);
+        through *= 1.0 + INNER_BLOTCH * wobble(offset * INNER_SCALE + drift);
 
         reading = max(reading, clamp(through, 0.0, 1.0));
     }
