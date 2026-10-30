@@ -34,8 +34,6 @@ class WheelSurface(
         this.active = active
     }
 
-    fun glow(index: Int): Float = painter.glow(index)
-
     fun flash(index: Int) = painter.flash(index)
 
     override fun draw(graphics: OwoUIGraphics, component: ParentUIComponent) {

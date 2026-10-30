@@ -57,8 +57,6 @@ class RadialPainter(
         }
     }
 
-    fun glow(index: Int): Float = intensity.getOrElse(index) { 0f }
-
     fun flash(index: Int) {
         if (index in flashes.indices) flashes[index] = 1f
     }

@@ -50,7 +50,7 @@ class AbilityWheel(
                 ).apply {
                     alignment(HorizontalAlignment.CENTER, VerticalAlignment.CENTER)
                     positioning(Positioning.absolute(x, y))
-                    child(iconOf(index, ability))
+                    child(iconOf(ability))
                 }
             )
         }
@@ -110,8 +110,8 @@ class AbilityWheel(
         focus?.let { wheelSurface.flash(it) }
     }
 
-    private fun iconOf(index: Int, ability: Ability): UIComponent =
-        ability.sprite?.let { AbilityIcon(it, metrics.iconSize) { wheelSurface.glow(index) } }
+    private fun iconOf(ability: Ability): UIComponent =
+        ability.sprite?.let { AbilityIcon(it, metrics.iconSize) }
             ?: UIComponents.item(ItemStack(ability.icon)).apply {
                 setTooltipFromStack(false)
             }
