@@ -24,6 +24,12 @@ object HotCold {
 
     private const val EASING = 6.0f
 
+    private const val PULSE_SLOW = 2f
+
+    private const val PULSE_FAST = 12f
+
+    private const val TAU = 6.2831855f
+
     private const val FADE_MILLIS = 700f
 
     private val PIPELINE: RenderPipeline = RenderPipeline.builder()
@@ -48,6 +54,7 @@ object HotCold {
 
     private var shown = 0f
     private var lastFrame = 0L
+    private var pulse = 0f
     private var startedAt = 0L
     private var nextBlip = 0L
 
@@ -95,6 +102,7 @@ object HotCold {
         val sinceFrame = if (lastFrame == 0L) 0f else (now - lastFrame) / 1000f
         lastFrame = now
         shown += (target - shown) * (EASING * sinceFrame).coerceIn(0f, 1f)
+        pulse = (pulse + sinceFrame * (PULSE_SLOW + (PULSE_FAST - PULSE_SLOW) * shown)) % TAU
 
         blip(now)
 
@@ -108,7 +116,7 @@ object HotCold {
 
         val seconds = (now - startedAt) / 1000f
 
-        val parameters = Matrix4f().m00(shown).m01(seconds)
+        val parameters = Matrix4f().m00(shown).m01(seconds).m02(pulse)
 
         val transform = RenderSystem.getDynamicUniforms().writeTransform(
             Matrix4f(),

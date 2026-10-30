@@ -16,8 +16,6 @@ const float SPIKE = 0.26;
 const float SOFT_HOT = 0.50;
 const float SOFT_COLD = 0.14;
 
-const float PULSE_SLOW = 2.0;
-const float PULSE_FAST = 12.0;
 const float PULSE_DEPTH = 0.26;
 
 const float MAX_OPACITY = 0.66;
@@ -28,6 +26,7 @@ const float FROST_STRENGTH = 0.85;
 
 const float FLAME_DEPTH = 0.06;
 const float FLAME_TONGUES = 11.0;
+const float FLAME_ECHO_TONGUES = 19.0;
 const float FLAME_SPEED = 2.6;
 
 const vec3 ICE = vec3(0.60, 0.85, 1.00);
@@ -49,7 +48,7 @@ void main() {
     float around = atan(fromCentre.y, fromCentre.x);
 
     float flame = sin(around * FLAME_TONGUES + seconds * FLAME_SPEED) * 0.6
-                + sin(around * FLAME_TONGUES * 1.7 - seconds * FLAME_SPEED * 1.3) * 0.4;
+                + sin(around * FLAME_ECHO_TONGUES - seconds * FLAME_SPEED * 1.3) * 0.4;
 
     float edge = mix(OPEN_COLD, OPEN_HOT, warmth)
                - SPIKE * chill * (shards(around, seconds) * 0.5 + 0.5)
@@ -65,7 +64,7 @@ void main() {
         discard;
     }
 
-    float beat = 1.0 + PULSE_DEPTH * warmth * sin(seconds * mix(PULSE_SLOW, PULSE_FAST, warmth));
+    float beat = 1.0 + PULSE_DEPTH * warmth * sin(TextureMat[0].z);
 
     float strength = COLD_PRESENCE + (1.0 - COLD_PRESENCE) * warmth;
 
