@@ -54,9 +54,11 @@ object Cinema {
     private const val ORBIT_MILLIS = 4200L
     private const val ORBIT_STEP_MILLIS = 100L
     private const val TO_SEEKER_MILLIS = 900L
-    private const val SEEKER_BACK = 3.2
-    private const val SEEKER_UP = 1.7
-    private const val SEEKER_LOOK_UP = 1.5
+    private const val SEEKER_BACK = 4.6
+    private const val SEEKER_UP = 0.85
+    private const val SEEKER_CLOSE_BACK = 2.9
+    private const val SEEKER_CLOSE_UP = 1.05
+    private const val SEEKER_LOOK_UP = 1.65
     private const val INTRO_RETURN_MILLIS = 1300L
     private const val INTRO_END_EARLY_MILLIS = 200L
 
@@ -157,11 +159,12 @@ object Cinema {
         }
 
         val seeker = Shot(centre.add(facing.scale(SEEKER_BACK)).add(0.0, SEEKER_UP, 0.0), centre.add(0.0, SEEKER_LOOK_UP, 0.0))
+        val pushedIn = Shot(centre.add(facing.scale(SEEKER_CLOSE_BACK)).add(0.0, SEEKER_CLOSE_UP, 0.0), centre.add(0.0, SEEKER_LOOK_UP, 0.0))
         val atSeeker = keys.last().at + TO_SEEKER_MILLIS
         val length = payload.lengthTicks * TICK_MILLIS - INTRO_END_EARLY_MILLIS
         val leaveSeeker = maxOf(atSeeker + 1, length - INTRO_RETURN_MILLIS)
         keys += Key(atSeeker, seeker)
-        keys += Key(leaveSeeker, seeker)
+        keys += Key(leaveSeeker, pushedIn)
         keys += Key(maxOf(leaveSeeker + 1, length), null)
 
         val captions = listOf(Caption(atSeeker - TO_SEEKER_MILLIS / 2, payload.seeker, SEEKS, SEEKER_RED))
