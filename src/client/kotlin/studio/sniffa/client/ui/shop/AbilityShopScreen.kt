@@ -80,7 +80,7 @@ class AbilityShopScreen : BaseOwoScreen<FlowLayout>() {
         if (!ShopSession.buy(ability)) return
         UiSound.purchased()
 
-        wheels.getOrNull(page)?.clearFocus()
+        wheels.getOrNull(page)?.purchased()
     }
 
     private fun studioLockup(): FlowLayout =

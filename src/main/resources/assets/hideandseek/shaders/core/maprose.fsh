@@ -41,8 +41,8 @@ void main() {
     float crossStar = star(turned, CROSS_POINTS);
 
     float body = min(mainStar, crossStar);
-    float filled = 1.0 - smoothstep(1.0 - EDGE_SOFTNESS * perPixel / MAIN_POINTS,
-                                    1.0 + EDGE_SOFTNESS * perPixel / MAIN_POINTS, body);
+    float soft = EDGE_SOFTNESS * max(fwidth(body), 1.0e-5);
+    float filled = 1.0 - smoothstep(1.0 - soft, 1.0 + soft, body);
 
     float d = length(shapeCoord);
 
@@ -51,7 +51,7 @@ void main() {
                                        abs(d - INNER_RING_AT) * radiusPixels);
     float hub = 1.0 - smoothstep(0.0, EDGE_SOFTNESS, (d - HUB) * radiusPixels);
 
-    float north = step(0.0, -shapeCoord.y) * step(abs(shapeCoord.x), -shapeCoord.y);
+    float north = clamp((-shapeCoord.y - abs(shapeCoord.x)) / (1.4142136 * perPixel) + 0.5, 0.0, 1.0);
     float weight = max(0.35, north);
 
     float light = max(max(filled * weight, hub), max(ring, innerRing * 0.7));
@@ -61,5 +61,5 @@ void main() {
         discard;
     }
 
-    fragColor = vec4(tint.rgb * alpha, alpha);
+    fragColor = vec4(tint.rgb, alpha);
 }

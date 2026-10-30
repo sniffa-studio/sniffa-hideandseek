@@ -17,6 +17,7 @@ class RadialPainter(
 ) {
 
     private val intensity = FloatArray(slots)
+    private val flashes = FloatArray(slots)
     private var lastFrame = 0L
 
     private val wedgeFrom = DoubleArray(slots)
@@ -47,11 +48,17 @@ class RadialPainter(
         lastFrame = now
 
         val step = (1.0 - Math.exp(-elapsed / Spacing.GLOW_EASE_SECONDS)).toFloat()
+        val fade = (1.0 - Math.exp(-elapsed / FLASH_EASE_SECONDS)).toFloat()
 
         for (index in intensity.indices) {
             val target = if (index == active) 1f else 0f
             intensity[index] += (target - intensity[index]) * step
+            flashes[index] -= flashes[index] * fade
         }
+    }
+
+    fun flash(index: Int) {
+        if (index in flashes.indices) flashes[index] = 1f
     }
 
     fun drawWedge(
@@ -65,12 +72,14 @@ class RadialPainter(
         val from = wedgeFrom[index]
         val to = wedgeTo[index]
         val burn = intensity[index]
+        val flash = flashes[index] * FLASH_STRENGTH
+        val outer = metrics.outer + metrics.haloWidth * POP_SHARE * burn
 
         graphics.drawRing(
             centerX, centerY,
             from, to,
             wedgeSegments,
-            innerEdge, metrics.outer,
+            innerEdge, outer,
             trackInk, trackInk,
         )
 
@@ -78,22 +87,22 @@ class RadialPainter(
             centerX, centerY,
             from, to,
             wedgeSegments,
-            innerEdge, metrics.outer,
-            Color.ofArgb(blend(style.innerIdle, style.innerHot, burn)),
-            Color.ofArgb(blend(style.outerIdle, style.outerHot, burn)),
+            innerEdge, outer,
+            Color.ofArgb(blend(blend(style.innerIdle, style.innerHot, burn), FLASH, flash)),
+            Color.ofArgb(blend(blend(style.outerIdle, style.outerHot, burn), FLASH, flash)),
         )
 
-        drawCooldown(graphics, centerX, centerY, from, to, cooling)
+        drawCooldown(graphics, centerX, centerY, from, to, cooling, outer)
 
-        drawContour(graphics, centerX, centerY, from, to)
+        drawContour(graphics, centerX, centerY, from, to, outer)
 
-        if (burn > INVISIBLE) {
+        if (burn > INVISIBLE || flash > INVISIBLE) {
             graphics.drawRing(
                 centerX, centerY,
                 from, to,
                 wedgeSegments,
-                metrics.outer, metrics.outer + metrics.haloWidth,
-                Color.ofArgb(blend(TRANSPARENT, style.halo, burn)), TRANSPARENT_INK,
+                outer, outer + metrics.haloWidth,
+                Color.ofArgb(blend(blend(TRANSPARENT, style.halo, burn), FLASH_HALO, flash)), TRANSPARENT_INK,
             )
         }
     }
@@ -105,6 +114,7 @@ class RadialPainter(
         from: Double,
         to: Double,
         cooling: Float,
+        outer: Double,
     ) {
         if (cooling <= INVISIBLE) return
 
@@ -112,8 +122,8 @@ class RadialPainter(
         graphics.drawRing(
             centerX, centerY,
             to - covered, to,
-            segmentsFor(covered, metrics.outer),
-            innerEdge, metrics.outer,
+            segmentsFor(covered, outer),
+            innerEdge, outer,
             shadeInk, shadeInk,
         )
     }
@@ -124,12 +134,13 @@ class RadialPainter(
         centerY: Int,
         from: Double,
         to: Double,
+        outer: Double,
     ) {
         graphics.drawRing(
             centerX, centerY,
             from, to,
             wedgeSegments,
-            metrics.outer - metrics.rim, metrics.outer,
+            outer - metrics.rim, outer,
             edgeInk, edgeInk,
         )
 
@@ -137,11 +148,11 @@ class RadialPainter(
 
         graphics.drawRing(
             centerX, centerY, from, from + span, EDGE_SEGMENTS,
-            innerEdge, metrics.outer, edgeInk, edgeInk,
+            innerEdge, outer, edgeInk, edgeInk,
         )
         graphics.drawRing(
             centerX, centerY, to - span, to, EDGE_SEGMENTS,
-            innerEdge, metrics.outer, edgeInk, edgeInk,
+            innerEdge, outer, edgeInk, edgeInk,
         )
     }
 
@@ -175,5 +186,15 @@ class RadialPainter(
         const val EDGE_SEGMENTS = 1
 
         const val NANOS_PER_SECOND = 1_000_000_000.0
+
+        const val POP_SHARE = 0.55
+
+        const val FLASH_EASE_SECONDS = 0.18
+
+        const val FLASH_STRENGTH = 0.65f
+
+        const val FLASH = 0xFFFFFFFF.toInt()
+
+        const val FLASH_HALO = 0xB3FFFFFF.toInt()
     }
 }

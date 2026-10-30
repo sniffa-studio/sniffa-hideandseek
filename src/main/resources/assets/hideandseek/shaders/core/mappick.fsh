@@ -26,7 +26,7 @@ const float CENTRE_STRENGTH = 1.0;
 void main() {
     float d = length(shapeCoord);
 
-    float perPixel = length(vec2(dFdx(d), dFdy(d)));
+    float perPixel = length(vec2(dFdx(shapeCoord.x), dFdy(shapeCoord.x)));
     if (perPixel <= 0.0) {
         discard;
     }
@@ -39,6 +39,7 @@ void main() {
     float glow = exp(-outside / GLOW_PIXELS) * GLOW_STRENGTH;
 
     float inside = 1.0 - smoothstep(1.0 - perPixel, 1.0 + perPixel, d);
+    glow *= 1.0 - inside;
     float fill = pow(clamp(d, 0.0, 1.0), FILL_FALLOFF) * FILL_STRENGTH * inside;
 
     float offAxis = min(abs(shapeCoord.x), abs(shapeCoord.y)) * radiusPixels;
@@ -57,5 +58,5 @@ void main() {
 
     vec3 colour = mix(tint.rgb, vec3(1.0), smoothstep(0.5, 1.0, max(rim, centre)) * 0.75);
 
-    fragColor = vec4(colour * alpha, alpha);
+    fragColor = vec4(colour, alpha);
 }

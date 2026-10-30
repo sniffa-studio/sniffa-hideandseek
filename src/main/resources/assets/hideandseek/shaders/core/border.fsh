@@ -29,15 +29,26 @@ const float FILL_FAR = 0.07;
 const float FILL_SPREAD = 0.14;
 const float FILL_SHADE = 0.85;
 
-const float SPARK_SHARE = 0.07;
-const float SPARK_STRENGTH = 0.24;
+const float LINES_NEAR_FROM = 10.0;
+const float LINES_NEAR_TO = 34.0;
+const float LINES_FAR = 0.18;
 
-const float TWINKLE_CYCLES = 150.0;
+const float AURORA_CELLS = 26.0;
+const float AURORA_HEIGHT_CELLS = 9.0;
+const float AURORA_CYCLES = 40.0;
+const float AURORA_STRENGTH = 0.35;
+
+const float STREAM_SHARE = 0.1;
+const float STREAM_PERIOD_CELLS = 48.0;
+const float STREAM_TAIL_CELLS = 4.0;
+const float STREAM_CYCLES = 100.0;
+const float STREAM_FILL = 0.5;
+const float STREAM_LINE = 0.8;
 
 const float SWEEP_CYCLES = 200.0;
 const float SWEEP_CELLS = 18.0;
 const float SWEEP_SHARPNESS = 10.0;
-const float SWEEP_STRENGTH = 0.9;
+const float SWEEP_STRENGTH = 0.45;
 const float SHRINK_SWEEP = -1.0;
 
 const float BREATH_CYCLES = 600.0;
@@ -111,6 +122,23 @@ float pulse(float phase) {
     return 0.5 + 0.5 * sin(TAU * phase);
 }
 
+float aurora(vec2 coord, float around, float time) {
+    float folds = max(1.0, floor(around / AURORA_CELLS + 0.5));
+    float sway = 0.35 * sin(TAU * (coord.y / AURORA_HEIGHT_CELLS + time * AURORA_CYCLES));
+    float slow = sin(TAU * (coord.x / around * folds + sway - time * AURORA_CYCLES * 0.5));
+    float fine = sin(TAU * (coord.x / around * folds * 3.0 - sway * 0.5 + time * AURORA_CYCLES));
+    return 0.5 + 0.35 * slow + 0.15 * fine;
+}
+
+float stream(vec2 id, float pace, float time) {
+    float column = hash(vec2(id.x, 913.0));
+    float speed = 0.7 + 0.6 * hash(vec2(id.x, 377.0));
+    float head = fract(column * 13.7 + time * STREAM_CYCLES * speed * pace) * STREAM_PERIOD_CELLS;
+    float behind = mod((head - id.y) * pace, STREAM_PERIOD_CELLS);
+    float tail = exp(-behind / STREAM_TAIL_CELLS) * (1.0 - smoothstep(STREAM_TAIL_CELLS * 3.0, STREAM_TAIL_CELLS * 4.0, behind));
+    return tail * step(column, STREAM_SHARE);
+}
+
 float ripples(vec2 centre, float around) {
     float total = 0.0;
 
@@ -155,9 +183,9 @@ void main() {
     float legible = 1.0 - smoothstep(0.1, 0.6, cellsPerPixel);
 
     float seed = hash(id);
-    float spark = hash(id + 71.0);
 
     float time = GameTime;
+    float around = columns * HEX_STEP.x;
 
     float lineWidth = min(LINE_PIXELS, LINE_CELLS / max(cellsPerPixel, 1.0e-6));
     float line = (1.0 - smoothstep(0.0, lineWidth, pixelsToEdge)) * LINE_STRENGTH;
@@ -165,12 +193,16 @@ void main() {
     bloom *= GLOW_STRENGTH;
     float rim = exp(-toEdge / RIM_CELLS) * RIM_STRENGTH;
 
-    float twinkle = pulse(time * TWINKLE_CYCLES + seed);
-    float lit = step(1.0 - SPARK_SHARE, spark) * pulse(time * TWINKLE_CYCLES * 2.0 + spark * 7.0);
-    float fill = mix(FILL_FAR, FILL + FILL_SPREAD * seed * twinkle + SPARK_STRENGTH * lit, legible);
-
     float shrinking = step(TextureMat[0][3], -0.5);
     float pace = mix(1.0, SHRINK_SWEEP, shrinking);
+
+    float curtain = aurora(wallCoord, around, time);
+    float flow = stream(id, pace, time) * legible;
+    float fill = mix(FILL_FAR, FILL + FILL_SPREAD * 0.5, legible) * (1.0 + AURORA_STRENGTH * (curtain * 2.0 - 1.0))
+               + STREAM_FILL * flow;
+
+    float close = 1.0 - smoothstep(LINES_NEAR_FROM, LINES_NEAR_TO, distanceToEye);
+    float drawn = mix(LINES_FAR, 1.0, close);
 
     float sweep = pow(pulse(id.y / SWEEP_CELLS - time * SWEEP_CYCLES * pace + seed * 0.06), SWEEP_SHARPNESS);
     sweep *= SWEEP_STRENGTH * legible;
@@ -195,8 +227,8 @@ void main() {
     float lift = sweep + wave + flash + breath;
 
     float body = (fill + HOT_FILL * hot) * (1.0 + lift) * strength;
-    float shine = (bloom + rim) * legible * (1.0 + lift + HOT_LIGHT * hot) * strength;
-    float core = line * legible * (1.0 + 0.5 * sweep + wave + flash + HOT_LIGHT * hot) * strength;
+    float shine = (bloom + rim) * legible * drawn * (1.0 + lift + HOT_LIGHT * hot) * strength;
+    float core = line * legible * (drawn + STREAM_LINE * flow) * (1.0 + 0.5 * sweep + wave + flash + HOT_LIGHT * hot) * strength;
 
     vec3 tint = ColorModulator.rgb;
     vec3 lineColour = mix(tint, vec3(1.0), LINE_WHITE);

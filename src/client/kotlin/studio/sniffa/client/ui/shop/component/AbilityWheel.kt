@@ -106,6 +106,10 @@ class AbilityWheel(
         }
     }
 
+    fun purchased() {
+        focus?.let { wheelSurface.flash(it) }
+    }
+
     private fun iconOf(ability: Ability): UIComponent =
         ability.sprite?.let { AbilityIcon(it, metrics.iconSize) }
             ?: UIComponents.item(ItemStack(ability.icon)).apply {
