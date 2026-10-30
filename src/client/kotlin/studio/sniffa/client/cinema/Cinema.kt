@@ -16,7 +16,7 @@ import kotlin.math.sqrt
 object Cinema {
 
     private const val STEP_SPACING = 1.75
-    private val HEIGHTS = doubleArrayOf(1.6, 1.1, 0.7)
+    private val HEIGHTS = doubleArrayOf(1.598, 1.148, 0.798)
     private val COLOURS = intArrayOf(0xFFCCA120.toInt(), 0xFFC4CCD4.toInt(), 0xFFC8844E.toInt())
 
     private const val TICK_MILLIS = 50L
@@ -33,9 +33,9 @@ object Cinema {
     private const val CAPTION_FADE_MILLIS = 300f
     private const val TITLE = "ꜱɪᴇɢᴇʀᴇʜʀᴜɴɢ"
 
-    private const val WIDE_BACK = 9.0
-    private const val WIDE_UP = 3.4
-    private const val WIDE_LOOK_UP = 1.8
+    private const val WIDE_BACK = 10.5
+    private const val WIDE_UP = 3.2
+    private const val WIDE_LOOK_UP = 2.7
     private const val CLOSE_BACK = 3.4
     private const val CLOSE_UP = 1.8
     private const val CLOSE_LOOK_UP = 1.4
