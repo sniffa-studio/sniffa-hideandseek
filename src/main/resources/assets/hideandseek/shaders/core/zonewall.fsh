@@ -38,6 +38,14 @@ const float PULSE_STRENGTH = 0.25;
 
 const float WHITE = 0.35;
 
+const float EMBER_CELLS = 0.85;
+const float EMBER_SHARE = 0.16;
+const float EMBER_URGENT_SHARE = 0.34;
+const float EMBER_CYCLES = 700.0;
+const float EMBER_RADIUS = 0.11;
+const float EMBER_STRENGTH = 0.8;
+const float EMBER_WHITE = 0.6;
+
 const float FADE_FROM = 26.0;
 const float FADE_TO = 95.0;
 
@@ -46,6 +54,29 @@ const float VISIBLE_TO = 96.0;
 
 float pulse(float phase) {
     return 0.5 + 0.5 * sin(TAU * phase);
+}
+
+float hash(vec2 id) {
+    vec3 p = fract(vec3(id.xyx) * vec3(0.1031, 0.1030, 0.0973));
+    p += dot(p, p.yzx + 33.33);
+    return fract((p.x + p.y) * p.z);
+}
+
+float embers(vec2 coord, float around, float share) {
+    float columns = max(1.0, floor(around / EMBER_CELLS + 0.5));
+    vec2 grid = vec2(coord.x / around * columns, coord.y / EMBER_CELLS);
+    vec2 id = vec2(mod(floor(grid.x), columns), floor(grid.y));
+    vec2 inside = fract(grid);
+
+    float seed = hash(id);
+    float speed = 0.6 + 0.8 * hash(id + 9.0);
+    float rise = fract(seed * 7.31 + GameTime * EMBER_CYCLES * speed);
+    vec2 centre = vec2(0.25 + 0.5 * hash(id + 3.0), rise);
+
+    float reach = length((inside - centre) * vec2(columns / around * EMBER_CELLS, 1.0));
+    float soft = clamp(fwidth(grid.y) * 1.5, 1.0e-4, 0.2);
+    float spark = 1.0 - smoothstep(EMBER_RADIUS - soft, EMBER_RADIUS + soft, reach);
+    return spark * sin(3.1415927 * rise) * step(seed, share);
 }
 
 float band(float phase, float share, float soft) {
@@ -80,8 +111,11 @@ void main() {
     float visible = 1.0 - smoothstep(VISIBLE_FROM, VISIBLE_TO, distanceFromViewer);
     float eyeline = exp(-abs(heightFromViewer) / EYE_BLOCKS) * EYE_STRENGTH;
 
+    float ember = embers(wallCoord, around, mix(EMBER_SHARE, EMBER_URGENT_SHARE, urgent))
+        * EMBER_STRENGTH * legible * (0.6 + 0.6 * urgent);
+
     float body = (BODY + eyeline + STRIPE_STRENGTH * stripe * legible + scan) * throb;
-    float shine = (edge + edgeGlow) * legible * throb;
+    float shine = (edge + edgeGlow) * legible * throb + ember;
 
     float strength = standing * visible;
     float total = (body + shine) * strength;
@@ -91,7 +125,8 @@ void main() {
     }
 
     vec3 tint = ColorModulator.rgb;
-    vec3 colour = (tint * body + mix(tint, vec3(1.0), WHITE) * shine) / (body + shine);
+    vec3 colour = (tint * body + mix(tint, vec3(1.0), WHITE) * (shine - ember) + mix(tint, vec3(1.0), EMBER_WHITE) * ember)
+        / max(body + shine, 1.0e-5);
 
     fragColor = vec4(colour, clamp(total, 0.0, 1.0) * ColorModulator.a);
 }
