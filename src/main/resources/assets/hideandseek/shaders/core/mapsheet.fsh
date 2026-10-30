@@ -29,7 +29,9 @@ const float RULE_WEIGHT = 1.3;
 const float CORNER_PIXELS = 26.0;
 
 float hash(vec2 at) {
-    return fract(sin(dot(at, vec2(127.1, 311.7))) * 43758.5453123);
+    vec3 p = fract(vec3(at.xyx) * 0.1031);
+    p += dot(p, p.yzx + 33.33);
+    return fract((p.x + p.y) * p.z);
 }
 
 float noise(vec2 at) {
@@ -68,32 +70,37 @@ void main() {
         min(shapeCoord.y, 1.0 - shapeCoord.y) / perY
     );
     float edge = min(toEdge.x, toEdge.y);
+    vec2 even = vec2(shapeCoord.x * perY / perX, shapeCoord.y);
 
-    float blotch = fbm(shapeCoord * BLOTCH_SCALE);
+    float blotch = fbm(even * BLOTCH_SCALE);
     float grain = noise(pixel / GRAIN_SCALE * 40.0);
-    float fibre = noise(vec2(pixel.x * 0.9, pixel.y * FIBRE_SCALE * 0.02));
+    float fibre = noise(vec2(pixel.x * 0.04, pixel.y * 0.9));
 
     vec3 paper = mix(PAPER_SHADE, PAPER_LIT, smoothstep(0.25, 0.80, blotch));
     paper += (grain - 0.5) * GRAIN_STRENGTH;
     paper += (fibre - 0.5) * FIBRE_STRENGTH;
 
-    float burn = (1.0 - smoothstep(0.0, BURN_PIXELS, edge)) * BURN_STRENGTH;
-    burn *= 0.65 + 0.35 * fbm(shapeCoord * 11.0 + 4.0);
-    paper = mix(paper, PAPER_BURN, clamp(burn, 0.0, 1.0));
+    if (edge < BURN_PIXELS) {
+        float burn = (1.0 - smoothstep(0.0, BURN_PIXELS, edge)) * BURN_STRENGTH;
+        burn *= 0.65 + 0.35 * fbm(even * 11.0 + 4.0);
+        paper = mix(paper, PAPER_BURN, clamp(burn, 0.0, 1.0));
+    }
 
-    float wobble = (fbm(shapeCoord * 30.0) - 0.5) * 1.6;
-    float outerRule = 1.0 - smoothstep(0.0, RULE_WEIGHT, abs(edge - (RULE_OUTER_PIXELS + wobble)));
-    float innerRule = 1.0 - smoothstep(0.0, RULE_WEIGHT * 0.8,
-                                       abs(edge - (RULE_INNER_PIXELS + wobble)));
-    float rule = max(outerRule, innerRule * 0.55);
+    float rule = 0.0;
+    if (edge < RULE_INNER_PIXELS + 4.0) {
+        float wobble = (fbm(even * 30.0) - 0.5) * 1.6;
+        float outerRule = 1.0 - smoothstep(0.0, RULE_WEIGHT, abs(edge - (RULE_OUTER_PIXELS + wobble)));
+        float innerRule = 1.0 - smoothstep(0.0, RULE_WEIGHT * 0.8,
+                                           abs(edge - (RULE_INNER_PIXELS + wobble)));
+        rule = max(outerRule, innerRule * 0.55);
 
-    float corner = step(toEdge.x, CORNER_PIXELS) * step(toEdge.y, CORNER_PIXELS);
-    float diagonal = 1.0 - smoothstep(0.0, RULE_WEIGHT,
-                                      abs(toEdge.x - toEdge.y) - RULE_OUTER_PIXELS * 0.25);
-    rule = max(rule, corner * diagonal * step(edge, RULE_INNER_PIXELS + 3.0) * 0.8);
+        float corner = step(toEdge.x, CORNER_PIXELS) * step(toEdge.y, CORNER_PIXELS);
+        float diagonal = 1.0 - smoothstep(0.0, RULE_WEIGHT, abs(toEdge.x - toEdge.y) * 0.7071068);
+        float within = 1.0 - smoothstep(RULE_INNER_PIXELS + 2.0, RULE_INNER_PIXELS + 3.0, edge);
+        rule = max(rule, corner * diagonal * within * 0.8);
+    }
 
     vec3 colour = mix(paper, INK, clamp(rule, 0.0, 1.0) * 0.85);
 
-    float alpha = tint.a;
-    fragColor = vec4(colour * alpha, alpha);
+    fragColor = vec4(colour, tint.a);
 }
