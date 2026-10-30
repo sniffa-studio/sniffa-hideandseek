@@ -46,8 +46,8 @@ const float PING_REACH = 1.25;
 const float PING_HALF_WIDTH = 0.05;
 const float PING_LIGHT = 0.22;
 
-float band(float offset, float halfWidth) {
-    return 1.0 - smoothstep(halfWidth, halfWidth + SOFT, abs(offset));
+float band(float offset, float halfWidth, float soft) {
+    return 1.0 - smoothstep(halfWidth, halfWidth + soft, abs(offset));
 }
 
 float span(float value, float from, float to, float fade) {
@@ -61,6 +61,7 @@ void main() {
 
     vec2 p = plate;
     float radius = length(p);
+    float soft = max(SOFT, 1.5 * fwidth(radius));
 
     if (radius > REACH) {
         discard;
@@ -68,7 +69,7 @@ void main() {
 
     float angle = atan(p.y, p.x);
 
-    float light = band(radius - DIAL_RADIUS, DIAL_HALF_WIDTH) * DIAL_LIGHT;
+    float light = band(radius - DIAL_RADIUS, DIAL_HALF_WIDTH, soft) * DIAL_LIGHT;
 
     float index = floor(angle / TICK_STEP + 0.5);
     float cardinal = 1.0 - step(0.001, mod(abs(index), 6.0));
@@ -77,8 +78,8 @@ void main() {
     float fromTick = (angle - index * TICK_STEP) * radius;
     float outward = radius - (DIAL_RADIUS + TICK_GAP);
 
-    float tick = band(fromTick, TICK_HALF_WIDTH)
-        * span(outward, 0.0, tickLength, SOFT);
+    float tick = band(fromTick, TICK_HALF_WIDTH, soft)
+        * span(outward, 0.0, tickLength, soft);
 
     light += tick * mix(TICK_LIGHT, CARDINAL_LIGHT, cardinal);
 
@@ -91,18 +92,18 @@ void main() {
 
     float turn = atan(sin(angle - bearing), cos(angle - bearing));
     float focus = exp(-(turn / NEEDLE_ARC) * (turn / NEEDLE_ARC));
-    float needle = band(radius - DIAL_RADIUS, DIAL_HALF_WIDTH + 0.02) * focus;
+    float needle = band(radius - DIAL_RADIUS, DIAL_HALF_WIDTH + 0.02, soft) * focus;
 
     float headFrom = DIAL_RADIUS + HEAD_GAP;
     float headAt = (along - headFrom) / HEAD_LENGTH;
-    float head = band(across, HEAD_HALF_WIDTH * (1.0 - clamp(headAt, 0.0, 1.0)))
+    float head = band(across, HEAD_HALF_WIDTH * (1.0 - clamp(headAt, 0.0, 1.0)), soft)
         * span(headAt, 0.0, 1.0, 0.12);
 
     float halo = exp(-abs(radius - DIAL_RADIUS) / HALO_REACH) * focus * HALO_LIGHT;
 
     float pingAt = fract(seconds / PING_SECONDS);
     float pingRadius = mix(PING_FROM, DIAL_RADIUS * PING_REACH, pingAt);
-    float ping = band(radius - pingRadius, PING_HALF_WIDTH) * (1.0 - pingAt) * PING_LIGHT;
+    float ping = band(radius - pingRadius, PING_HALF_WIDTH, soft) * (1.0 - pingAt) * smoothstep(0.0, 0.08, pingAt) * PING_LIGHT;
 
     light += (needle * NEEDLE_LIGHT + head * HEAD_LIGHT + halo + ping) * live;
 

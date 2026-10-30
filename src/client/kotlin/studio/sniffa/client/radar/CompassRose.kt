@@ -33,6 +33,8 @@ object CompassRose {
 
     private const val SWING_SECONDS = 0.14
 
+    private const val LIGHT_SECONDS = 0.12
+
     private const val PLATE_BLOCKS = 4f
 
     private const val LIFT = 0.02
@@ -63,6 +65,7 @@ object CompassRose {
     private var startedAt = 0L
 
     private var needle = 0.0
+    private var lit = 0.0
 
     private var lastFrame = 0L
 
@@ -132,7 +135,7 @@ object CompassRose {
         val parameters = Matrix4f()
             .m00((now - startedAt) / 1000f)
             .m01(needle.toFloat())
-            .m02(if (live) 1f else 0f)
+            .m02(lit.toFloat())
 
         val transform = RenderSystem.getDynamicUniforms().writeTransform(
             RenderSystem.getModelViewMatrix(),
@@ -169,6 +172,9 @@ object CompassRose {
 
         val step = 1.0 - exp(-elapsed / SWING_SECONDS)
         needle += wrapToPi(bearing - needle) * step
+
+        val fade = 1.0 - exp(-elapsed / LIGHT_SECONDS)
+        lit += ((if (live) 1.0 else 0.0) - lit) * fade
     }
 
     private fun wrapToPi(angle: Double): Double {
