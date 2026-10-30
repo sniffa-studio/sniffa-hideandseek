@@ -5,8 +5,13 @@ import io.wispforest.owo.ui.core.OwoUIGraphics
 import io.wispforest.owo.ui.core.Sizing
 import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.resources.Identifier
+import kotlin.math.roundToInt
 
-class AbilityIcon(private val sprite: Identifier, private val size: Int) : BaseUIComponent() {
+class AbilityIcon(
+    private val sprite: Identifier,
+    private val size: Int,
+    private val glow: () -> Float,
+) : BaseUIComponent() {
 
     override fun determineHorizontalContentSize(sizing: Sizing): Int = size
 
@@ -19,6 +24,12 @@ class AbilityIcon(private val sprite: Identifier, private val size: Int) : BaseU
         partialTicks: Float,
         delta: Float,
     ) {
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, y, width, height)
+        val grown = (width * (1f + GROW * glow())).roundToInt()
+        val offset = (grown - width) / 2
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x - offset, y - offset, grown, grown)
+    }
+
+    private companion object {
+        const val GROW = 0.18f
     }
 }
