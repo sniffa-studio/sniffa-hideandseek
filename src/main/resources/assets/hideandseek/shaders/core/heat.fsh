@@ -7,21 +7,21 @@ flat in mat4 InverseProjection;
 
 out vec4 fragColor;
 
-const float BODY_RADIUS = 0.8;
-const float BODY_HALF_LENGTH = 0.55;
+const float BODY_RADIUS = 0.5;
+const float BODY_HALF_LENGTH = 0.48;
 
-const float HAZE_REACH = 0.9;
-const float HAZE_LIGHT = 0.22;
+const float HAZE_REACH = 0.45;
+const float HAZE_LIGHT = 0.16;
 
 const float SWEEP_SECONDS = 1.8;
 const float SWEEP_SHARPNESS = 5.0;
 const float SWEEP_LIGHT = 0.3;
 
-const float EDGE_BLOTCH = 0.30;
-const float EDGE_SCALE = 2.6;
+const float EDGE_BLOTCH = 0.14;
+const float EDGE_SCALE = 3.4;
 
-const float INNER_BLOTCH = 0.34;
-const float INNER_SCALE = 1.5;
+const float INNER_BLOTCH = 0.22;
+const float INNER_SCALE = 3.0;
 
 const float DRIFT = 0.35;
 
