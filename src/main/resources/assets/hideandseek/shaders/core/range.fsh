@@ -60,8 +60,8 @@ void main() {
     float falloff = 1.0 - smoothstep(0.0, GLOW_REACH, toEdge);
     float glow = falloff * falloff * GLOW_STRENGTH;
 
-    float span = tail.x - head.x;
-    float atX = (p.x - head.x) / max(span, 1.0e-5);
+    float span = tail.x - head.x + 2.0 * radius;
+    float atX = (p.x - head.x + radius) / max(span, 1.0e-5);
     float filled = 1.0 - smoothstep(fill - pixel / max(span, 1.0e-5), fill + pixel / max(span, 1.0e-5), atX);
 
     float up = clamp((p.y - (middle - radius)) / (radius * 2.0), 0.0, 1.0);
@@ -69,7 +69,7 @@ void main() {
 
     body = mix(body, MINT, smoothstep(0.62, 0.95, up) * 0.55);
 
-    float headGlow = (1.0 - smoothstep(0.0, HEAD_REACH / max(span, 1.0e-5), fill - atX)) * step(atX, fill);
+    float headGlow = (1.0 - smoothstep(0.0, HEAD_REACH / max(span, 1.0e-5), fill - atX)) * filled;
     body = mix(body, MINT, headGlow * 0.8);
 
     float sweep = fract(TextureMat[0].y / SHEEN_SECONDS) * 1.4 - 0.2;
