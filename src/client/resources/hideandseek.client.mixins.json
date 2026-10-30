@@ -11,7 +11,8 @@
 		"CrewNameMixin",
 		"CinemaCameraMixin",
 		"CinemaHudMixin",
-		"CinemaCrowdMixin"
+		"CinemaCrowdMixin",
+		"CinemaHandMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
