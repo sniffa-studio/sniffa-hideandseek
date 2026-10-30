@@ -101,18 +101,18 @@ void main() {
     float crest = 0.0;
 
     for (int wave = 0; wave < WAVES; wave++) {
-        float step = float(wave);
+        float echo = float(wave);
 
-        float radius = leading - spacing * step * (1.0 + ECHO_SPREAD * step);
-        float width = thickness * (1.0 + ECHO_WIDENING * step);
-        float loudness = pow(ECHO_FALLOFF, step);
+        float radius = leading - spacing * echo * (1.0 + ECHO_SPREAD * echo);
+        float width = thickness * (1.0 + ECHO_WIDENING * echo);
+        float loudness = pow(ECHO_FALLOFF, echo);
 
-        if (radius <= 0.0 || radius > range) {
+        if (radius <= 0.0 || radius > range + 4.0 * width) {
             continue;
         }
 
         float spent = 1.0 - 0.6 * clamp(radius / max(range, 1.0), 0.0, 1.0);
-        float strength = loudness * spent;
+        float strength = loudness * spent * (1.0 - smoothstep(range, range + 4.0 * width, radius));
 
         if (hasSurface && surfaceDistance <= range) {
 
