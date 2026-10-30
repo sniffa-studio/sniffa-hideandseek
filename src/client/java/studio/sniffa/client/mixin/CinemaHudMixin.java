@@ -14,10 +14,17 @@ public abstract class CinemaHudMixin {
 
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
     private void hideandseek$letterbox(GuiGraphics graphics, DeltaTracker delta, CallbackInfo info) {
-        if (!Cinema.showing()) {
+        if (!Cinema.takesOver()) {
             return;
         }
         Cinema.drawBars(graphics);
         info.cancel();
+    }
+
+    @Inject(method = "render", at = @At("TAIL"))
+    private void hideandseek$letterboxOverTheHud(GuiGraphics graphics, DeltaTracker delta, CallbackInfo info) {
+        if (Cinema.showing() && !Cinema.takesOver()) {
+            Cinema.drawBars(graphics);
+        }
     }
 }

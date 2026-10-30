@@ -16,7 +16,7 @@ public abstract class CinemaCrowdMixin {
     @Inject(method = "shouldRender", at = @At("HEAD"), cancellable = true)
     private <E extends Entity> void hideandseek$clearTheStage(E entity, Frustum frustum, double x, double y, double z,
                                                             CallbackInfoReturnable<Boolean> info) {
-        if (entity instanceof Player && Cinema.showing()) {
+        if (entity instanceof Player && Cinema.takesOver()) {
             info.setReturnValue(false);
         }
     }
