@@ -61,5 +61,5 @@ void main() {
         discard;
     }
 
-    fragColor = vec4(tint.rgb * alpha, alpha);
+    fragColor = vec4(tint.rgb, alpha);
 }

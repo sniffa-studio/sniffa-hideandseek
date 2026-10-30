@@ -23,7 +23,7 @@ float combEdge(vec2 cell) {
     vec2 second = mod(cell + HEX_HALF, HEX_STEP) - HEX_STEP * 0.5;
     vec2 nearest = dot(first, first) < dot(second, second) ? first : second;
 
-    return max(
+    return 0.5 - max(
         abs(nearest.x) * 0.8660254 + abs(nearest.y) * 0.5,
         abs(nearest.y)
     );
@@ -32,7 +32,7 @@ float combEdge(vec2 cell) {
 void main() {
     float d = length(shapeCoord);
 
-    float perPixel = length(vec2(dFdx(d), dFdy(d)));
+    float perPixel = length(vec2(dFdx(shapeCoord.x), dFdy(shapeCoord.x)));
     if (perPixel <= 0.0) {
         discard;
     }
@@ -45,12 +45,13 @@ void main() {
     float glow = exp(-fromLine / GLOW_PIXELS) * GLOW_STRENGTH;
 
     float circumference = 6.2831853 * radiusPixels;
-    float cells = max(6.0, floor(circumference / COMB_CELL_PIXELS + 0.5));
+    float columns = max(4.0, floor(circumference / (COMB_CELL_PIXELS * 1.7320508) + 0.5));
+    float unit = circumference / (columns * 1.7320508);
 
     float angle = atan(shapeCoord.y, shapeCoord.x);
     vec2 cell = vec2(
-        angle * 0.1591549 * cells,
-        (d - 1.0) * radiusPixels / (circumference / cells)
+        angle * 0.1591549 * columns * 1.7320508,
+        (d - 1.0) * radiusPixels / unit
     );
 
     float comb = 1.0 - smoothstep(0.0, 0.10, combEdge(cell));
@@ -65,5 +66,5 @@ void main() {
 
     vec3 colour = mix(tint.rgb, vec3(1.0), smoothstep(0.5, 1.0, line) * 0.7);
 
-    fragColor = vec4(colour * alpha, alpha);
+    fragColor = vec4(colour, alpha);
 }
