@@ -6,6 +6,10 @@ plugins {
 	id("org.jetbrains.kotlin.jvm") version "2.4.10"
 }
 
+base {
+	archivesName.set("marguhl-hideandseek")
+}
+
 repositories {
 	maven("https://maven.wispforest.io/releases/")
 	maven("https://jitpack.io")
