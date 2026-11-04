@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.5
+
+### Added
+
+- After a disconnect from the event a "Zurück zum Event" button takes you straight back in.
+- The mod tells the event server which mods are loaded, so it can turn away the ones the event does not allow.
+
+### Changed
+
+- The title screen shows the state of the event the server reports: when it opens, how many seats are left or that
+  it is full. It asks again every 20 seconds.
+
 ## 1.0.4
 
 ### Added
