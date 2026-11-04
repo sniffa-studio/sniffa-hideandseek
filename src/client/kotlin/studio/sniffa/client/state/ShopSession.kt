@@ -24,7 +24,7 @@ object ShopSession {
     fun canAfford(ability: Ability): Boolean = points >= price(ability)
 
     fun available(ability: Ability): Boolean =
-        canAfford(ability) && AbilityCooldowns.ready(ability.id)
+        RoundState.clock != RoundState.Clock.PAUSED && canAfford(ability) && AbilityCooldowns.ready(ability.id)
 
     fun cooldownLeft(ability: Ability): Int = AbilityCooldowns.remaining(ability.id)
 

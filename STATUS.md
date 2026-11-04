@@ -405,7 +405,7 @@ server will refuse.
 as blocked on somebody else is really blocked on that.
 
 1. **The hiders' half has never been played.** Two accounts and a round: `/hsborder here 200`,
-   `/hsround start <du>`, `/hsskip`, then `G` on the second client. What to watch for — the wheel
+   `/hsround start <du>`, `/hsskip`, then `Z` (`Y` on a German keyboard) on the second client. What to watch for — the wheel
    shows three wedges, points climb by one every two minutes, `/hsdebug radar` on the seeker throws
    the red ERFASST warning on the hider, and a jammer bought first makes that warning stop arriving.
 2. **The mod cannot reach anybody yet.** `enforce: true` is live and the kick message points at

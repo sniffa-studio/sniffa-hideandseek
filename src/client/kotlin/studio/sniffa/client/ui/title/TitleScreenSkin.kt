@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.components.AbstractWidget
 import net.minecraft.client.gui.components.Button
+import net.minecraft.client.gui.screens.ConfirmLinkScreen
 import net.minecraft.client.gui.screens.ConnectScreen
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.gui.screens.TitleScreen
@@ -23,6 +24,8 @@ import studio.sniffa.client.ui.theme.Textures
 object TitleScreenSkin {
 
     private const val EVENT_ADDRESS = "event.sniffa.studio"
+
+    private const val DISCORD = "https://discord.sniffa.studio"
 
     private const val OPTIONS = "menu.options"
     private const val QUIT = "menu.quit"
@@ -81,12 +84,19 @@ object TitleScreenSkin {
         }
 
         buttons.add(
-            Button.builder(Component.literal("Join Event")) { connect(screen) }
+            Button.builder(Component.translatable("menu.hideandseek.join_event")) { connect(screen) }
                 .bounds(anchorX, anchorY, HALF_WIDTH, ROW_HEIGHT)
                 .build()
         )
         place(quit, anchorX + HALF_WIDTH + GAP, anchorY, HALF_WIDTH)
-        place(options, anchorX, anchorY + ROW_HEIGHT + ROW_GAP, FULL_WIDTH)
+        place(options, anchorX, anchorY + ROW_HEIGHT + ROW_GAP, HALF_WIDTH)
+        buttons.add(
+            Button.builder(Component.translatable("menu.hideandseek.discord")) {
+                ConfirmLinkScreen.confirmLinkNow(screen, DISCORD, true)
+            }
+                .bounds(anchorX + HALF_WIDTH + GAP, anchorY + ROW_HEIGHT + ROW_GAP, HALF_WIDTH, ROW_HEIGHT)
+                .build()
+        )
 
         statusY = anchorY + 2 * ROW_HEIGHT + ROW_GAP + STATUS_GAP
     }

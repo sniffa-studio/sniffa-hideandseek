@@ -9,7 +9,7 @@ object AbilityCooldowns {
     fun accept(secondsLeft: Map<String, Int>) {
         val now = System.currentTimeMillis()
         readyAt = secondsLeft.mapValues { now + it.value * 1000L }
-        used += secondsLeft.filterValues { it > 0 }.keys
+        used += secondsLeft.keys
     }
 
     fun forget() {

@@ -7,10 +7,25 @@
 - After a disconnect from the event a "Zurück zum Event" button takes you straight back in.
 - The mod tells the event server which mods are loaded, so it can turn away the ones the event does not allow.
 
+- A Discord button next to Options on the title screen opens discord.sniffa.studio.
+
 ### Changed
 
 - The title screen shows the state of the event the server reports: when it opens, how many seats are left or that
   it is full. It asks again every 20 seconds.
+- The ability wheel opens with Z (Y on a German keyboard) instead of G, which vanilla uses for Quick Actions. Both
+  keys sit in their own Hide & Seek category in the controls.
+- Menu buttons follow the game language, "Event beitreten" in German.
+- One word for one thing: GEFUNDEN when caught, "erfasst" when a radar spots you, "Fähigkeiten-Rad" everywhere,
+  "1 Block" instead of "1 Blöcke", "Sucher" in the role card.
+- The radar result sits above the action bar instead of on it, and the role card hides while F3 is open.
+- The wheel only mentions Q / E when there is a second page and explains itself in plainer words.
+
+### Fixed
+
+- After a reconnect the wheel knows which abilities were already bought (needs the event server from 2026-11-04).
+- The wheel no longer pretends to buy while the round is paused.
+- The wheel no longer lays itself out again on every frame.
 
 ## 1.0.4
 

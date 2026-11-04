@@ -41,14 +41,28 @@ class WheelDetail : FlowLayout(
         show(null)
     }
 
+    var paging: Boolean = false
+
+    private var shown: List<Any?>? = null
+
     fun show(ability: Ability?) {
+        val now = listOf(
+            ability?.id, ShopSession.points, ShopSession.known, paging,
+            ability?.let { ShopSession.cooldownLeft(it) },
+            ability?.let { ShopSession.available(it) },
+            ability?.let { ShopSession.price(it) },
+        )
+        if (now == shown) return
+        shown = now
+
         if (ability == null) {
             title.text(McText.literal("${ShopSession.points} Punkte"))
             title.color(Color.ofArgb(if (ShopSession.known) Palette.BRAND else Palette.ERROR))
             body.text(
                 McText.literal(
-                    if (ShopSession.known) "Zeig nach außen  ·  Q / E blättert  ·  Esc schließt"
-                    else "Keine Runde  ·  der Server hat noch keine Punkte geschickt"
+                    if (!ShopSession.known) "Noch keine Punkte  ·  warte auf die Runde"
+                    else if (paging) "Maus auf eine Fähigkeit  ·  Q / E blättert  ·  Esc schließt"
+                    else "Maus auf eine Fähigkeit  ·  Esc schließt"
                 )
             )
             return

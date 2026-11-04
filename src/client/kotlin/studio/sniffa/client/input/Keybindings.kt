@@ -1,5 +1,6 @@
 package studio.sniffa.client.input
 
+import studio.sniffa.Hideandseek
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
 import net.minecraft.client.KeyMapping
@@ -13,16 +14,18 @@ import studio.sniffa.client.ui.shop.AbilityShopScreen
 
 object Keybindings {
 
+    private val CATEGORY: KeyMapping.Category = KeyMapping.Category.register(Hideandseek.id("main"))
+
     private lateinit var openShop: KeyMapping
     private lateinit var openWatch: KeyMapping
 
     fun install() {
         openShop = KeyBindingHelper.registerKeyBinding(
-            KeyMapping("key.hideandseek.open_shop", GLFW.GLFW_KEY_G, KeyMapping.Category.GAMEPLAY)
+            KeyMapping("key.hideandseek.open_shop", GLFW.GLFW_KEY_Z, CATEGORY)
         )
 
         openWatch = KeyBindingHelper.registerKeyBinding(
-            KeyMapping("key.hideandseek.open_watch", GLFW.GLFW_KEY_R, KeyMapping.Category.GAMEPLAY)
+            KeyMapping("key.hideandseek.open_watch", GLFW.GLFW_KEY_R, CATEGORY)
         )
 
         ClientTickEvents.END_CLIENT_TICK.register { client ->
@@ -43,6 +46,8 @@ object Keybindings {
         client.player == null -> ""
         RoundState.phase == RoundState.Phase.HIDING ->
             "Solange versteckt wird, kauft niemand."
+        RoundState.clock == RoundState.Clock.PAUSED ->
+            "Die Runde ist pausiert."
         AbilityCatalog.forSide(RoundState.side).isEmpty() ->
             if (RoundState.running) "Du schaust nur zu." else "Es läuft keine Runde."
         else -> null

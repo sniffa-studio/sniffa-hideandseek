@@ -31,7 +31,7 @@ class AbilityShopScreen : BaseOwoScreen<FlowLayout>() {
 
     private val pages = WheelPages.split(AbilityCatalog.forSide(RoundState.side))
     private val dots = PageDots(pages.size)
-    private val detail = WheelDetail()
+    private val detail = WheelDetail().apply { paging = pages.size > 1 }
 
     private var wheels: List<AbilityWheel> = emptyList()
     private lateinit var metrics: WheelMetrics
