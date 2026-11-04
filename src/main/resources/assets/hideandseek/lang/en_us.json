@@ -1,6 +1,11 @@
 {
-  "key.hideandseek.open_shop": "Open ability shop",
-  "key.hideandseek.open_watch": "Open teleporter (crew)",
+  "menu.hideandseek.join_event": "Join Event",
+  "menu.hideandseek.discord": "Discord",
+  "menu.hideandseek.back_to_event": "Back to the Event",
+
+  "key.category.hideandseek.main": "Hide & Seek",
+  "key.hideandseek.open_shop": "Open ability wheel",
+  "key.hideandseek.open_watch": "Open teleporter (staff)",
 
   "subtitles.hideandseek.round_opens": "The round begins",
   "subtitles.hideandseek.hunt_begins": "The hunt begins",

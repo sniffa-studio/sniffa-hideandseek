@@ -49,7 +49,7 @@ object ScanReadout {
 
         val font = Minecraft.getInstance().font
 
-        val where = if (range > 0) "in $range Blöcken" else "in der Nähe"
+        val where = if (range > 0) "in ${if (range == 1) "1 Block" else "$range Blöcken"}" else "in der Nähe"
         val text = when {
             count == 0 -> "niemand $where"
             count == 1 -> "1 Verstecker $where"
@@ -58,7 +58,7 @@ object ScanReadout {
         val colour = if (count == 0) Palette.MUTED else Palette.TEXT
 
         val x = (graphics.guiWidth() - font.width(text)) / 2
-        val y = graphics.guiHeight() - 68
+        val y = graphics.guiHeight() - 84
 
         graphics.drawString(font, text, x, y, alpha(colour, fade), true)
     }

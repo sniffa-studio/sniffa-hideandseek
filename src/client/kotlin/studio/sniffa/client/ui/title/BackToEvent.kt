@@ -27,7 +27,7 @@ object BackToEvent {
             val buttons = Screens.getButtons(screen)
             val below = buttons.maxOfOrNull { it.y + it.height }?.plus(GAP) ?: (height / 2 + 40)
             buttons.add(
-                Button.builder(Component.literal("Zurück zum Event")) { connect(address) }
+                Button.builder(Component.translatable("menu.hideandseek.back_to_event")) { connect(address) }
                     .bounds(width / 2 - WIDTH / 2, below, WIDTH, HEIGHT)
                     .build()
             )

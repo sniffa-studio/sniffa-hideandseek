@@ -58,7 +58,7 @@ object SpottedWarning {
         val height = graphics.guiHeight()
 
         val headline = "ERFASST"
-        val detail = "Ein Radar hat dich gefunden  ·  $range Blöcke"
+        val detail = "Ein Radar hat dich erfasst  ·  ${blocks(range)}"
 
         val top = height / 2 - 34
 

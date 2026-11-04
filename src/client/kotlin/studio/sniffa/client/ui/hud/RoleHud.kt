@@ -55,7 +55,7 @@ object RoleHud {
     private const val POINTS_LABEL = " ᴘᴋᴛ"
 
     private const val HIDERS = "ᴠᴇʀꜱᴛᴇᴄᴋᴛ"
-    private const val SEEKERS = "ꜱᴜᴄʜᴇɴ"
+    private const val SEEKERS = "ꜱᴜᴄʜᴇʀ"
 
     private data class Look(val title: String, val colour: Int, val key: Component?, val action: String, val ready: Boolean)
 
@@ -73,7 +73,7 @@ object RoleHud {
         HudRenderCallback.EVENT.register { graphics, _ ->
             val minecraft = Minecraft.getInstance()
 
-            if (minecraft.options.hideGui) return@register
+            if (minecraft.options.hideGui || minecraft.debugOverlay.showDebugScreen()) return@register
             if (!RoundState.running) {
                 lastRemaining = -1
                 runningSince = 0L
