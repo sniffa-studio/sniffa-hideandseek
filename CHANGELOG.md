@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.0.4
+
+### Added
+
+- At round start the camera orbits the platform and shows the seeker, and big moments of the finale play behind
+  letterbox bars.
+- The danger zone is drawn in the honeycomb of the border, beats and turns white hot at the end, with embers rising
+  along its wall.
+- The role card in the top left is a sliding glass panel with a phase chip, a glowing clock and live counters.
+
+### Changed
+
+- The border shows a calm aurora from afar and the honeycomb only near you.
+- Heat vision draws bodies as player-sized capsules with an outline and a scanning line.
+- The scan wave has a bright leading fringe and echo rings, and fades out past its range.
+- The ability wheel grows the focused wedge and flashes when an ability is bought; icons keep their size on hover.
+- Smoother compass, range, hot and cold, and map visuals.
+
+### Fixed
+
+- The own hand no longer shows while the camera flies.
+
+## 1.0.3
+
+### Added
+
+- At the end of a round the camera flies over the podium behind letterbox bars.
+
 ## 1.0.2
 
 ### Changed
