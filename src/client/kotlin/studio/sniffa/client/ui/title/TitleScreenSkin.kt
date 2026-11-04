@@ -55,7 +55,7 @@ object TitleScreenSkin {
                 status(graphics, screen)
                 sign(graphics)
             }
-            ScreenEvents.remove(screen).register { EventStatus.forget() }
+            ScreenEvents.remove(screen).register { EventStatus.stop() }
         }
     }
 
