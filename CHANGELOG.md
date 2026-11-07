@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.6
+
+### Changed
+
+- The border shrinks and grows smoothly. It used to be redrawn in quarter-block steps, which made it and its pattern
+  jump while it moved.
+- When the server makes every use of an ability cost points, the wheel always shows the price and when the ability is
+  ready again, instead of "gekauft".
+
 ## 1.0.5
 
 ### Added
