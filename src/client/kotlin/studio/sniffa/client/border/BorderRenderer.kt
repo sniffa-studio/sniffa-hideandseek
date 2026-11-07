@@ -25,15 +25,12 @@ object BorderRenderer {
 
     private const val ZONE_TINT = 0xFFFC301E.toInt()
 
-    private const val RADIUS_STEPS = 4.0
-
     private class Layer {
         var mesh: BorderMesh? = null
 
         fun meshFor(ring: BorderZone.Ring): BorderMesh {
-            val settled = ring.copy(radius = Math.round(ring.radius * RADIUS_STEPS) / RADIUS_STEPS)
-            mesh?.let { if (it.matches(settled)) return it else it.close() }
-            return BorderMesh.build(settled).also { mesh = it }
+            mesh?.let { if (it.scaleFor(ring) != null) return it else it.close() }
+            return BorderMesh.build(ring).also { mesh = it }
         }
 
         fun drop() {
@@ -57,7 +54,7 @@ object BorderRenderer {
                     BorderEffects.uniforms(ring, it.columns, camera)
                 }
                 roundSeam.meshFor(ring, camera)?.let { seam ->
-                    pass(BorderPipeline.SEAM, seam.vertices, seam.indexCount, ring, BorderZone.tint(), camera, roundSeam.uniforms(seam.reach, BorderZone.motion()))
+                    pass(BorderPipeline.SEAM, seam.vertices, seam.indexCount, ring, BorderZone.tint(), camera, roundSeam.uniforms(seam.reach, BorderZone.motion()), roundSeam.scaleFor(ring))
                 }
             }
 
@@ -71,7 +68,7 @@ object BorderRenderer {
                     zoneUniforms(it.columns)
                 }
                 zoneSeam.meshFor(zoneRing, camera)?.let { seam ->
-                    pass(BorderPipeline.SEAM, seam.vertices, seam.indexCount, zoneRing, ZONE_TINT, camera, zoneSeam.uniforms(seam.reach, BorderZone.Motion.STATIONARY))
+                    pass(BorderPipeline.SEAM, seam.vertices, seam.indexCount, zoneRing, ZONE_TINT, camera, zoneSeam.uniforms(seam.reach, BorderZone.Motion.STATIONARY), zoneSeam.scaleFor(zoneRing))
                 }
             }
         })
@@ -86,7 +83,7 @@ object BorderRenderer {
         extras: (BorderMesh) -> Matrix4f,
     ) {
         val current = layer.meshFor(ring)
-        pass(pipeline, current.vertices, current.indexCount, ring, tint, camera, extras(current))
+        pass(pipeline, current.vertices, current.indexCount, ring, tint, camera, extras(current), current.scaleFor(ring) ?: 1.0)
     }
 
     private fun zoneUniforms(columns: Int): Matrix4f {
@@ -104,7 +101,9 @@ object BorderRenderer {
         tint: Int,
         camera: Vec3,
         extras: Matrix4f,
+        scale: Double,
     ) {
+        extras.m13(scale.toFloat())
         val client = Minecraft.getInstance()
 
         val weather = client.levelRenderer.weatherTarget

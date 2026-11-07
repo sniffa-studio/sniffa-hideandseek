@@ -69,6 +69,12 @@ class BorderSeam {
         return mesh
     }
 
+    fun scaleFor(ring: BorderZone.Ring): Double {
+        val built = builtFor ?: return 1.0
+        if (built.radius <= 0.0) return 1.0
+        return ring.radius / built.radius
+    }
+
     fun drop() {
         mesh?.vertices?.close()
         mesh = null

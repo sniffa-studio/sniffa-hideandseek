@@ -82,7 +82,7 @@ class WheelDetail : FlowLayout(
         body.text(
             McText.literal(
                 when {
-                    cooling > 0 -> "${ability.description}  (noch ${cooling}s)"
+                    cooling > 0 -> "${ability.description}  (wieder bereit in ${readyIn(cooling)})"
                     !ShopSession.canAfford(ability) ->
                         "${ability.description}  (es fehlen ${price - ShopSession.points})"
                     else -> ability.description
@@ -90,4 +90,7 @@ class WheelDetail : FlowLayout(
             )
         )
     }
+
+    private fun readyIn(seconds: Int): String =
+        if (seconds < 60) "${seconds}s" else "${seconds / 60}:${(seconds % 60).toString().padStart(2, '0')}"
 }

@@ -6,15 +6,23 @@ object AbilityCooldowns {
 
     private val used = mutableSetOf<String>()
 
+    private const val PAY_PER_USE = "@pay"
+
+    var payPerUse: Boolean = false
+        private set
+
     fun accept(secondsLeft: Map<String, Int>) {
         val now = System.currentTimeMillis()
-        readyAt = secondsLeft.mapValues { now + it.value * 1000L }
-        used += secondsLeft.keys
+        payPerUse = PAY_PER_USE in secondsLeft
+        val abilities = secondsLeft - PAY_PER_USE
+        readyAt = abilities.mapValues { now + it.value * 1000L }
+        if (!payPerUse) used += abilities.keys
     }
 
     fun forget() {
         readyAt = emptyMap()
         used.clear()
+        payPerUse = false
     }
 
     fun owned(abilityId: String): Boolean = abilityId in used
