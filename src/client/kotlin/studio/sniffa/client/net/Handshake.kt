@@ -7,6 +7,7 @@ import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.Minecraft
 import org.slf4j.LoggerFactory
 import studio.sniffa.Hideandseek
+import studio.sniffa.client.compat.ShaderGuard
 import studio.sniffa.net.payload.HandshakePayload
 import studio.sniffa.net.payload.ModsPayload
 import studio.sniffa.protocol.Protocol
@@ -64,5 +65,6 @@ object Handshake {
             ClientPlayNetworking.send(ModsPayload(loadedMods()))
         }
         LOGGER.info("Announced as version {} (protocol {}).", Hideandseek.version, Protocol.VERSION)
+        ShaderGuard.onEventJoined()
     }
 }
