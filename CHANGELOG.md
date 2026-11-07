@@ -6,6 +6,8 @@
 
 - The border shrinks and grows smoothly. It used to be redrawn in quarter-block steps, which made it and its pattern
   jump while it moved.
+- With Iris installed, shaders are switched off while you are on the event server and back on when you leave, with a
+  short note in chat. The event's border, radar and camera do not work under shader packs.
 - When the server makes every use of an ability cost points, the wheel always shows the price and when the ability is
   ready again, instead of "gekauft".
 
