@@ -48,7 +48,8 @@ Ja. Der komplette Quellcode liegt hier offen, jeder kann nachlesen, was die Mod 
 
 - In jedem Release stehen die SHA-256-Prüfsummen. Vergleich sie mit deiner Datei, unter Windows mit
   `certutil -hashfile marguhl-hideandseek-<version>.jar SHA256`.
-- Manche Virenscanner schlagen bei `.jar`-Dateien grundlos an. Wenn du unsicher bist, lad die Datei bei
+- Version 1.0.6 bei VirusTotal: [0 von 58 Virenscannern schlagen an](https://www.virustotal.com/gui/file/16cd36f361498668251b0230107516573f2a1a6326e80cad415e54ed84bcbb44).
+- Manche Virenscanner schlagen bei `.jar`-Dateien grundlos an. Wenn du unsicher bist, lad die Datei selbst bei
   [VirusTotal](https://www.virustotal.com) hoch.
 - Du kannst die Mod auch selbst aus diesem Code bauen: `./gradlew build` (Java 21).
 
