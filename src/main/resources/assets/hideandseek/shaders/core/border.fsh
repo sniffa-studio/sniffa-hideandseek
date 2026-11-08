@@ -16,13 +16,13 @@ out vec4 fragColor;
 const float TAU = 6.2831853;
 const float PERIOD_CELLS = 1.7320508;
 
-const float SHARD_CELLS = 1.15;
+const float SHARD_CELLS = 9.2;
 const float SHARD_JITTER = 0.85;
 
 const float EDGE_PIXELS = 1.6;
 const float EDGE_CELLS = 0.035;
 const float EDGE_STRENGTH = 0.85;
-const float EDGE_GLOW_CELLS = 0.16;
+const float EDGE_GLOW_CELLS = 0.03;
 const float EDGE_GLOW_STRENGTH = 0.32;
 
 const float FILL = 0.07;
@@ -31,7 +31,7 @@ const float FACET_STRENGTH = 0.55;
 const float FACET_SPREAD = 0.35;
 
 const float FROST_CELLS = 0.16;
-const float FROST_EDGE = 0.14;
+const float FROST_EDGE = 0.03;
 const float FROST_BELOW_FROM = 0.5;
 const float FROST_BELOW_TO = 6.0;
 const float FROST_BELOW = 0.35;
@@ -96,11 +96,11 @@ const float BEVEL_DARK = 0.35;
 const float MILKY_SHARE = 0.3;
 const float MILKY_STRENGTH = 0.22;
 
-const float HAIRLINE_SHARE = 0.45;
-const float HAIRLINE_SCALE = 2.7;
+const float HAIRLINE_SHARE = 0.6;
+const float HAIRLINE_SCALE = 5.0;
 const float HAIRLINE_STRENGTH = 0.35;
 
-const float DEPTH_CELLS = 0.45;
+const float DEPTH_CELLS = 0.3;
 
 const float STREAK_WIDTH = 0.2;
 const float STREAK_CYCLES = 8.0;
