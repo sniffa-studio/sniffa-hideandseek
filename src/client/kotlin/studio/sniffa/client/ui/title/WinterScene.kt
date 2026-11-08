@@ -20,6 +20,7 @@ object WinterScene {
     private val TREE: Identifier = Hideandseek.id("textures/ui/xmas/tree.png")
     private val GIFTS: Identifier = Hideandseek.id("textures/ui/xmas/gifts.png")
     private val HAT: Identifier = Hideandseek.id("textures/ui/xmas/santahat.png")
+    private val SLEIGH: Identifier = Hideandseek.id("textures/ui/xmas/sleigh.png")
 
     private const val DRIFT_W = 64
     private const val DRIFT_H = 18
@@ -29,6 +30,24 @@ object WinterScene {
     private const val GIFTS_H = 16
     private const val HAT_W = 29
     private const val HAT_H = 17
+    private const val SLEIGH_W = 64
+    private const val SLEIGH_H = 12
+
+    private const val SLEIGH_EVERY_MS = 26_000L
+    private const val SLEIGH_FLIGHT_MS = 11_000L
+
+    private const val GIFT_MIN_WIDTH = 60
+    private const val RIBBON_INSET = 14
+
+    private class Wrap(val base: Int, val light: Int, val dark: Int, val outline: Int)
+
+    private val WRAPS = arrayOf(
+        Wrap(0xFFB3122F.toInt(), 0xFFD62A47.toInt(), 0xFF7E0A20.toInt(), 0xFF3A0610.toInt()),
+        Wrap(0xFF1E7A3F.toInt(), 0xFF2E9E55.toInt(), 0xFF125128.toInt(), 0xFF07240F.toInt()),
+    )
+    private const val RIBBON = 0xFFE8B33A.toInt()
+    private const val RIBBON_DARK = 0xFFA8761C.toInt()
+    private const val RIBBON_LIGHT = 0xFFFFE07A.toInt()
 
     private const val LOGO_HALF_WIDTH = 128
     private const val LOGO_TOP = 30
@@ -65,6 +84,7 @@ object WinterScene {
         val now = Util.getMillis()
         graphics.fillGradient(0, 0, width, height / 2, argb(0xB0, NIGHT), argb(0x00, NIGHT))
         graphics.fillGradient(0, height * 11 / 20, width, height, argb(0x00, NIGHT), argb(0x9A, NIGHT))
+        aurora(graphics, width, height, now)
         stars(graphics, width, height, now)
         snow(graphics, width, height, now, FAR)
         snow(graphics, width, height, now, MID)
@@ -73,9 +93,14 @@ object WinterScene {
 
     fun front(graphics: GuiGraphics, width: Int, height: Int, widgets: List<AbstractWidget>) {
         val now = Util.getMillis()
+        val gifts = widgets.filter { it.visible && it is AbstractButton && it.width >= GIFT_MIN_WIDTH }
+        gifts.forEachIndexed { i, button -> wrap(graphics, button, WRAPS[i % WRAPS.size]) }
         widgets.filter { it.visible && it is AbstractButton }.forEach { cap(graphics, it) }
+        gifts.forEach { bow(graphics, it, now) }
+        logoSnow(graphics, width)
+        sleigh(graphics, width, height, now)
         garland(graphics, width, now)
-        hat(graphics, width)
+        hat(graphics, width, now)
         edition(graphics, width)
         snow(graphics, width, height, now, NEAR)
     }
@@ -218,16 +243,126 @@ object WinterScene {
         }
     }
 
-    private fun hat(graphics: GuiGraphics, width: Int) {
-        val x = width / 2 - LOGO_HALF_WIDTH - 6
-        val y = LOGO_TOP - 12
+    private fun hat(graphics: GuiGraphics, width: Int, now: Long) {
+        val w = HAT_W * 3 / 2
+        val h = HAT_H * 3 / 2
+        val centreX = width / 2 - LOGO_HALF_WIDTH + 22
+        val centreY = LOGO_TOP + 6 - h / 2
+        val sway = -0.14 + 0.06 * sin(now / 650.0)
         val pose = graphics.pose()
         pose.pushMatrix()
-        pose.translate(x.toFloat() + HAT_W, y.toFloat() + HAT_H)
-        pose.rotate((-PI / 9).toFloat())
-        graphics.blit(RenderPipelines.GUI_TEXTURED, HAT, -HAT_W * 3 / 2, -HAT_H * 3 / 2, 0f, 0f,
-            HAT_W * 3 / 2, HAT_H * 3 / 2, HAT_W, HAT_H, HAT_W, HAT_H)
+        pose.translate(centreX.toFloat(), (centreY + h / 2).toFloat())
+        pose.rotate(sway.toFloat())
+        graphics.blit(RenderPipelines.GUI_TEXTURED, HAT, -w / 2, -h, 0f, 0f, w, h, HAT_W, HAT_H, HAT_W, HAT_H)
         pose.popMatrix()
+    }
+
+    private fun logoSnow(graphics: GuiGraphics, width: Int) {
+        val left = width / 2 - LOGO_HALF_WIDTH + 34
+        val right = width / 2 + LOGO_HALF_WIDTH - 6
+        val top = LOGO_TOP + 1
+        var x = left
+        while (x < right) {
+            val bump = hash(x / 2, 91) % 3
+            if (hash(x / 5, 17) % 9 != 0) {
+                graphics.fill(x, top - bump, x + 2, top + 2, SNOW)
+                graphics.fill(x, top + 2, x + 2, top + 3, SNOW_SHADE)
+            }
+            x += 2
+        }
+    }
+
+    private fun aurora(graphics: GuiGraphics, width: Int, height: Int, now: Long) {
+        val t = now / 1000.0
+        val base = height * 0.18
+        var x = 0
+        while (x < width) {
+            val centre = (base + 9 * sin(x / 70.0 + t * 0.25) + 5 * sin(x / 27.0 - t * 0.45)).toInt()
+            val strength = 0.5 + 0.5 * sin(x / 95.0 + t * 0.3)
+            val alpha = (22 + 74 * strength).toInt()
+            val reach = (18 + 30 * strength).toInt()
+            val mix = (0.5 + 0.5 * sin(x / 160.0 + t * 0.12))
+            val colour = blend(0x3BFF9A, 0x8A6BFF, mix)
+            graphics.fillGradient(x, centre - reach, x + 2, centre, argb(0, colour), argb(alpha, colour))
+            graphics.fillGradient(x, centre, x + 2, centre + 5, argb(alpha, colour), argb(0, colour))
+            x += 2
+        }
+    }
+
+    private fun sleigh(graphics: GuiGraphics, width: Int, height: Int, now: Long) {
+        val phase = now % SLEIGH_EVERY_MS
+        if (phase >= SLEIGH_FLIGHT_MS) {
+            return
+        }
+        val p = phase / SLEIGH_FLIGHT_MS.toDouble()
+        val x = (-SLEIGH_W * 3 / 2 + p * (width + SLEIGH_W * 3)).toInt()
+        val y = (height * 0.26 - p * (height * 0.26 - 12) + 4 * sin(p * PI * 4)).toInt()
+        for (k in 1..10) {
+            val tx = x - k * 4
+            val ty = y + 9 + (2 * sin(p * 40 + k)).toInt()
+            graphics.fill(tx, ty, tx + 1, ty + 1, argb(220 - k * 20, 0xFFE07A))
+        }
+        graphics.blit(RenderPipelines.GUI_TEXTURED, SLEIGH, x, y - SLEIGH_H / 2, 0f, 0f, SLEIGH_W * 3 / 2, SLEIGH_H * 3 / 2,
+            SLEIGH_W, SLEIGH_H, SLEIGH_W, SLEIGH_H)
+    }
+
+    private fun wrap(graphics: GuiGraphics, button: AbstractWidget, paper: Wrap) {
+        val x = button.x
+        val y = button.y
+        val r = x + button.width
+        val b = y + button.height
+        val hot = button.isHoveredOrFocused
+        if (hot) {
+            graphics.fill(x - 2, y - 2, r + 2, b + 2, argb(0x70, RIBBON_LIGHT))
+        }
+        graphics.fill(x, y, r, b, paper.outline)
+        graphics.fill(x + 1, y + 1, r - 1, b - 1, if (hot) paper.light else paper.base)
+        graphics.fill(x + 1, y + 1, r - 1, y + 2, paper.light)
+        graphics.fill(x + 1, b - 3, r - 1, b - 1, paper.dark)
+        var row = 0
+        var dy = y + 5
+        while (dy < b - 4) {
+            var dx = x + 5 + (row % 2) * 4
+            while (dx < r - 3) {
+                graphics.fill(dx, dy, dx + 1, dy + 1, argb(0x60, 0xFFFFFF))
+                dx += 8
+            }
+            dy += 6
+            row++
+        }
+        val rx = x + RIBBON_INSET
+        graphics.fill(rx, y + 1, rx + 4, b - 1, RIBBON)
+        graphics.fill(rx, y + 1, rx + 1, b - 1, RIBBON_DARK)
+        graphics.fill(rx + 3, y + 1, rx + 4, b - 1, RIBBON_DARK)
+        graphics.fill(rx + 1, y + 1, rx + 2, b - 1, RIBBON_LIGHT)
+        val font = Minecraft.getInstance().font
+        val colour = when {
+            !button.active -> 0xFFA0A0A0.toInt()
+            hot -> RIBBON_LIGHT
+            else -> 0xFFFFFFFF.toInt()
+        }
+        val textX = rx + 4 + (r - rx - 4) / 2
+        graphics.drawCenteredString(font, button.message, textX, y + (button.height - 8) / 2, colour)
+    }
+
+    private fun bow(graphics: GuiGraphics, button: AbstractWidget, now: Long) {
+        val rx = button.x + RIBBON_INSET
+        val top = button.y
+        val lift = if (button.isHoveredOrFocused) (2 * abs(sin(now / 120.0))).toInt() else 0
+        val y = top - 4 - lift
+        graphics.fill(rx - 5, y - 1, rx, y + 4, RIBBON_DARK)
+        graphics.fill(rx - 4, y, rx, y + 3, RIBBON)
+        graphics.fill(rx + 4, y - 1, rx + 9, y + 4, RIBBON_DARK)
+        graphics.fill(rx + 4, y, rx + 8, y + 3, RIBBON)
+        graphics.fill(rx, y + 1, rx + 4, y + 5, RIBBON_DARK)
+        graphics.fill(rx + 1, y + 2, rx + 3, y + 4, RIBBON_LIGHT)
+        graphics.fill(rx - 3, y + 4, rx - 1, y + 7, RIBBON)
+        graphics.fill(rx + 5, y + 4, rx + 7, y + 7, RIBBON)
+    }
+
+    private fun blend(a: Int, b: Int, t: Double): Int {
+        fun ch(shift: Int) = ((a shr shift and 0xFF) * (1 - t) + (b shr shift and 0xFF) * t).toInt() and 0xFF
+        return (ch(16) shl 16) or (ch(8) shl 8) or ch(0)
     }
 
     private fun edition(graphics: GuiGraphics, width: Int) {
