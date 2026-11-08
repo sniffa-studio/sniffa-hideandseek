@@ -90,6 +90,23 @@ const float VISIBLE_TO = 96.0;
 const float FADE_FROM = 40.0;
 const float FADE_TO = 150.0;
 
+const float BEVEL_BRIGHT = 1.0;
+const float BEVEL_DARK = 0.35;
+
+const float MILKY_SHARE = 0.3;
+const float MILKY_STRENGTH = 0.22;
+
+const float HAIRLINE_SHARE = 0.45;
+const float HAIRLINE_SCALE = 2.7;
+const float HAIRLINE_STRENGTH = 0.35;
+
+const float DEPTH_CELLS = 0.45;
+
+const float STREAK_COUNT = 1.0;
+const float STREAK_WIDTH = 0.2;
+const float STREAK_CYCLES = 8.0;
+const float STREAK_STRENGTH = 0.14;
+
 const vec3 ICE = vec3(0.72, 0.9, 1.0);
 const vec3 ICE_DEEP = vec3(0.38, 0.66, 0.95);
 const vec3 FROST = vec3(0.93, 0.97, 1.0);
@@ -139,7 +156,7 @@ vec2 site(vec2 id, float columns, float time, float creep) {
     return 0.5 + (base - 0.5) * SHARD_JITTER + drift * 0.12;
 }
 
-vec4 shards(vec2 p, float columns, float time, float creep) {
+vec4 shards(vec2 p, float columns, float time, float creep, out vec2 edgeNormal) {
     vec2 cell = floor(p);
     vec2 inside = fract(p);
 
@@ -161,13 +178,19 @@ vec4 shards(vec2 p, float columns, float time, float creep) {
     }
 
     float toEdge = 8.0;
+    edgeNormal = vec2(0.0, 1.0);
     for (int y = -2; y <= 2; y++) {
         for (int x = -2; x <= 2; x++) {
             vec2 neighbour = vec2(float(x), float(y));
             vec2 offset = neighbour + site(cell + neighbour, columns, time, creep) - inside;
             vec2 between = offset - nearestOffset;
             if (dot(between, between) > 1.0e-5) {
-                toEdge = min(toEdge, dot(0.5 * (nearestOffset + offset), normalize(between)));
+                vec2 towards = normalize(between);
+                float reach = dot(0.5 * (nearestOffset + offset), towards);
+                if (reach < toEdge) {
+                    toEdge = reach;
+                    edgeNormal = towards;
+                }
             }
         }
     }
@@ -221,7 +244,8 @@ void main() {
     vec2 scale = vec2(shardColumns / around, 1.0 / SHARD_CELLS);
     vec2 p = wallCoord * scale;
 
-    vec4 shard = shards(p, shardColumns, time, creep);
+    vec2 edgeNormal;
+    vec4 shard = shards(p, shardColumns, time, creep, edgeNormal);
     vec2 fromSite = shard.xy;
     float toEdge = shard.z;
     float seed = shard.w;
@@ -238,19 +262,41 @@ void main() {
     float drawn = mix(LINES_FAR, 1.0, close);
 
     float edgeWidth = min(EDGE_PIXELS, EDGE_CELLS / max(perPixel, 1.0e-6));
-    float edge = (1.0 - smoothstep(0.0, edgeWidth, pixelsToEdge)) * EDGE_STRENGTH;
-    float edgeGlow = (1.0 - smoothstep(0.0, EDGE_GLOW_CELLS, toEdge)) * EDGE_GLOW_STRENGTH;
-
     vec2 light = normalize(vec2(-0.6, 0.8));
+    float bevel = mix(BEVEL_DARK, BEVEL_BRIGHT, 0.5 + 0.5 * dot(edgeNormal, light));
+    float varyPeriod = max(1.0, floor(around * 3.0 / PERIOD_CELLS + 0.5));
+    float edgeVary = 0.55 + 0.45 * noise(vec2(wallCoord.x / around * varyPeriod, wallCoord.y * 3.0), varyPeriod);
+
+    float edge = (1.0 - smoothstep(0.0, edgeWidth, pixelsToEdge)) * EDGE_STRENGTH * bevel * edgeVary;
+    float edgeGlow = (1.0 - smoothstep(0.0, EDGE_GLOW_CELLS, toEdge)) * EDGE_GLOW_STRENGTH * bevel;
     float facet = 0.5 + 0.5 * dot(normalize(-fromSite + 1.0e-4), light) * min(length(fromSite) * 2.0, 1.0);
     float shade = mix(1.0 - FACET_SPREAD, 1.0 + FACET_SPREAD, seed) * mix(0.7, 1.15, facet);
 
     float hot = TextureMat[3][1] * exp(-distanceToEye / HOT_BLOCKS);
     float below = smoothstep(FROST_BELOW_FROM, FROST_BELOW_TO, -heightFromViewer) * FROST_BELOW;
-    float frostField = frostNoise(vec2(wallCoord.x / FROST_CELLS, wallCoord.y / FROST_CELLS), floor(around / FROST_CELLS + 0.5));
+    float frostPeriod = max(1.0, floor(around / FROST_CELLS + 0.5));
+    float frostField = frostNoise(vec2(wallCoord.x / around * frostPeriod, wallCoord.y / FROST_CELLS), frostPeriod);
     float nearEdge = 1.0 - smoothstep(0.0, FROST_EDGE, toEdge);
     float frostAmount = clamp(nearEdge * 0.75 + below + HOT_FROST * hot, 0.0, 1.0) * mix(0.55, 1.0, nearEdge);
     float frost = smoothstep(1.0 - frostAmount, 1.0 - frostAmount * 0.4, frostField) * FROST_STRENGTH * legible;
+
+    float seedMilky = hash(vec2(seed * 57.3, 3.7));
+    float milky = smoothstep(1.0 - MILKY_SHARE, 1.0, seedMilky) * MILKY_STRENGTH * (0.6 + 0.4 * frostField) * legible;
+
+    float hairline = 0.0;
+    if (hash(vec2(seed * 31.1, 9.2)) < HAIRLINE_SHARE) {
+        vec2 hairNormal;
+        float hairColumns = floor(shardColumns * HAIRLINE_SCALE + 0.5);
+        vec2 hairScale = vec2(hairColumns / around, HAIRLINE_SCALE / SHARD_CELLS);
+        vec4 hair = shards(wallCoord * hairScale + vec2(0.0, seed * 17.0), hairColumns, time, 0.0, hairNormal);
+        float hairPixels = hair.z / max(perPixel * HAIRLINE_SCALE, 1.0e-6);
+        hairline = (1.0 - smoothstep(0.0, 1.0, hairPixels)) * HAIRLINE_STRENGTH * legible * close;
+    }
+
+    float thickness = smoothstep(0.0, DEPTH_CELLS, toEdge);
+
+    float streakPhase = (p.x * 0.8 + p.y) * STREAK_COUNT / 3.0 + seed * 0.3 - time * STREAK_CYCLES;
+    float streak = exp(-pow((fract(streakPhase) - 0.5) / STREAK_WIDTH, 2.0)) * STREAK_STRENGTH * thickness * legible;
 
     float folds = max(1.0, floor(around / SHIMMER_CELLS + 0.5));
     float band = fract((wallCoord.x + wallCoord.y * 0.35) / around * folds - time * SHIMMER_CYCLES);
@@ -289,9 +335,9 @@ void main() {
     float lift = breath + flash + HOT_LIGHT * hot * 0.5;
 
     float glass = mix(FILL_FAR, FILL, legible) * shade * (1.0 + FACET_STRENGTH * (facet - 0.5)) * (1.0 + lift) * strength;
-    float rime = (frost + flash * 0.6) * strength;
-    float glint = (edgeGlow * legible * drawn + shimmer) * (1.0 + lift) * strength;
-    float bright = (edge * legible * drawn * (1.0 + lift) + sparkle + flake + crack) * strength;
+    float rime = (frost + milky + flash * 0.6) * strength;
+    float glint = (edgeGlow * legible * drawn + shimmer + streak) * (1.0 + lift) * strength;
+    float bright = (edge * legible * drawn * (1.0 + lift) + hairline + sparkle + flake + crack) * strength;
 
     float total = glass + rime + glint + bright;
     if (total * ColorModulator.a < 0.004) {
@@ -301,7 +347,7 @@ void main() {
     vec3 tint = ColorModulator.rgb;
     vec3 ice = mix(ICE, tint, TINT_SHARE);
     vec3 deep = mix(ICE_DEEP, tint, TINT_SHARE * 1.5);
-    vec3 glassColour = mix(deep, ice, facet);
+    vec3 glassColour = mix(ice, mix(deep, ice, facet), thickness);
 
     vec3 colour = (glassColour * glass + FROST * rime + ice * glint + vec3(1.0) * bright) / total;
     float alpha = clamp(total, 0.0, 1.0) * ColorModulator.a;
