@@ -70,8 +70,10 @@ object HeatMap {
     private const val BODY_SLOTS = 3
 
     private fun bodies(centre: Vec3, camera: Vec3): List<Vector3f> {
-        val level = Minecraft.getInstance().level ?: return emptyList()
-        val self = Minecraft.getInstance().player
+        val client = Minecraft.getInstance()
+        val level = client.level ?: return emptyList()
+        val self = client.player
+        val partial = client.deltaTracker.getGameTimeDeltaPartialTick(true)
 
         return level.players()
             .asSequence()
@@ -80,7 +82,7 @@ object HeatMap {
             .sortedBy { it.position().distanceToSqr(centre) }
             .take(BODY_SLOTS)
             .map { player ->
-                val at = player.position().add(0.0, player.bbHeight / 2.0, 0.0)
+                val at = player.getPosition(partial).add(0.0, player.bbHeight / 2.0, 0.0)
                 Vector3f(
                     (at.x - camera.x).toFloat(),
                     (at.y - camera.y).toFloat(),

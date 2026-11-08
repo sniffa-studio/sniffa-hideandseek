@@ -13,13 +13,13 @@ object ShopSession {
     val remainingHiders: Int get() = RoundState.remainingHiders
 
     fun restocking(ability: Ability): Boolean =
-        !AbilityCooldowns.payPerUse && ability.restockCost > 0 && AbilityCooldowns.owned(ability.id)
+        ServerPrices.restockCost(ability) > 0 && AbilityCooldowns.owned(ability.id)
 
     fun price(ability: Ability): Int = when {
-        AbilityCooldowns.payPerUse -> ability.cost
-        restocking(ability) -> ability.restockCost
+        restocking(ability) -> ServerPrices.restockCost(ability)
+        AbilityCooldowns.payPerUse -> ServerPrices.cost(ability)
         AbilityCooldowns.owned(ability.id) -> 0
-        else -> ability.cost
+        else -> ServerPrices.cost(ability)
     }
 
     fun canAfford(ability: Ability): Boolean = points >= price(ability)
@@ -30,7 +30,7 @@ object ShopSession {
     fun cooldownLeft(ability: Ability): Int = AbilityCooldowns.remaining(ability.id)
 
     fun cooldownShare(ability: Ability): Float =
-        AbilityCooldowns.fraction(ability.id, ability.cooldownSeconds)
+        AbilityCooldowns.fraction(ability.id, ServerPrices.cooldownSeconds(ability))
 
     fun buy(ability: Ability): Boolean {
         if (!ClientPlayNetworking.canSend(PurchaseRequestPayload.TYPE)) {
