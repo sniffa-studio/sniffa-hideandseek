@@ -163,7 +163,7 @@ class MapScreen(
 
         val line = if (armed) {
             if (zoneRadius != null) {
-                "$worldX, $worldZ  ·  Klicken setzt die Gefahrenzone  ·  Esc bricht ab"
+                "$worldX, $worldZ  ·  Klicken lässt den Schneesturm los  ·  Esc bricht ab"
             } else {
                 "$worldX, $worldZ  ·  Klicken teleportiert  ·  Rad zoomt  ·  Esc schließt"
             }

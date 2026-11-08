@@ -7,8 +7,8 @@ object AbilityCatalog {
 
     val RADAR = Ability(
         id = "radar",
-        displayName = "Radar",
-        description = "Zeigt, wie viele Verstecker in der Nähe sind — und markiert sie kurz.",
+        displayName = "Rentier-Nase",
+        description = "Rudolph wittert, wie viele Verstecker in der Nähe sind — und markiert sie kurz.",
         side = Side.SEEKER,
         cost = 5,
         cooldownSeconds = 30,
@@ -19,8 +19,8 @@ object AbilityCatalog {
 
     val SPEED = Ability(
         id = "speed",
-        displayName = "Tempo",
-        description = "Kurzer Geschwindigkeitsschub.",
+        displayName = "Zuckerstange",
+        description = "Zuckerschock: kurzer Geschwindigkeitsschub.",
         side = Side.SEEKER,
         cost = 1,
         cooldownSeconds = 45,
@@ -31,8 +31,8 @@ object AbilityCatalog {
 
     val RANDOM_PING = Ability(
         id = "random_ping",
-        displayName = "Wärmebild",
-        description = "Zeigt ungefähr, wo ein zufälliger Verstecker ist.",
+        displayName = "Kaminfeuer-Blick",
+        description = "Zeigt ungefähr, wo ein zufälliger Verstecker ist — warm wie Kaminglut.",
         side = Side.SEEKER,
         cost = 5,
         cooldownSeconds = 40,
@@ -43,8 +43,8 @@ object AbilityCatalog {
 
     val HOT_COLD = Ability(
         id = "hot_cold",
-        displayName = "Heiß / Kalt",
-        description = "Zeigt, ob du näher kommst oder dich entfernst.",
+        displayName = "Schneemann-Thermometer",
+        description = "Eiskalt oder kuschelig warm: zeigt, ob du näher kommst oder dich entfernst.",
         side = Side.SEEKER,
         cost = 2,
         cooldownSeconds = 30,
@@ -55,8 +55,8 @@ object AbilityCatalog {
 
     val NEAREST_PLAYER = Ability(
         id = "nearest_player",
-        displayName = "Entfernungsmesser",
-        description = "Zeigt, wie weit der nächste Verstecker weg ist.",
+        displayName = "Glöckchen",
+        description = "Klingelt dir, wie weit der nächste Verstecker weg ist.",
         side = Side.SEEKER,
         cost = 3,
         cooldownSeconds = 30,
@@ -67,8 +67,8 @@ object AbilityCatalog {
 
     val PLAYER_COMPASS = Ability(
         id = "player_compass",
-        displayName = "Kompass",
-        description = "Zeigt die Richtung zum nächsten Verstecker.",
+        displayName = "Polarstern",
+        description = "Der Stern zeigt dir die Richtung zum nächsten Verstecker.",
         side = Side.SEEKER,
         cost = 8,
         cooldownSeconds = 45,
@@ -79,8 +79,8 @@ object AbilityCatalog {
 
     val GLOW = Ability(
         id = "glow",
-        displayName = "Aufleuchten",
-        description = "Alle Verstecker leuchten kurz auf.",
+        displayName = "Lichterkette",
+        description = "Alle Verstecker leuchten kurz auf wie eine Lichterkette.",
         side = Side.SEEKER,
         cost = 9,
         cooldownSeconds = 60,
@@ -91,8 +91,8 @@ object AbilityCatalog {
 
     val ELYTRA = Ability(
         id = "elytra",
-        displayName = "Elytra",
-        description = "Elytra für die ganze Runde und zwei Raketen. Danach nur Raketen nachkaufen.",
+        displayName = "Rentier-Schlitten",
+        description = "Flügel für die ganze Runde und zwei Knallbonbons. Danach nur Knallbonbons nachkaufen.",
         side = Side.SEEKER,
         cost = 20,
         cooldownSeconds = 60,
@@ -104,8 +104,8 @@ object AbilityCatalog {
 
     val TELEPORT = Ability(
         id = "teleport",
-        displayName = "Teleport",
-        description = "Karte öffnen und hinspringen.",
+        displayName = "Durch den Kamin",
+        description = "Karte öffnen und hinrutschen wie der Weihnachtsmann.",
         side = Side.SEEKER,
         cost = 10,
         cooldownSeconds = 60,
@@ -116,7 +116,7 @@ object AbilityCatalog {
 
     val SWAP = Ability(
         id = "swap",
-        displayName = "Tausch",
+        displayName = "Wichteln",
         description = "Tauscht deine Position mit einem zufälligen Verstecker.",
         side = Side.SEEKER,
         cost = 12,
@@ -128,8 +128,8 @@ object AbilityCatalog {
 
     val DANGER_ZONE = Ability(
         id = "danger_zone",
-        displayName = "Gefahrenzone",
-        description = "Setzt einen Kreis auf der Karte. Wer nach zwei Minuten noch drin steht, ist raus.",
+        displayName = "Schneesturm",
+        description = "Lässt einen Schneesturm auf der Karte los. Wer nach zwei Minuten noch drin steht, ist raus.",
         side = Side.SEEKER,
         cost = 30,
         cooldownSeconds = 300,
@@ -140,8 +140,8 @@ object AbilityCatalog {
 
     val SPRINT = Ability(
         id = "sprint",
-        displayName = "Sprint",
-        description = "Kurzer Geschwindigkeitsschub.",
+        displayName = "Schlittschuhe",
+        description = "Auf Kufen: kurzer Geschwindigkeitsschub.",
         side = Side.HIDER,
         cost = 3,
         cooldownSeconds = 60,
@@ -152,8 +152,8 @@ object AbilityCatalog {
 
     val JAMMER = Ability(
         id = "jammer",
-        displayName = "Störsender",
-        description = "Das nächste Radar zählt dich nicht mit.",
+        displayName = "Geschenkpapier",
+        description = "Gut eingepackt: Die nächste Rentier-Nase zählt dich nicht mit.",
         side = Side.HIDER,
         cost = 4,
         cooldownSeconds = 75,
@@ -164,8 +164,8 @@ object AbilityCatalog {
 
     val EARLY_WARNING = Ability(
         id = "early_warning",
-        displayName = "Frühwarnung",
-        description = "Zeigt kurz, wie weit der Sucher weg ist.",
+        displayName = "Weihnachtsglöckchen",
+        description = "Bimmelt dir kurz, wie weit der Sucher weg ist.",
         side = Side.HIDER,
         cost = 6,
         cooldownSeconds = 60,

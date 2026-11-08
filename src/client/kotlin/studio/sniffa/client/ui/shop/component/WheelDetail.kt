@@ -73,7 +73,7 @@ class WheelDetail : FlowLayout(
 
         val price = ShopSession.price(ability)
         val label = when {
-            ShopSession.restocking(ability) -> "Raketen  —  $price Punkte"
+            ShopSession.restocking(ability) -> "Knallbonbons  —  $price Punkte"
             price == 0 -> "gekauft"
             else -> "$price Punkte"
         }
