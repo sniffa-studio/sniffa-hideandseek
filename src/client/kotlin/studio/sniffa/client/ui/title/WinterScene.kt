@@ -79,7 +79,7 @@ object WinterScene {
     @JvmStatic
     fun back(graphics: GuiGraphics, width: Int, height: Int) {
         val now = Util.getMillis()
-        backdrop(graphics, width, height, now)
+        backdrop(graphics, width, height)
         graphics.fill(0, 0, width, height, argb(0x30, NIGHT))
         graphics.fillGradient(0, 0, width, height * 2 / 5, argb(0x96, NIGHT), argb(0x00, NIGHT))
         graphics.fillGradient(0, height * 2 / 5, width, height, argb(0x00, NIGHT), argb(0xB4, NIGHT))
@@ -103,12 +103,11 @@ object WinterScene {
         snow(graphics, width, height, now, NEAR)
     }
 
-    private fun backdrop(graphics: GuiGraphics, width: Int, height: Int, now: Long) {
-        val breathe = 1.06 + 0.03 * sin(now / 9000.0)
-        val scale = maxOf(width / BACKGROUND_W.toDouble(), height / BACKGROUND_H.toDouble()) * breathe
-        val w = (BACKGROUND_W * scale).toInt()
-        val h = (BACKGROUND_H * scale).toInt()
-        val x = (width - w) / 2 + (6 * sin(now / 13000.0)).toInt()
+    private fun backdrop(graphics: GuiGraphics, width: Int, height: Int) {
+        val scale = maxOf(width / BACKGROUND_W.toDouble(), height / BACKGROUND_H.toDouble())
+        val w = kotlin.math.ceil(BACKGROUND_W * scale).toInt()
+        val h = kotlin.math.ceil(BACKGROUND_H * scale).toInt()
+        val x = (width - w) / 2
         val y = (height - h) / 2
         graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, x, y, 0f, 0f, w, h,
             BACKGROUND_W, BACKGROUND_H, BACKGROUND_W, BACKGROUND_H)
