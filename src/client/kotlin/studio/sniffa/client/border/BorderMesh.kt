@@ -14,6 +14,7 @@ class BorderMesh private constructor(
     val indexCount: Int,
     val columns: Int,
     val ring: BorderZone.Ring,
+    val dome: Boolean,
 ) : AutoCloseable {
 
     fun matches(other: BorderZone.Ring): Boolean = ring == other
@@ -32,6 +33,10 @@ class BorderMesh private constructor(
 
         private const val SEGMENTS = 192
 
+        private const val DOME_RINGS = 40
+
+        const val DOME_BASE = 110.0
+
         private const val LEAST_SCALE = 0.45
 
         private const val MOST_SCALE = 2.2
@@ -42,9 +47,9 @@ class BorderMesh private constructor(
 
         const val PERIOD_CELLS = 1.7320508
 
-        fun build(ring: BorderZone.Ring): BorderMesh {
+        fun build(ring: BorderZone.Ring, dome: Boolean): BorderMesh {
             val format = DefaultVertexFormat.POSITION_TEX
-            val quads = SEGMENTS
+            val quads = SEGMENTS * (if (dome) 1 + DOME_RINGS else 1)
             val bytes = format.vertexSize * 4 * quads
 
             ByteBufferBuilder(bytes).use { storage ->
@@ -57,9 +62,9 @@ class BorderMesh private constructor(
                 val uPerSegment = tiles * PERIOD_CELLS / SEGMENTS
 
                 val bottom = BorderZone.BOTTOM.toFloat()
-                val top = BorderZone.TOP.toFloat()
+                val top = (if (dome) DOME_BASE else BorderZone.TOP).toFloat()
                 val vBottom = (BorderZone.BOTTOM / CELL_BLOCKS).toFloat()
-                val vTop = (BorderZone.TOP / CELL_BLOCKS).toFloat()
+                val vTop = (top / CELL_BLOCKS).toFloat()
 
                 for (segment in 0 until SEGMENTS) {
                     val from = segment * step
@@ -77,6 +82,25 @@ class BorderMesh private constructor(
                     builder.addVertex(x1, bottom, z1).setUv(u1, vBottom)
                     builder.addVertex(x1, top, z1).setUv(u1, vTop)
                     builder.addVertex(x0, top, z0).setUv(u0, vTop)
+
+                    if (dome) {
+                        for (band in 0 until DOME_RINGS) {
+                            val low = band * (Math.PI / 2.0) / DOME_RINGS
+                            val high = (band + 1) * (Math.PI / 2.0) / DOME_RINGS
+
+                            val rLow = cos(low) * ring.radius
+                            val rHigh = cos(high) * ring.radius
+                            val yLow = (DOME_BASE + sin(low) * ring.radius).toFloat()
+                            val yHigh = (DOME_BASE + sin(high) * ring.radius).toFloat()
+                            val vLow = vTop + (low * ring.radius / CELL_BLOCKS).toFloat()
+                            val vHigh = vTop + (high * ring.radius / CELL_BLOCKS).toFloat()
+
+                            builder.addVertex((cos(from) * rLow).toFloat(), yLow, (sin(from) * rLow).toFloat()).setUv(u0, vLow)
+                            builder.addVertex((cos(to) * rLow).toFloat(), yLow, (sin(to) * rLow).toFloat()).setUv(u1, vLow)
+                            builder.addVertex((cos(to) * rHigh).toFloat(), yHigh, (sin(to) * rHigh).toFloat()).setUv(u1, vHigh)
+                            builder.addVertex((cos(from) * rHigh).toFloat(), yHigh, (sin(from) * rHigh).toFloat()).setUv(u0, vHigh)
+                        }
+                    }
                 }
 
                 val mesh = builder.buildOrThrow()
@@ -86,7 +110,7 @@ class BorderMesh private constructor(
                         GpuBuffer.USAGE_VERTEX,
                         it.vertexBuffer(),
                     )
-                    return BorderMesh(buffer, quads * 6, tiles.toInt(), ring)
+                    return BorderMesh(buffer, quads * 6, tiles.toInt(), ring, dome)
                 }
             }
         }

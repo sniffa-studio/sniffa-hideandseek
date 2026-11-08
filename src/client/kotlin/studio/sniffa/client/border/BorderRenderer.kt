@@ -17,20 +17,20 @@ import java.util.OptionalDouble
 
 object BorderRenderer {
 
-    private val roundBorder = Layer()
-    private val dangerZone = Layer()
+    private val roundBorder = Layer(dome = true)
+    private val dangerZone = Layer(dome = false)
 
     private val roundSeam = BorderSeam()
     private val zoneSeam = BorderSeam()
 
     private const val ZONE_TINT = 0xFFFC301E.toInt()
 
-    private class Layer {
+    private class Layer(val dome: Boolean) {
         var mesh: BorderMesh? = null
 
         fun meshFor(ring: BorderZone.Ring): BorderMesh {
             mesh?.let { if (it.scaleFor(ring) != null) return it else it.close() }
-            return BorderMesh.build(ring).also { mesh = it }
+            return BorderMesh.build(ring, dome).also { mesh = it }
         }
 
         fun drop() {
@@ -83,7 +83,9 @@ object BorderRenderer {
         extras: (BorderMesh) -> Matrix4f,
     ) {
         val current = layer.meshFor(ring)
-        pass(pipeline, current.vertices, current.indexCount, ring, tint, camera, extras(current), current.scaleFor(ring) ?: 1.0)
+        val values = extras(current)
+        values.m23(if (current.dome) BorderMesh.DOME_BASE.toFloat() else 0f)
+        pass(pipeline, current.vertices, current.indexCount, ring, tint, camera, values, current.scaleFor(ring) ?: 1.0)
     }
 
     private fun zoneUniforms(columns: Int): Matrix4f {
