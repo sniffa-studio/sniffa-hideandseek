@@ -7,6 +7,9 @@ in vec2 wallCoord;
 in float heightFromViewer;
 in float distanceFromViewer;
 in float distanceToEye;
+in float domeShare;
+in vec3 viewPos;
+in vec3 sphereNormal;
 
 out vec4 fragColor;
 
@@ -106,6 +109,18 @@ const float STREAK_COUNT = 1.0;
 const float STREAK_WIDTH = 0.2;
 const float STREAK_CYCLES = 8.0;
 const float STREAK_STRENGTH = 0.14;
+
+const float DOME_VISIBLE_FROM = 600.0;
+const float DOME_VISIBLE_TO = 1000.0;
+const float DOME_SHARD_SCALE = 7.0;
+const float DOME_LINES_FAR = 0.7;
+const float RIM_POWER = 2.6;
+const float RIM_DOME = 0.55;
+const float RIM_WALL = 0.12;
+const float DOME_GLASS = 0.3;
+const float DOME_MILKY = 0.4;
+const float DOME_FROST = 0.35;
+const float DOME_EDGE = 0.8;
 
 const vec3 ICE = vec3(0.72, 0.9, 1.0);
 const vec3 ICE_DEEP = vec3(0.38, 0.66, 0.95);
@@ -240,8 +255,9 @@ void main() {
     float shrinking = step(TextureMat[0][3], -0.5);
     float creep = shrinking * CREEP_SHRINK;
 
-    float shardColumns = max(1.0, floor(around / SHARD_CELLS + 0.5));
-    vec2 scale = vec2(shardColumns / around, 1.0 / SHARD_CELLS);
+    float shardSize = SHARD_CELLS * mix(1.0, DOME_SHARD_SCALE, step(0.5, domeShare));
+    float shardColumns = max(1.0, floor(around / shardSize + 0.5));
+    vec2 scale = vec2(shardColumns / around, 1.0 / shardSize);
     vec2 p = wallCoord * scale;
 
     vec2 edgeNormal;
@@ -259,7 +275,7 @@ void main() {
     float legible = 1.0 - smoothstep(0.1, 0.6, cellsPerPixel);
 
     float close = 1.0 - smoothstep(LINES_NEAR_FROM, LINES_NEAR_TO, distanceToEye);
-    float drawn = mix(LINES_FAR, 1.0, close);
+    float drawn = mix(mix(LINES_FAR, DOME_LINES_FAR, step(0.5, domeShare)), 1.0, close);
 
     float edgeWidth = min(EDGE_PIXELS, EDGE_CELLS / max(perPixel, 1.0e-6));
     vec2 light = normalize(vec2(-0.6, 0.8));
@@ -326,18 +342,29 @@ void main() {
     float shown = clamp(revealed / REVEAL_EDGE, 0.0, 1.0);
     float flash = revealed > 0.0 ? exp(-revealed * REVEAL_FLASH) * REVEAL_FLASH_STRENGTH : 0.0;
 
-    float standing = 1.0 - smoothstep(FADE_FROM, FADE_TO, abs(heightFromViewer));
+    float dome = domeShare;
+    float facing = abs(dot(normalize(viewPos), sphereNormal));
+    float rim = pow(1.0 - facing, RIM_POWER) * mix(RIM_WALL, RIM_DOME, dome);
+    float standing = mix(1.0 - smoothstep(FADE_FROM, FADE_TO, abs(heightFromViewer)), 1.0, dome);
     float near = 1.0 + NEAR_BOOST * (1.0 - smoothstep(NEAR_BLOCKS, NEAR_FADE, distanceFromViewer));
     float breath = (0.5 + 0.5 * sin(TAU * time * BREATH_CYCLES)) * BREATH_STRENGTH * shrinking;
-    float visible = 1.0 - smoothstep(VISIBLE_FROM, VISIBLE_TO, distanceFromViewer);
+    float visible = mix(1.0 - smoothstep(VISIBLE_FROM, VISIBLE_TO, distanceFromViewer),
+                        1.0 - smoothstep(DOME_VISIBLE_FROM, DOME_VISIBLE_TO, distanceFromViewer), dome);
     float strength = standing * near * shown * visible;
 
     float lift = breath + flash + HOT_LIGHT * hot * 0.5;
 
-    float glass = mix(FILL_FAR, FILL, legible) * shade * (1.0 + FACET_STRENGTH * (facet - 0.5)) * (1.0 + lift) * strength;
+    milky *= mix(1.0, DOME_MILKY, dome);
+    frost *= mix(1.0, DOME_FROST, dome);
+    flake *= 1.0 - dome;
+    edge *= mix(1.0, DOME_EDGE, dome);
+
+    float glass = mix(1.0, DOME_GLASS, dome) * mix(FILL_FAR, FILL, legible) * shade * (1.0 + FACET_STRENGTH * (facet - 0.5)) * (1.0 + lift) * strength;
     float rime = (frost + milky + flash * 0.6) * strength;
     float glint = (edgeGlow * legible * drawn + shimmer + streak) * (1.0 + lift) * strength;
     float bright = (edge * legible * drawn * (1.0 + lift) + hairline + sparkle + flake + crack) * strength;
+
+    glint += rim * strength;
 
     float total = glass + rime + glint + bright;
     if (total * ColorModulator.a < 0.004) {
