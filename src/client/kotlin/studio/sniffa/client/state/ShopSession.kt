@@ -13,11 +13,11 @@ object ShopSession {
     val remainingHiders: Int get() = RoundState.remainingHiders
 
     fun restocking(ability: Ability): Boolean =
-        !AbilityCooldowns.payPerUse && ability.restockCost > 0 && AbilityCooldowns.owned(ability.id)
+        ability.restockCost > 0 && AbilityCooldowns.owned(ability.id)
 
     fun price(ability: Ability): Int = when {
-        AbilityCooldowns.payPerUse -> ability.cost
         restocking(ability) -> ability.restockCost
+        AbilityCooldowns.payPerUse -> ability.cost
         AbilityCooldowns.owned(ability.id) -> 0
         else -> ability.cost
     }
