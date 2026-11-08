@@ -13,47 +13,38 @@ out vec4 fragColor;
 const float TAU = 6.2831853;
 const float PERIOD_CELLS = 1.7320508;
 
-const float BODY = 0.08;
+const float BODY = 0.07;
 const float EYE_STRENGTH = 0.14;
 const float EYE_BLOCKS = 7.0;
 
-const float STRIPE_CELLS = 3.0;
-const float STRIPE_SHARE = 0.5;
-const float STRIPE_STRENGTH = 0.05;
-const float STRIPE_CYCLES = 120.0;
+const float GUST_CELLS = 2.4;
+const float GUST_STRETCH = 5.0;
+const float GUST_CYCLES = 300.0;
+const float GUST_STRENGTH = 0.38;
 
-const float LINE_PIXELS = 2.0;
-const float LINE_CELLS = 0.05;
-const float LINE_STRENGTH = 0.85;
-const float GLOW_PIXELS = 12.0;
-const float GLOW_CELLS = 0.18;
-const float GLOW_STRENGTH = 0.3;
+const float FLAKE_CELLS = 0.5;
+const float FLAKE_SHARE = 0.4;
+const float FLAKE_CYCLES = 900.0;
+const float FLAKE_FALL = 260.0;
+const float FLAKE_PIXELS = 1.4;
+const float FLAKE_STRENGTH = 1.0;
+
+const float WARN_CELLS = 3.0;
+const float WARN_SHARE = 0.18;
+const float WARN_CYCLES = 120.0;
+const float WARN_STRENGTH = 0.28;
 
 const float LINES_NEAR_FROM = 6.0;
 const float LINES_NEAR_TO = 26.0;
-const float LINES_FAR = 0.25;
-
-const float SCAN_CELLS = 0.5;
-const float SCAN_STRENGTH = 0.03;
-const float SCAN_CYCLES = 900.0;
+const float LINES_FAR = 0.3;
 
 const float CALM_CYCLES = 600.0;
 const float URGENT_CYCLES = 2400.0;
 const float URGENT_SECONDS = 10.0;
 const float PULSE_STRENGTH = 0.25;
-const float URGENT_LINE_BEAT = 0.8;
 
-const float WHITE = 0.35;
 const float WHITE_HOT = 0.4;
 const float WHITE_HOT_SECONDS = 5.0;
-
-const float EMBER_CELLS = 0.85;
-const float EMBER_SHARE = 0.16;
-const float EMBER_URGENT_SHARE = 0.34;
-const float EMBER_CYCLES = 700.0;
-const float EMBER_RADIUS = 0.11;
-const float EMBER_STRENGTH = 0.8;
-const float EMBER_WHITE = 0.6;
 
 const float FADE_FROM = 26.0;
 const float FADE_TO = 95.0;
@@ -61,8 +52,7 @@ const float FADE_TO = 95.0;
 const float VISIBLE_FROM = 48.0;
 const float VISIBLE_TO = 96.0;
 
-const vec2 HEX_STEP = vec2(1.7320508, 1.0);
-const vec2 HEX_HALF = vec2(0.8660254, 0.5);
+const vec3 SNOW = vec3(0.95, 0.97, 1.0);
 
 float pulse(float phase) {
     return 0.5 + 0.5 * sin(TAU * phase);
@@ -74,47 +64,15 @@ float hash(vec2 id) {
     return fract((p.x + p.y) * p.z);
 }
 
-float seamless(float delta) {
-    return delta - HEX_STEP.x * round(delta / HEX_STEP.x);
-}
-
-vec4 hexCell(vec2 p) {
-    vec2 centreA = round(p / HEX_STEP);
-    vec2 centreB = round((p - HEX_HALF) / HEX_STEP) + 0.5;
-
-    vec2 offsetA = p - centreA * HEX_STEP;
-    vec2 offsetB = p - centreB * HEX_STEP;
-
-    return dot(offsetA, offsetA) < dot(offsetB, offsetB)
-        ? vec4(offsetA, centreA)
-        : vec4(offsetB, centreB);
-}
-
-vec3 hexEdge(vec2 offset) {
-    vec2 folded = abs(offset);
-
-    float towardsFlat = folded.y;
-    float towardsCorner = dot(folded, HEX_HALF);
-
-    vec2 normal = towardsCorner > towardsFlat ? HEX_HALF : vec2(0.0, 1.0);
-    return vec3(0.5 - max(towardsFlat, towardsCorner), normal * sign(offset));
-}
-
-float embers(vec2 coord, float around, float share) {
-    float columns = max(1.0, floor(around / EMBER_CELLS + 0.5));
-    vec2 grid = vec2(coord.x / around * columns, coord.y / EMBER_CELLS);
-    vec2 id = vec2(mod(floor(grid.x), columns), floor(grid.y));
-    vec2 inside = fract(grid);
-
-    float seed = hash(id);
-    float speed = 0.6 + 0.8 * hash(id + 9.0);
-    float rise = fract(seed * 7.31 + GameTime * EMBER_CYCLES * speed);
-    vec2 centre = vec2(0.25 + 0.5 * hash(id + 3.0), rise);
-
-    float reach = length((inside - centre) * vec2(columns / around * EMBER_CELLS, 1.0));
-    float soft = clamp(fwidth(grid.y) * 1.5, 1.0e-4, 0.2);
-    float spark = 1.0 - smoothstep(EMBER_RADIUS - soft, EMBER_RADIUS + soft, reach);
-    return spark * sin(3.1415927 * rise) * step(seed, share);
+float noise(vec2 p, float period) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    float a = hash(vec2(mod(i.x, period), i.y));
+    float b = hash(vec2(mod(i.x + 1.0, period), i.y));
+    float c = hash(vec2(mod(i.x, period), i.y + 1.0));
+    float d = hash(vec2(mod(i.x + 1.0, period), i.y + 1.0));
+    return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
 }
 
 float band(float phase, float share, float soft) {
@@ -122,66 +80,69 @@ float band(float phase, float share, float soft) {
     return smoothstep(0.0, soft, into) * (1.0 - smoothstep(share - soft, share, into));
 }
 
+float gusts(vec2 coord, float around, float time) {
+    float columns = max(1.0, floor(around / GUST_CELLS + 0.5));
+    float swirl = 0.6 * sin(TAU * (coord.y / (GUST_CELLS * 3.0) + time * GUST_CYCLES * 0.3));
+    vec2 p = vec2(coord.x / around * columns + swirl - time * GUST_CYCLES * 0.02 * columns, coord.y / GUST_CELLS * GUST_STRETCH);
+    float slow = noise(vec2(p.x, p.y / GUST_STRETCH), columns);
+    float fine = noise(vec2(p.x * 2.0, p.y / GUST_STRETCH * 2.0), columns * 2.0);
+    return smoothstep(0.45, 0.85, slow * 0.65 + fine * 0.35);
+}
+
+float flakes(vec2 coord, float around, float time, float share, float perPixel) {
+    float columns = max(1.0, floor(around / FLAKE_CELLS + 0.5));
+    vec2 grid = vec2(coord.x / around * columns - time * FLAKE_CYCLES * 0.05 * columns, coord.y / FLAKE_CELLS + time * FLAKE_FALL);
+    vec2 id = vec2(mod(floor(grid.x), columns), floor(grid.y));
+    vec2 at = vec2(hash(id + 3.0), hash(id + 9.0));
+    vec2 from = (fract(grid) - at) * FLAKE_CELLS;
+    float pixels = length(from) / max(perPixel, 1.0e-6);
+    return step(hash(id + 21.0), share) * (1.0 - smoothstep(0.0, FLAKE_PIXELS, pixels));
+}
+
 void main() {
     float columns = max(TextureMat[3][0], 1.0);
     float around = columns * PERIOD_CELLS;
+    float time = GameTime;
 
-    vec4 cell = hexCell(wallCoord);
-    vec3 edge = hexEdge(cell.xy);
-    float toEdge = edge.x;
-    vec2 normal = edge.yz;
-
-    vec2 alongX = vec2(seamless(dFdx(wallCoord.x)), dFdx(wallCoord.y));
-    vec2 alongY = vec2(seamless(dFdy(wallCoord.x)), dFdy(wallCoord.y));
-
-    float perPixel = length(vec2(dot(alongX, normal), dot(alongY, normal)));
-    float pixelsToEdge = toEdge / max(perPixel, 1.0e-6);
-
-    float cellsPerPixel = max(length(alongX), length(alongY));
-    float legible = 1.0 - smoothstep(0.1, 0.6, cellsPerPixel);
-
-    float lineWidth = min(LINE_PIXELS, LINE_CELLS / max(cellsPerPixel, 1.0e-6));
-    float line = (1.0 - smoothstep(0.0, lineWidth, pixelsToEdge)) * LINE_STRENGTH;
-    float glow = (1.0 - smoothstep(0.0, GLOW_PIXELS, pixelsToEdge)) * (1.0 - smoothstep(0.0, GLOW_CELLS, toEdge))
-               * GLOW_STRENGTH;
-
-    float stripes = max(1.0, floor(around / STRIPE_CELLS + 0.5));
-    float phase = (wallCoord.x + wallCoord.y) / (around / stripes) - GameTime * STRIPE_CYCLES;
-    float stripe = band(phase, STRIPE_SHARE, clamp(fwidth(phase) * 1.5, 0.002, 0.25));
-
-    float scan = band(wallCoord.y / SCAN_CELLS - GameTime * SCAN_CYCLES, 0.15, 0.05) * SCAN_STRENGTH;
+    float dx = dFdx(wallCoord.x);
+    float dy = dFdy(wallCoord.x);
+    dx -= around * round(dx / around);
+    dy -= around * round(dy / around);
+    float perPixel = max(length(vec2(dx, dFdx(wallCoord.y))), length(vec2(dy, dFdy(wallCoord.y))));
+    float legible = 1.0 - smoothstep(0.1, 0.6, perPixel);
 
     float secondsLeft = TextureMat[0][0];
     float urgent = 1.0 - smoothstep(URGENT_SECONDS * 0.5, URGENT_SECONDS, secondsLeft);
-    float beat = pulse(GameTime * mix(CALM_CYCLES, URGENT_CYCLES, urgent));
+    float beat = pulse(time * mix(CALM_CYCLES, URGENT_CYCLES, urgent));
     float throb = 1.0 + PULSE_STRENGTH * (0.4 + 0.6 * urgent) * beat;
     float whiteHot = (1.0 - smoothstep(0.0, WHITE_HOT_SECONDS, secondsLeft)) * WHITE_HOT;
 
     float close = 1.0 - smoothstep(LINES_NEAR_FROM, LINES_NEAR_TO, distanceToEye);
-    float drawn = mix(LINES_FAR, 1.0, close) * (1.0 + URGENT_LINE_BEAT * urgent * beat);
+    float drawn = mix(LINES_FAR, 1.0, close);
 
     float standing = 1.0 - smoothstep(FADE_FROM, FADE_TO, abs(heightFromViewer));
     float visible = 1.0 - smoothstep(VISIBLE_FROM, VISIBLE_TO, distanceFromViewer);
     float eyeline = exp(-abs(heightFromViewer) / EYE_BLOCKS) * EYE_STRENGTH;
 
-    float ember = embers(wallCoord, around, mix(EMBER_SHARE, EMBER_URGENT_SHARE, urgent))
-        * EMBER_STRENGTH * legible * (0.6 + 0.6 * urgent);
+    float storm = gusts(wallCoord, around, time) * GUST_STRENGTH * (1.0 + 0.6 * urgent) * mix(0.5, 1.0, legible);
+    float snow = flakes(wallCoord, around, time, mix(FLAKE_SHARE, FLAKE_SHARE * 1.6, urgent), perPixel) * FLAKE_STRENGTH * legible * drawn;
 
-    float body = (BODY + eyeline + STRIPE_STRENGTH * stripe * legible + scan) * throb;
-    float lines = (line + glow) * legible * drawn * throb;
+    float warnings = max(1.0, floor(around / WARN_CELLS + 0.5));
+    float phase = (wallCoord.x + wallCoord.y * 0.5) / (around / warnings) - time * WARN_CYCLES;
+    float warn = band(phase, WARN_SHARE, clamp(fwidth(phase) * 1.5, 0.002, 0.25)) * WARN_STRENGTH * legible;
+
+    float red = (BODY + eyeline + warn) * throb;
+    float white = storm * throb + snow;
 
     float strength = standing * visible;
-    float total = (body + lines + ember) * strength;
+    float total = (red + white) * strength;
 
     if (total * ColorModulator.a < 0.004) {
         discard;
     }
 
     vec3 tint = ColorModulator.rgb;
-    vec3 colour = (tint * body
-                 + mix(tint, vec3(1.0), WHITE + whiteHot) * lines
-                 + mix(tint, vec3(1.0), EMBER_WHITE) * ember)
-                / max(body + lines + ember, 1.0e-5);
+    vec3 colour = (mix(tint, vec3(1.0), whiteHot) * red + SNOW * white) / max(red + white, 1.0e-5);
 
     fragColor = vec4(colour, clamp(total, 0.0, 1.0) * ColorModulator.a);
 }
