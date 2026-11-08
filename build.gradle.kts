@@ -14,11 +14,11 @@ repositories {
 	maven("https://maven.wispforest.io/releases/")
 	maven("https://jitpack.io")
 	maven("https://api.modrinth.com/maven")
+	maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
 }
 
 loom {
 	splitEnvironmentSourceSets()
-
 
 	mods {
 		register("hideandseek") {
@@ -27,6 +27,29 @@ loom {
 		}
 	}
 
+	runs {
+		named("client") {
+			vmArgs("-XX:+IgnoreUnrecognizedVMOptions", "-XX:+AllowEnhancedClassRedefinition")
+
+			vmArgs("-Ddevauth.enabled=true")
+
+			vmArgs("-Ddevauth.configDir=devauth")
+		}
+
+		create("clientAlt") {
+			client()
+			configName = "Minecraft Client (Alt)"
+
+			runDir = "run-alt"
+
+			vmArgs("-XX:+IgnoreUnrecognizedVMOptions", "-XX:+AllowEnhancedClassRedefinition")
+			vmArgs("-Ddevauth.enabled=true")
+
+			vmArgs("-Ddevauth.configDir=../run/devauth")
+
+			vmArgs("-Ddevauth.account=alt")
+		}
+	}
 }
 
 dependencies {
@@ -48,6 +71,7 @@ dependencies {
 
     include("io.wispforest:owo-lib:${providers.gradleProperty("owo_version").get()}")
 
+    runtimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.2")
 }
 
 tasks.processResources {
