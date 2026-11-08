@@ -1,9 +1,9 @@
 package studio.sniffa.client.prop
 
+import com.geckolib.constant.dataticket.DataTicket
+import com.geckolib.model.GeoModel
+import com.geckolib.renderer.base.GeoRenderState
 import net.minecraft.resources.Identifier
-import software.bernie.geckolib.constant.dataticket.DataTicket
-import software.bernie.geckolib.model.GeoModel
-import software.bernie.geckolib.renderer.base.GeoRenderState
 import studio.sniffa.Hideandseek
 import studio.sniffa.prop.PropKind
 

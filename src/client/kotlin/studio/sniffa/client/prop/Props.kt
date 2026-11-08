@@ -1,15 +1,16 @@
 package studio.sniffa.client.prop
 
+import com.geckolib.constant.DataTickets
+import com.geckolib.renderer.GeoObjectRenderer
+import com.geckolib.renderer.base.GeoRenderState
+import com.geckolib.renderer.base.RenderPassInfo
 import com.mojang.blaze3d.vertex.PoseStack
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents
 import net.minecraft.client.Minecraft
-import net.minecraft.client.renderer.LightTexture
 import net.minecraft.core.BlockPos
+import net.minecraft.util.LightCoordsUtil
 import org.slf4j.LoggerFactory
-import software.bernie.geckolib.constant.DataTickets
-import software.bernie.geckolib.renderer.GeoObjectRenderer
-import software.bernie.geckolib.renderer.base.GeoRenderState
-import software.bernie.geckolib.renderer.base.RenderPassInfo
 import studio.sniffa.Hideandseek
 import studio.sniffa.prop.PropKind
 import java.util.concurrent.CopyOnWriteArrayList
@@ -49,14 +50,14 @@ object Props {
     }
 
     fun install() {
-        WorldRenderEvents.AFTER_ENTITIES.register { context ->
-            draw(context.matrices(), context)
+        LevelRenderEvents.COLLECT_SUBMITS.register { context ->
+            draw(context.poseStack(), context)
         }
     }
 
     private fun draw(
         matrices: PoseStack,
-        context: net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderContext,
+        context: LevelRenderContext,
     ) {
         if (standing.isEmpty()) return
 
@@ -65,7 +66,7 @@ object Props {
 
         val client = Minecraft.getInstance()
         val level = client.level ?: return
-        val camera = client.gameRenderer.mainCamera.position()
+        val camera = client.gameRenderer.mainCamera().position()
 
         for (prop in standing) {
             matrices.pushPose()
@@ -79,10 +80,10 @@ object Props {
                 prop,
                 prop,
                 matrices,
-                context.commandQueue(),
-                context.worldState().cameraRenderState,
+                context.submitNodeCollector(),
+                context.levelState().cameraRenderState,
                 lightAt(level, prop),
-                0,
+                0f,
             )
 
             matrices.popPose()
@@ -91,7 +92,7 @@ object Props {
 
     private fun lightAt(level: net.minecraft.world.level.Level, prop: Prop): Int {
         val at = BlockPos.containing(prop.x, prop.y + 0.5, prop.z)
-        return LightTexture.pack(
+        return LightCoordsUtil.pack(
             level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, at),
             level.getBrightness(net.minecraft.world.level.LightLayer.SKY, at),
         )
