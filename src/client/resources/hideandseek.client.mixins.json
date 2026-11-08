@@ -5,6 +5,7 @@
 	"client": [
 		"EntityGlowMixin",
 		"TitleSplashMixin",
+		"TitleWinterMixin",
 		"WorldBorderRendererMixin",
 		"FlatHeadMixin",
 		"CrewColourMixin",

@@ -56,6 +56,7 @@ object TitleScreenSkin {
             if (Settings.pingEventServer) EventStatus.refresh(EVENT_ADDRESS)
 
             ScreenEvents.afterRender(screen).register { _, graphics, _, _, _ ->
+                WinterScene.front(graphics, screen.width, screen.height, Screens.getButtons(screen))
                 EventStatus.tick()
                 status(graphics, screen)
                 sign(graphics)
@@ -150,7 +151,7 @@ object TitleScreenSkin {
         val markWidth = widthFor(Textures.MARK_SOURCE_WIDTH, Textures.MARK_SOURCE_HEIGHT)
         val wordWidth = widthFor(Textures.WORDMARK_SOURCE_WIDTH, Textures.WORDMARK_SOURCE_HEIGHT)
 
-        val y = graphics.guiHeight() - LOCKUP_HEIGHT - MARGIN
+        val y = graphics.guiHeight() - LOCKUP_HEIGHT - MARGIN - WinterScene.SIGN_LIFT
         val left = graphics.guiWidth() - MARGIN - wordWidth - LOCKUP_GAP - markWidth
 
         draw(graphics, Textures.SNIFFA, left, y, markWidth,
