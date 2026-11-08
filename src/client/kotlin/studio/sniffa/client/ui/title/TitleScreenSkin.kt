@@ -30,6 +30,8 @@ object TitleScreenSkin {
     private const val OPTIONS = "menu.options"
     private const val QUIT = "menu.quit"
 
+    private val REPLAY_BUTTONS = setOf("flashback.open_replays", "replaymod.gui.replayviewer")
+
     private const val FULL_WIDTH = 240
     private const val GAP = 6
     private const val HALF_WIDTH = (FULL_WIDTH - GAP) / 2
@@ -74,13 +76,16 @@ object TitleScreenSkin {
         val anchorY = screen.height / 4 + 48
         var options: AbstractWidget? = null
         var quit: AbstractWidget? = null
+        val replays = mutableListOf<AbstractWidget>()
 
         for (widget in buttons) {
-            when (keyOf(widget)) {
+            val key = keyOf(widget)
+            when (key) {
                 OPTIONS -> options = widget
                 QUIT -> quit = widget
+                in REPLAY_BUTTONS -> replays += widget
             }
-            widget.visible = false
+            widget.visible = key in REPLAY_BUTTONS
         }
 
         buttons.add(
@@ -97,6 +102,19 @@ object TitleScreenSkin {
                 .bounds(anchorX + HALF_WIDTH + GAP, anchorY + ROW_HEIGHT + ROW_GAP, HALF_WIDTH, ROW_HEIGHT)
                 .build()
         )
+
+        if (replays.isNotEmpty()) {
+            val pinReplays = {
+                replays.forEachIndexed { row, widget ->
+                    widget.setX(anchorX + FULL_WIDTH + GAP)
+                    widget.setY(anchorY + row * (ROW_HEIGHT + ROW_GAP) + (ROW_HEIGHT - widget.height) / 2)
+                    widget.visible = true
+                }
+            }
+            pinReplays()
+            ScreenEvents.afterTick(screen).register { pinReplays() }
+            ScreenEvents.beforeRender(screen).register { _, _, _, _, _ -> pinReplays() }
+        }
 
         statusY = anchorY + 2 * ROW_HEIGHT + ROW_GAP + STATUS_GAP
     }
