@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import net.minecraft.client.Minecraft
 import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.core.BlockPos
+import net.minecraft.core.Direction
 import net.minecraft.tags.BlockTags
 import net.minecraft.world.level.levelgen.Heightmap
 import net.minecraft.world.phys.Vec3
@@ -38,7 +39,8 @@ class BorderSeam {
         const val REBUILD_MILLIS = 1000L
         const val MOVE_BLOCKS = 6.0
         const val RADIUS_BLOCKS = 0.5
-        const val LEAF_DEPTH = 48
+        const val LEAF_DEPTH = 96
+        const val STEP_LIMIT = 2.5f
         const val REACH_BLOCKS = 96.0
     }
 
@@ -99,7 +101,7 @@ class BorderSeam {
         val reach = minOf(client.options.renderDistance().get() * 16.0, REACH_BLOCKS)
         val samples = sample(level, ring, camera, reach)
 
-        val pairs = samples.zipWithNext().count { (a, b) -> a != null && b != null }
+        val pairs = samples.zipWithNext().count { (a, b) -> joined(a, b) }
         if (pairs == 0) return null
 
         val format = DefaultVertexFormat.POSITION_TEX
@@ -109,7 +111,7 @@ class BorderSeam {
             val builder = BufferBuilder(storage, PrimitiveTopology.QUADS, format)
 
             for ((from, to) in samples.zipWithNext()) {
-                if (from == null || to == null) continue
+                if (from == null || to == null || !joined(from, to)) continue
 
                 builder.addVertex(from.x, from.ground, from.z).setUv(from.along, 0f)
                 builder.addVertex(to.x, to.ground, to.z).setUv(to.along, 0f)
@@ -132,6 +134,9 @@ class BorderSeam {
             }
         }
     }
+
+    private fun joined(from: Sample?, to: Sample?): Boolean =
+        from != null && to != null && abs(from.ground - to.ground) <= STEP_LIMIT
 
     private fun sample(level: ClientLevel, ring: BorderZone.Ring, camera: Vec3, reach: Double): List<Sample?> {
         val radius = ring.radius
@@ -183,7 +188,7 @@ class BorderSeam {
         var depth = 0
         while (y > level.minY && depth < LEAF_DEPTH) {
             val below = level.getBlockState(pos.set(x, y - 1, z))
-            if (!below.isAir && !below.`is`(BlockTags.LEAVES)) break
+            if (!below.isAir && !below.`is`(BlockTags.LEAVES) && below.isFaceSturdy(level, pos, Direction.UP)) break
             y--
             depth++
         }
