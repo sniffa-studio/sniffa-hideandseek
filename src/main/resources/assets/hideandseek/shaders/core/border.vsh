@@ -11,7 +11,7 @@ out vec2 wallCoord;
 out float heightFromViewer;
 out float distanceFromViewer;
 out float distanceToEye;
-out float domeShare;
+out vec3 shardPos;
 out vec3 viewPos;
 out vec3 sphereNormal;
 
@@ -22,7 +22,7 @@ void main() {
     if (base > 0.0 && y > base) {
         y = base + (y - base) * scale;
     }
-    domeShare = base > 0.0 ? clamp((Position.y - base) / 8.0, 0.0, 1.0) : 0.0;
+    shardPos = Position / max(TextureMat[3][3], 1.0);
     vec3 pos = vec3(Position.x * scale, y, Position.z * scale) + ModelOffset;
     vec3 centre = vec3(ModelOffset.x, (base > 0.0 ? base : y) + ModelOffset.y, ModelOffset.z);
     vec3 outward = pos - centre;
