@@ -8,6 +8,8 @@ object AbilityCooldowns {
 
     private const val PAY_PER_USE = "@pay"
 
+    private const val GAP_SECONDS = 5
+
     var payPerUse: Boolean = false
         private set
 
@@ -16,7 +18,7 @@ object AbilityCooldowns {
         payPerUse = PAY_PER_USE in secondsLeft
         val abilities = secondsLeft - PAY_PER_USE
         readyAt = abilities.mapValues { now + it.value * 1000L }
-        if (!payPerUse) used += abilities.keys
+        used += if (payPerUse) abilities.filterValues { it > GAP_SECONDS }.keys else abilities.keys
     }
 
     fun forget() {
