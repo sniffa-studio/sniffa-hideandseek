@@ -67,6 +67,7 @@ object TitleScreenSkin {
 
     private fun status(graphics: GuiGraphics, screen: TitleScreen) {
         val line = EventStatus.line() ?: return
+        WinterScene.plate(graphics, screen.font.width(line), screen.width / 2, statusY)
         graphics.drawCenteredString(screen.font, line, screen.width / 2, statusY, -1)
     }
 

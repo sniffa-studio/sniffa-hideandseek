@@ -17,6 +17,9 @@ import kotlin.math.sin
 object WinterScene {
 
     private val DRIFT: Identifier = Hideandseek.id("textures/ui/xmas/snowdrift.png")
+    private val BACKGROUND: Identifier = Hideandseek.id("textures/ui/xmas/background.png")
+    private const val BACKGROUND_W = 1280
+    private const val BACKGROUND_H = 720
     private val TREE: Identifier = Hideandseek.id("textures/ui/xmas/tree.png")
     private val GIFTS: Identifier = Hideandseek.id("textures/ui/xmas/gifts.png")
     private val HAT: Identifier = Hideandseek.id("textures/ui/xmas/santahat.png")
@@ -76,8 +79,10 @@ object WinterScene {
     @JvmStatic
     fun back(graphics: GuiGraphics, width: Int, height: Int) {
         val now = Util.getMillis()
-        graphics.fillGradient(0, 0, width, height / 2, argb(0xB0, NIGHT), argb(0x00, NIGHT))
-        graphics.fillGradient(0, height * 11 / 20, width, height, argb(0x00, NIGHT), argb(0x9A, NIGHT))
+        backdrop(graphics, width, height, now)
+        graphics.fill(0, 0, width, height, argb(0x30, NIGHT))
+        graphics.fillGradient(0, 0, width, height * 2 / 5, argb(0x96, NIGHT), argb(0x00, NIGHT))
+        graphics.fillGradient(0, height * 2 / 5, width, height, argb(0x00, NIGHT), argb(0xB4, NIGHT))
         aurora(graphics, width, height, now)
         stars(graphics, width, height, now)
         snow(graphics, width, height, now, FAR)
@@ -96,6 +101,17 @@ object WinterScene {
         hat(graphics, width, now)
         edition(graphics, width)
         snow(graphics, width, height, now, NEAR)
+    }
+
+    private fun backdrop(graphics: GuiGraphics, width: Int, height: Int, now: Long) {
+        val breathe = 1.06 + 0.03 * sin(now / 9000.0)
+        val scale = maxOf(width / BACKGROUND_W.toDouble(), height / BACKGROUND_H.toDouble()) * breathe
+        val w = (BACKGROUND_W * scale).toInt()
+        val h = (BACKGROUND_H * scale).toInt()
+        val x = (width - w) / 2 + (6 * sin(now / 13000.0)).toInt()
+        val y = (height - h) / 2
+        graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, x, y, 0f, 0f, w, h,
+            BACKGROUND_W, BACKGROUND_H, BACKGROUND_W, BACKGROUND_H)
     }
 
     private fun stars(graphics: GuiGraphics, width: Int, height: Int, now: Long) {
@@ -345,7 +361,20 @@ object WinterScene {
 
     private fun edition(graphics: GuiGraphics, width: Int) {
         val font = Minecraft.getInstance().font
-        graphics.drawCenteredString(font, EDITION_LINE, width / 2, EDITION_BOTTOM + 4, GOLD)
+        val y = EDITION_BOTTOM + 4
+        plate(graphics, font.width(EDITION_LINE), width / 2, y)
+        graphics.drawCenteredString(font, EDITION_LINE, width / 2, y, GOLD)
+    }
+
+    fun plate(graphics: GuiGraphics, textWidth: Int, centreX: Int, textY: Int) {
+        val left = centreX - textWidth / 2 - 7
+        val right = centreX + (textWidth + 1) / 2 + 7
+        val top = textY - 3
+        val bottom = textY + 11
+        graphics.fill(left + 1, top, right - 1, bottom, argb(0xB8, NIGHT))
+        graphics.fill(left, top + 1, right, bottom - 1, argb(0xB8, NIGHT))
+        graphics.fill(left + 2, top, right - 2, top + 1, argb(0xC0, 0xE8B33A))
+        graphics.fill(left + 2, bottom - 1, right - 2, bottom, argb(0xC0, 0xE8B33A))
     }
 
     private fun argb(alpha: Int, rgb: Int): Int = (alpha.coerceIn(0, 255) shl 24) or (rgb and 0xFFFFFF)
