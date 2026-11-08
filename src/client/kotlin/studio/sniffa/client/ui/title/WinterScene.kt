@@ -1,7 +1,7 @@
 package studio.sniffa.client.ui.title
 
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.AbstractButton
 import net.minecraft.client.gui.components.AbstractWidget
 import net.minecraft.client.renderer.RenderPipelines
@@ -77,7 +77,7 @@ object WinterScene {
     private val NEAR = Layer(16, 3, 30f, 12f, 16f, 0xE6, 37)
 
     @JvmStatic
-    fun back(graphics: GuiGraphics, width: Int, height: Int) {
+    fun back(graphics: GuiGraphicsExtractor, width: Int, height: Int) {
         val now = Util.getMillis()
         backdrop(graphics, width, height)
         graphics.fill(0, 0, width, height, argb(0x30, NIGHT))
@@ -90,7 +90,7 @@ object WinterScene {
         ground(graphics, width, height)
     }
 
-    fun front(graphics: GuiGraphics, width: Int, height: Int, widgets: List<AbstractWidget>) {
+    fun front(graphics: GuiGraphicsExtractor, width: Int, height: Int, widgets: List<AbstractWidget>) {
         val now = Util.getMillis()
         val gifts = widgets.filter { it.visible && it is AbstractButton && it.width >= GIFT_MIN_WIDTH }
         gifts.forEachIndexed { i, button -> wrap(graphics, button, WRAPS[i % WRAPS.size]) }
@@ -103,7 +103,7 @@ object WinterScene {
         snow(graphics, width, height, now, NEAR)
     }
 
-    private fun backdrop(graphics: GuiGraphics, width: Int, height: Int) {
+    private fun backdrop(graphics: GuiGraphicsExtractor, width: Int, height: Int) {
         val scale = maxOf(width / BACKGROUND_W.toDouble(), height / BACKGROUND_H.toDouble())
         val w = kotlin.math.ceil(BACKGROUND_W * scale).toInt()
         val h = kotlin.math.ceil(BACKGROUND_H * scale).toInt()
@@ -113,7 +113,7 @@ object WinterScene {
             BACKGROUND_W, BACKGROUND_H, BACKGROUND_W, BACKGROUND_H)
     }
 
-    private fun stars(graphics: GuiGraphics, width: Int, height: Int, now: Long) {
+    private fun stars(graphics: GuiGraphicsExtractor, width: Int, height: Int, now: Long) {
         val sky = height * 2 / 5
         for (i in 0 until 48) {
             val x = hash(i, 3) % width
@@ -128,7 +128,7 @@ object WinterScene {
         }
     }
 
-    private fun snow(graphics: GuiGraphics, width: Int, height: Int, now: Long, layer: Layer) {
+    private fun snow(graphics: GuiGraphicsExtractor, width: Int, height: Int, now: Long, layer: Layer) {
         val seconds = now / 1000.0
         val fall = height + 12
         for (i in 0 until layer.count) {
@@ -152,7 +152,7 @@ object WinterScene {
         }
     }
 
-    private fun ground(graphics: GuiGraphics, width: Int, height: Int) {
+    private fun ground(graphics: GuiGraphicsExtractor, width: Int, height: Int) {
         val tileW = DRIFT_W * 2
         val tileH = DRIFT_H * 2
         val top = height - tileH + 6
@@ -196,7 +196,7 @@ object WinterScene {
         graphics.fill(starX, starY + 6, starX + 1, starY + 7 + ray / 2, shine)
     }
 
-    private fun cap(graphics: GuiGraphics, button: AbstractWidget) {
+    private fun cap(graphics: GuiGraphicsExtractor, button: AbstractWidget) {
         val left = button.x
         val right = button.x + button.width
         val top = button.y
@@ -217,7 +217,7 @@ object WinterScene {
         }
     }
 
-    private fun garland(graphics: GuiGraphics, width: Int, now: Long) {
+    private fun garland(graphics: GuiGraphicsExtractor, width: Int, now: Long) {
         val spans = maxOf(2, width / 140)
         val span = width / spans.toFloat()
         val sag = 9f
@@ -253,7 +253,7 @@ object WinterScene {
         }
     }
 
-    private fun hat(graphics: GuiGraphics, width: Int, now: Long) {
+    private fun hat(graphics: GuiGraphicsExtractor, width: Int, now: Long) {
         val w = HAT_W * 3 / 2
         val h = HAT_H * 3 / 2
         val centreX = width / 2 - LOGO_HALF_WIDTH + 22
@@ -267,7 +267,7 @@ object WinterScene {
         pose.popMatrix()
     }
 
-    private fun logoSnow(graphics: GuiGraphics, width: Int) {
+    private fun logoSnow(graphics: GuiGraphicsExtractor, width: Int) {
         val left = width / 2 - LOGO_HALF_WIDTH + 34
         val right = width / 2 + LOGO_HALF_WIDTH - 6
         val top = LOGO_TOP + 1
@@ -282,7 +282,7 @@ object WinterScene {
         }
     }
 
-    private fun aurora(graphics: GuiGraphics, width: Int, height: Int, now: Long) {
+    private fun aurora(graphics: GuiGraphicsExtractor, width: Int, height: Int, now: Long) {
         val t = now / 1000.0
         val base = height * 0.18
         var x = 0
@@ -299,7 +299,7 @@ object WinterScene {
         }
     }
 
-    private fun wrap(graphics: GuiGraphics, button: AbstractWidget, paper: Wrap) {
+    private fun wrap(graphics: GuiGraphicsExtractor, button: AbstractWidget, paper: Wrap) {
         val x = button.x
         val y = button.y
         val r = x + button.width
@@ -335,10 +335,10 @@ object WinterScene {
             else -> 0xFFFFFFFF.toInt()
         }
         val textX = rx + 4 + (r - rx - 4) / 2
-        graphics.drawCenteredString(font, button.message, textX, y + (button.height - 8) / 2, colour)
+        graphics.centeredText(font, button.message, textX, y + (button.height - 8) / 2, colour)
     }
 
-    private fun bow(graphics: GuiGraphics, button: AbstractWidget, now: Long) {
+    private fun bow(graphics: GuiGraphicsExtractor, button: AbstractWidget, now: Long) {
         val rx = button.x + RIBBON_INSET
         val top = button.y
         val lift = if (button.isHoveredOrFocused) (2 * abs(sin(now / 120.0))).toInt() else 0
@@ -358,14 +358,14 @@ object WinterScene {
         return (ch(16) shl 16) or (ch(8) shl 8) or ch(0)
     }
 
-    private fun edition(graphics: GuiGraphics, width: Int) {
+    private fun edition(graphics: GuiGraphicsExtractor, width: Int) {
         val font = Minecraft.getInstance().font
         val y = EDITION_BOTTOM + 4
         plate(graphics, font.width(EDITION_LINE), width / 2, y)
-        graphics.drawCenteredString(font, EDITION_LINE, width / 2, y, GOLD)
+        graphics.centeredText(font, EDITION_LINE, width / 2, y, GOLD)
     }
 
-    fun plate(graphics: GuiGraphics, textWidth: Int, centreX: Int, textY: Int) {
+    fun plate(graphics: GuiGraphicsExtractor, textWidth: Int, centreX: Int, textY: Int) {
         val left = centreX - textWidth / 2 - 7
         val right = centreX + (textWidth + 1) / 2 + 7
         val top = textY - 3

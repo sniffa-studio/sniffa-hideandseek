@@ -32,10 +32,9 @@ object ShaderGuard {
             if (!switchShaders(false)) return@execute
             turnedOff = true
             LOGGER.info("Turned shaders off for the event.")
-            client.player?.displayClientMessage(
+            client.player?.sendSystemMessage(
                 Component.literal("Shader sind während des Events aus. Danach gehen sie wieder an.")
                     .withStyle(ChatFormatting.YELLOW),
-                false,
             )
         }
     }

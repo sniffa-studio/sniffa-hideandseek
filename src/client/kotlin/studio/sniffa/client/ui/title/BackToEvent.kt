@@ -24,7 +24,7 @@ object BackToEvent {
             if (screen !is DisconnectedScreen) return@register
             val address = Handshake.eventAddress ?: return@register
 
-            val buttons = Screens.getButtons(screen)
+            val buttons = Screens.getWidgets(screen)
             val below = buttons.maxOfOrNull { it.y + it.height }?.plus(GAP) ?: (height / 2 + 40)
             buttons.add(
                 Button.builder(Component.translatable("menu.hideandseek.back_to_event")) { connect(address) }

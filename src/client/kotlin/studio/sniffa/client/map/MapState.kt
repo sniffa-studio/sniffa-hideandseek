@@ -109,7 +109,7 @@ object MapState {
         val minecraft = Minecraft.getInstance()
         minecraft.execute {
             if (minecraft.level != null) {
-                minecraft.setScreen(MapScreen(ready, zoneRadius))
+                minecraft.gui.setScreen(MapScreen(ready, zoneRadius))
             }
         }
     }

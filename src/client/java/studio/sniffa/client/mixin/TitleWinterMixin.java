@@ -1,6 +1,6 @@
 package studio.sniffa.client.mixin;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,14 +13,14 @@ import studio.sniffa.client.ui.title.WinterScene;
 public abstract class TitleWinterMixin {
 
     @Inject(
-            method = "render",
+            method = "extractRenderState",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/screens/TitleScreen;renderPanorama(Lnet/minecraft/client/gui/GuiGraphics;F)V",
+                    target = "Lnet/minecraft/client/gui/screens/TitleScreen;extractPanorama(Lnet/minecraft/client/gui/GuiGraphicsExtractor;F)V",
                     shift = At.Shift.AFTER
             )
     )
-    private void hideandseek$winter(GuiGraphics graphics, int mouseX, int mouseY, float partialTick, CallbackInfo info) {
+    private void hideandseek$winter(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick, CallbackInfo info) {
         Screen screen = (Screen) (Object) this;
         WinterScene.back(graphics, screen.width, screen.height);
     }

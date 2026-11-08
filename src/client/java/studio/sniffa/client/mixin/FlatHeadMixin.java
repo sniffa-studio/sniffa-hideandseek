@@ -1,6 +1,6 @@
 package studio.sniffa.client.mixin;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.Slot;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,8 +12,8 @@ import studio.sniffa.client.ui.inventory.FlatHeads;
 @Mixin(AbstractContainerScreen.class)
 public abstract class FlatHeadMixin {
 
-    @Inject(method = "renderSlot", at = @At("TAIL"))
-    private void hideandseek$flattenHead(GuiGraphics graphics, Slot slot, int mouseX, int mouseY,
+    @Inject(method = "extractSlot", at = @At("TAIL"))
+    private void hideandseek$flattenHead(GuiGraphicsExtractor graphics, Slot slot, int mouseX, int mouseY,
                                          CallbackInfo info) {
         FlatHeads.INSTANCE.overdraw(graphics, slot);
     }

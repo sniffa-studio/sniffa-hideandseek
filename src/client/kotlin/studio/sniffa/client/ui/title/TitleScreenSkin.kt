@@ -4,7 +4,7 @@ import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents
 import net.fabricmc.fabric.api.client.screen.v1.Screens
 import net.fabricmc.fabric.api.event.Event
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.AbstractWidget
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.screens.ConfirmLinkScreen
@@ -55,8 +55,8 @@ object TitleScreenSkin {
             rebuild(screen)
             if (Settings.pingEventServer) EventStatus.refresh(EVENT_ADDRESS)
 
-            ScreenEvents.afterRender(screen).register { _, graphics, _, _, _ ->
-                WinterScene.front(graphics, screen.width, screen.height, Screens.getButtons(screen))
+            ScreenEvents.afterExtract(screen).register { _, graphics, _, _, _ ->
+                WinterScene.front(graphics, screen.width, screen.height, Screens.getWidgets(screen))
                 EventStatus.tick()
                 status(graphics, screen)
                 sign(graphics)
@@ -65,14 +65,14 @@ object TitleScreenSkin {
         }
     }
 
-    private fun status(graphics: GuiGraphics, screen: TitleScreen) {
+    private fun status(graphics: GuiGraphicsExtractor, screen: TitleScreen) {
         val line = EventStatus.line() ?: return
         WinterScene.plate(graphics, screen.font.width(line), screen.width / 2, statusY)
-        graphics.drawCenteredString(screen.font, line, screen.width / 2, statusY, -1)
+        graphics.centeredText(screen.font, line, screen.width / 2, statusY, -1)
     }
 
     private fun rebuild(screen: TitleScreen) {
-        val buttons = Screens.getButtons(screen)
+        val buttons = Screens.getWidgets(screen)
 
         val anchorX = screen.width / 2 - FULL_WIDTH / 2
         val anchorY = screen.height / 4 + 48
@@ -115,7 +115,7 @@ object TitleScreenSkin {
             }
             pinReplays()
             ScreenEvents.afterTick(screen).register { pinReplays() }
-            ScreenEvents.beforeRender(screen).register { _, _, _, _, _ -> pinReplays() }
+            ScreenEvents.beforeExtract(screen).register { _, _, _, _, _ -> pinReplays() }
         }
 
         statusY = anchorY + 2 * ROW_HEIGHT + ROW_GAP + STATUS_GAP
@@ -148,7 +148,7 @@ object TitleScreenSkin {
     private fun keyOf(widget: AbstractWidget): String? =
         (widget.message.contents as? TranslatableContents)?.key
 
-    private fun sign(graphics: GuiGraphics) {
+    private fun sign(graphics: GuiGraphicsExtractor) {
         val markWidth = widthFor(Textures.MARK_SOURCE_WIDTH, Textures.MARK_SOURCE_HEIGHT)
         val wordWidth = widthFor(Textures.WORDMARK_SOURCE_WIDTH, Textures.WORDMARK_SOURCE_HEIGHT)
 
@@ -166,7 +166,7 @@ object TitleScreenSkin {
         (LOCKUP_HEIGHT * sourceWidth + sourceHeight / 2) / sourceHeight
 
     private fun draw(
-        graphics: GuiGraphics,
+        graphics: GuiGraphicsExtractor,
         texture: Identifier,
         x: Int,
         y: Int,

@@ -1,7 +1,7 @@
 package studio.sniffa.client.map
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
-import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.input.MouseButtonEvent
 import net.minecraft.client.renderer.RenderPipelines
@@ -39,7 +39,7 @@ class MapScreen(
 
     private val scale: Double get() = fitScale * zoom
 
-    override fun render(graphics: GuiGraphics, mouseX: Int, mouseY: Int, delta: Float) {
+    override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, delta: Float) {
         val sheet = ScreenRectangle(0, 0, width, height)
         val inside = ScreenRectangle(INSET, INSET, width - 2 * INSET, height - 2 * INSET)
 
@@ -56,7 +56,7 @@ class MapScreen(
         drawReadout(graphics, mouseX, mouseY, sheet)
     }
 
-    private fun drawTerrain(graphics: GuiGraphics) {
+    private fun drawTerrain(graphics: GuiGraphicsExtractor) {
         val texture = MapTexture.of(map)
         val size = map.meta.size
 
@@ -71,7 +71,7 @@ class MapScreen(
         )
     }
 
-    private fun drawRose(graphics: GuiGraphics, sheet: ScreenRectangle) {
+    private fun drawRose(graphics: GuiGraphicsExtractor, sheet: ScreenRectangle) {
         val centreX = sheet.right() - ROSE_INSET.toDouble()
         val centreY = sheet.top() + ROSE_INSET.toDouble()
 
@@ -90,8 +90,8 @@ class MapScreen(
         mark(graphics, "O", centreX + letters, centreY)
     }
 
-    private fun mark(graphics: GuiGraphics, letter: String, atX: Double, atY: Double) {
-        graphics.drawString(
+    private fun mark(graphics: GuiGraphicsExtractor, letter: String, atX: Double, atY: Double) {
+        graphics.text(
             font, letter,
             (atX - font.width(letter) / 2.0).toInt(),
             (atY - font.lineHeight / 2.0).toInt(),
@@ -99,7 +99,7 @@ class MapScreen(
         )
     }
 
-    private fun drawPick(graphics: GuiGraphics, mouseX: Int, mouseY: Int, clip: ScreenRectangle) {
+    private fun drawPick(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, clip: ScreenRectangle) {
         val worldX = toWorldX(mouseX.toDouble())
         val worldZ = toWorldZ(mouseY.toDouble())
         if (worldX < map.meta.originX || worldX >= map.meta.originX + map.meta.size ||
@@ -133,7 +133,7 @@ class MapScreen(
         )
     }
 
-    private fun drawBorder(graphics: GuiGraphics, clip: ScreenRectangle) {
+    private fun drawBorder(graphics: GuiGraphicsExtractor, clip: ScreenRectangle) {
         val ring = BorderZone.current() ?: return
 
         MapOverlay.circle(
@@ -148,7 +148,7 @@ class MapScreen(
         )
     }
 
-    private fun drawSelf(graphics: GuiGraphics) {
+    private fun drawSelf(graphics: GuiGraphicsExtractor) {
         val player = minecraft?.player ?: return
         val x = toScreenX(player.x).toInt()
         val z = toScreenZ(player.z).toInt()
@@ -157,7 +157,7 @@ class MapScreen(
         graphics.fill(x - 2, z - 2, x + 2, z + 2, SELF)
     }
 
-    private fun drawReadout(graphics: GuiGraphics, mouseX: Int, mouseY: Int, sheet: ScreenRectangle) {
+    private fun drawReadout(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, sheet: ScreenRectangle) {
         val worldX = floor(toWorldX(mouseX.toDouble())).toInt()
         val worldZ = floor(toWorldZ(mouseY.toDouble())).toInt()
 
@@ -170,7 +170,7 @@ class MapScreen(
         } else {
             "$worldX, $worldZ  ·  Gerät fährt hoch  ·  noch ${(waitingMillis + 999) / 1000} s"
         }
-        graphics.drawString(
+        graphics.text(
             font, line,
             (width - font.width(line)) / 2,
             sheet.bottom() - INSET - font.lineHeight,

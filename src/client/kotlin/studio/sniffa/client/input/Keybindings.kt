@@ -2,7 +2,7 @@ package studio.sniffa.client.input
 
 import studio.sniffa.Hideandseek
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper
 import net.minecraft.client.KeyMapping
 import net.minecraft.client.Minecraft
 import org.lwjgl.glfw.GLFW
@@ -20,11 +20,11 @@ object Keybindings {
     private lateinit var openWatch: KeyMapping
 
     fun install() {
-        openShop = KeyBindingHelper.registerKeyBinding(
+        openShop = KeyMappingHelper.registerKeyMapping(
             KeyMapping("key.hideandseek.open_shop", GLFW.GLFW_KEY_Z, CATEGORY)
         )
 
-        openWatch = KeyBindingHelper.registerKeyBinding(
+        openWatch = KeyMappingHelper.registerKeyMapping(
             KeyMapping("key.hideandseek.open_watch", GLFW.GLFW_KEY_R, CATEGORY)
         )
 
@@ -37,7 +37,7 @@ object Keybindings {
                     open(client, AbilityShopScreen())
                     continue
                 }
-                client.player?.displayClientMessage(Component.literal(refusal), true)
+                client.player?.sendOverlayMessage(Component.literal(refusal))
             }
         }
     }
@@ -59,16 +59,16 @@ object Keybindings {
 
     private fun watch(client: Minecraft) {
         val player = client.player ?: return
-        if (client.screen != null) return
+        if (client.gui.screen() != null) return
         if (RoundState.role != RoundState.Role.STAFF || !RoundState.running) {
-            player.displayClientMessage(Component.literal("Der Teleporter ist nur für die Regie, während eine Runde läuft."), true)
+            player.sendOverlayMessage(Component.literal("Der Teleporter ist nur für die Regie, während eine Runde läuft."))
             return
         }
         player.connection.sendCommand("hswatch")
     }
 
     private fun open(client: Minecraft, screen: Screen) {
-        if (client.screen != null) return
-        client.setScreen(screen)
+        if (client.gui.screen() != null) return
+        client.gui.setScreen(screen)
     }
 }

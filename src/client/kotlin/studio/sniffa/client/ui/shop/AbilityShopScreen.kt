@@ -10,7 +10,7 @@ import io.wispforest.owo.ui.core.OwoUIAdapter
 import io.wispforest.owo.ui.core.Sizing
 import io.wispforest.owo.ui.core.Surface
 import io.wispforest.owo.ui.core.VerticalAlignment
-import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.input.KeyEvent
 import net.minecraft.client.input.MouseButtonEvent
 import org.lwjgl.glfw.GLFW
@@ -129,7 +129,7 @@ class AbilityShopScreen : BaseOwoScreen<FlowLayout>() {
         dots.select(page)
     }
 
-    override fun render(graphics: GuiGraphics, mouseX: Int, mouseY: Int, delta: Float) {
+    override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, delta: Float) {
         wheels.getOrNull(page)?.let { wheel ->
             val centerX = wheel.x() + metrics.size / 2.0
             val centerY = wheel.y() + metrics.size / 2.0
@@ -138,12 +138,12 @@ class AbilityShopScreen : BaseOwoScreen<FlowLayout>() {
             detail.show(wheel.focused)
         }
 
-        super.render(graphics, mouseX, mouseY, delta)
+        super.extractRenderState(graphics, mouseX, mouseY, delta)
 
         wheels.getOrNull(page)?.let { drawPoints(graphics, it) }
     }
 
-    private fun drawPoints(graphics: GuiGraphics, wheel: AbilityWheel) {
+    private fun drawPoints(graphics: GuiGraphicsExtractor, wheel: AbilityWheel) {
         if (!ShopSession.known) return
 
         val text = ShopSession.points.toString()
@@ -154,7 +154,7 @@ class AbilityShopScreen : BaseOwoScreen<FlowLayout>() {
         graphics.pose().pushMatrix()
         graphics.pose().translate(centerX, top)
         graphics.pose().scale(scale, scale)
-        graphics.drawString(font, text, -font.width(text) / 2, 0, Palette.BRAND, true)
+        graphics.text(font, text, -font.width(text) / 2, 0, Palette.BRAND, true)
         graphics.pose().popMatrix()
     }
 
@@ -198,7 +198,7 @@ class AbilityShopScreen : BaseOwoScreen<FlowLayout>() {
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)
     }
 
-    override fun renderBackground(graphics: GuiGraphics, mouseX: Int, mouseY: Int, delta: Float) = Unit
+    override fun extractBackground(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, delta: Float) = Unit
 
     private companion object {
         const val BLUR_QUALITY = 4f

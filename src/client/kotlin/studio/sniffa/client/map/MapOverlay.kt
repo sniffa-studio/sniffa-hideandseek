@@ -1,17 +1,17 @@
 package studio.sniffa.client.map
 
+import com.mojang.blaze3d.PrimitiveTopology
 import com.mojang.blaze3d.pipeline.BlendFunction
+import com.mojang.blaze3d.pipeline.ColorTargetState
 import com.mojang.blaze3d.pipeline.RenderPipeline
-import com.mojang.blaze3d.platform.DepthTestFunction
-import com.mojang.blaze3d.shaders.UniformType
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
 import com.mojang.blaze3d.vertex.VertexConsumer
-import com.mojang.blaze3d.vertex.VertexFormat
-import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.navigation.ScreenRectangle
 import net.minecraft.client.gui.render.TextureSetup
-import net.minecraft.client.gui.render.state.GuiElementRenderState
+import net.minecraft.client.renderer.BindGroupLayouts
 import net.minecraft.client.renderer.RenderPipelines
+import net.minecraft.client.renderer.state.gui.GuiElementRenderState
 import org.joml.Matrix3x2f
 import org.joml.Matrix3x2fc
 import studio.sniffa.Hideandseek
@@ -34,13 +34,11 @@ object MapOverlay {
         .withLocation(Hideandseek.id("pipeline/map_$name"))
         .withVertexShader(Hideandseek.id("core/mapoverlay"))
         .withFragmentShader(Hideandseek.id(fragment))
-        .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
-        .withUniform("Projection", UniformType.UNIFORM_BUFFER)
-        .withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, VertexFormat.Mode.QUADS)
-        .withBlend(BlendFunction.TRANSLUCENT)
+        .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
+        .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
+        .withPrimitiveTopology(PrimitiveTopology.QUADS)
+        .withColorTargetState(ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(false)
-        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
-        .withDepthWrite(false)
         .build()
 
     fun install() {
@@ -52,7 +50,7 @@ object MapOverlay {
     }
 
     fun circle(
-        graphics: GuiGraphics,
+        graphics: GuiGraphicsExtractor,
         pipeline: RenderPipeline,
         bounds: ScreenRectangle,
         centreX: Double,
@@ -63,20 +61,20 @@ object MapOverlay {
     ) {
         if (radius < 1.0 || bounds.width() <= 0 || bounds.height() <= 0) return
 
-        graphics.guiRenderState.submitGuiElement(
+        graphics.guiRenderState.addGuiElement(
             Shape(pipeline, Matrix3x2f(graphics.pose()), bounds, centreX, centreY, radius, argb, clip)
         )
     }
 
     fun panel(
-        graphics: GuiGraphics,
+        graphics: GuiGraphicsExtractor,
         pipeline: RenderPipeline,
         bounds: ScreenRectangle,
         argb: Int,
     ) {
         if (bounds.width() <= 0 || bounds.height() <= 0) return
 
-        graphics.guiRenderState.submitGuiElement(
+        graphics.guiRenderState.addGuiElement(
             Panel(pipeline, Matrix3x2f(graphics.pose()), bounds, argb)
         )
     }

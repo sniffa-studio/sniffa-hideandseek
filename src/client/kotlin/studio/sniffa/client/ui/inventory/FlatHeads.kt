@@ -1,8 +1,8 @@
 package studio.sniffa.client.ui.inventory
 
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.GuiGraphics
-import net.minecraft.client.gui.components.PlayerFaceRenderer
+import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.client.gui.components.PlayerFaceExtractor
 import net.minecraft.core.component.DataComponents
 import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.Items
@@ -12,7 +12,7 @@ object FlatHeads {
 
     private const val SIZE = 16
 
-    fun overdraw(graphics: GuiGraphics, slot: Slot) {
+    fun overdraw(graphics: GuiGraphicsExtractor, slot: Slot) {
         if (Handshake.state != Handshake.State.REGISTERED) return
 
         val stack = slot.item
@@ -23,6 +23,6 @@ object FlatHeads {
             .createLookup(profile.partialProfile(), false)
             .get() ?: return
 
-        PlayerFaceRenderer.draw(graphics, skin, slot.x, slot.y, SIZE)
+        PlayerFaceExtractor.extractRenderState(graphics, skin, slot.x, slot.y, SIZE)
     }
 }
