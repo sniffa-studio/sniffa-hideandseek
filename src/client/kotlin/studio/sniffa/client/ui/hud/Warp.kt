@@ -1,9 +1,10 @@
 package studio.sniffa.client.ui.hud
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
+import studio.sniffa.Hideandseek
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.world.phys.Vec3
 import kotlin.math.pow
@@ -29,13 +30,13 @@ object Warp {
     fun install() {
         ClientTickEvents.END_CLIENT_TICK.register { client -> tick(client) }
 
-        HudRenderCallback.EVENT.register { graphics, _ ->
-            if (startedAt == 0L) return@register
+        HudElementRegistry.addLast(Hideandseek.id("warp")) { graphics, _ ->
+            if (startedAt == 0L) return@addLast
 
             val elapsed = System.currentTimeMillis() - startedAt
             if (elapsed >= HOLD_MILLIS + OPEN_MILLIS) {
                 startedAt = 0L
-                return@register
+                return@addLast
             }
 
             val opened = ((elapsed - HOLD_MILLIS).toFloat() / OPEN_MILLIS).coerceIn(0f, 1f)
@@ -43,7 +44,7 @@ object Warp {
         }
     }
 
-    private fun draw(graphics: GuiGraphics, opened: Float) {
+    private fun draw(graphics: GuiGraphicsExtractor, opened: Float) {
         val width = graphics.guiWidth()
         val height = graphics.guiHeight()
 

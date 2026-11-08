@@ -3,7 +3,7 @@ package studio.sniffa.client.cinema
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.world.phys.Vec3
 import studio.sniffa.client.ui.hud.Vignette
 import studio.sniffa.client.ui.theme.Palette
@@ -237,7 +237,7 @@ object Cinema {
     }
 
     @JvmStatic
-    fun drawBars(graphics: GuiGraphics) {
+    fun drawBars(graphics: GuiGraphicsExtractor) {
         val playing = running() ?: return
         val now = System.currentTimeMillis() - playing.startedAt
         val opening = (now / BARS_MILLIS).coerceIn(0f, 1f)
@@ -256,7 +256,7 @@ object Cinema {
 
         val font = Minecraft.getInstance().font
         if (playing.title.isNotEmpty()) {
-            graphics.drawString(font, playing.title, (width - font.width(playing.title)) / 2, (bar - font.lineHeight) / 2,
+            graphics.text(font, playing.title, (width - font.width(playing.title)) / 2, (bar - font.lineHeight) / 2,
                 Vignette.alpha(Palette.MUTED, amount), false)
         }
 
@@ -273,12 +273,12 @@ object Cinema {
         drawScaled(graphics, caption.detail, centreY + font.lineHeight * 0.55f * scale, 1f, Vignette.alpha(Palette.TEXT, shown))
     }
 
-    private fun drawScaled(graphics: GuiGraphics, text: String, centreY: Float, scale: Float, colour: Int) {
+    private fun drawScaled(graphics: GuiGraphicsExtractor, text: String, centreY: Float, scale: Float, colour: Int) {
         val font = Minecraft.getInstance().font
         graphics.pose().pushMatrix()
         graphics.pose().translate(graphics.guiWidth() / 2f, centreY)
         graphics.pose().scale(scale, scale)
-        graphics.drawString(font, text, -font.width(text) / 2, -font.lineHeight / 2, colour, true)
+        graphics.text(font, text, -font.width(text) / 2, -font.lineHeight / 2, colour, true)
         graphics.pose().popMatrix()
     }
 

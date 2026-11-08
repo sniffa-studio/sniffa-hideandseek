@@ -1,8 +1,9 @@
 package studio.sniffa.client.ui.hud
 
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
+import studio.sniffa.Hideandseek
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.GuiGraphicsExtractor
 import studio.sniffa.client.ui.theme.Palette
 
 object ScanReadout {
@@ -31,19 +32,19 @@ object ScanReadout {
     }
 
     fun install() {
-        HudRenderCallback.EVENT.register { graphics, _ ->
+        HudElementRegistry.addLast(Hideandseek.id("scan_readout")) { graphics, _ ->
             val minecraft = Minecraft.getInstance()
-            if (minecraft.options.hideGui) return@register
-            if (startedAt == 0L) return@register
+            if (minecraft.gui.hud.isHidden) return@addLast
+            if (startedAt == 0L) return@addLast
 
             val elapsed = System.currentTimeMillis() - startedAt
-            if (elapsed < WAIT_MILLIS || elapsed > WAIT_MILLIS + HOLD_MILLIS) return@register
+            if (elapsed < WAIT_MILLIS || elapsed > WAIT_MILLIS + HOLD_MILLIS) return@addLast
 
             draw(graphics, (elapsed - WAIT_MILLIS).toFloat())
         }
     }
 
-    private fun draw(graphics: GuiGraphics, sinceLanded: Float) {
+    private fun draw(graphics: GuiGraphicsExtractor, sinceLanded: Float) {
         val fade = ((HOLD_MILLIS - sinceLanded) / FADE_MILLIS).coerceIn(0f, 1f)
         if (fade <= 0f) return
 
@@ -60,7 +61,7 @@ object ScanReadout {
         val x = (graphics.guiWidth() - font.width(text)) / 2
         val y = graphics.guiHeight() - 84
 
-        graphics.drawString(font, text, x, y, alpha(colour, fade), true)
+        graphics.text(font, text, x, y, alpha(colour, fade), true)
     }
 
     private fun alpha(argb: Int, amount: Float): Int {

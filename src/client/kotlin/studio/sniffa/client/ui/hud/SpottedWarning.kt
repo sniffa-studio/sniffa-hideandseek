@@ -1,8 +1,9 @@
 package studio.sniffa.client.ui.hud
 
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
+import studio.sniffa.Hideandseek
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.GuiGraphicsExtractor
 import studio.sniffa.client.ui.theme.Palette
 
 object SpottedWarning {
@@ -32,20 +33,20 @@ object SpottedWarning {
     }
 
     fun install() {
-        HudRenderCallback.EVENT.register { graphics, _ ->
+        HudElementRegistry.addLast(Hideandseek.id("spotted_warning")) { graphics, _ ->
             val minecraft = Minecraft.getInstance()
 
-            if (minecraft.options.hideGui) return@register
-            if (startedAt == 0L) return@register
+            if (minecraft.gui.hud.isHidden) return@addLast
+            if (startedAt == 0L) return@addLast
 
             val elapsed = System.currentTimeMillis() - startedAt
-            if (elapsed < WAIT_MILLIS || elapsed > WAIT_MILLIS + HOLD_MILLIS) return@register
+            if (elapsed < WAIT_MILLIS || elapsed > WAIT_MILLIS + HOLD_MILLIS) return@addLast
 
             draw(graphics, (elapsed - WAIT_MILLIS).toFloat())
         }
     }
 
-    private fun draw(graphics: GuiGraphics, sinceLanded: Float) {
+    private fun draw(graphics: GuiGraphicsExtractor, sinceLanded: Float) {
         val rising = (sinceLanded / RISE_MILLIS).coerceIn(0f, 1f)
         val falling = ((HOLD_MILLIS - sinceLanded) / FALL_MILLIS).coerceIn(0f, 1f)
         val strength = rising * falling
@@ -62,12 +63,12 @@ object SpottedWarning {
 
         val top = height / 2 - 34
 
-        graphics.drawString(
+        graphics.text(
             font, headline,
             (width - font.width(headline)) / 2, top,
             alpha(Palette.ERROR, strength), true,
         )
-        graphics.drawString(
+        graphics.text(
             font, detail,
             (width - font.width(detail)) / 2, top + 12,
             alpha(Palette.TEXT, strength * 0.9f), true,

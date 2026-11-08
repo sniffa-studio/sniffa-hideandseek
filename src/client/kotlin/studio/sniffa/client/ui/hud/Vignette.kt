@@ -1,11 +1,11 @@
 package studio.sniffa.client.ui.hud
 
-import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.GuiGraphicsExtractor
 import studio.sniffa.client.map.MapOverlay
 
 object Vignette {
 
-    fun draw(graphics: GuiGraphics, argb: Int, strength: Float) {
+    fun draw(graphics: GuiGraphicsExtractor, argb: Int, strength: Float) {
         if (strength <= 0f) {
             return
         }

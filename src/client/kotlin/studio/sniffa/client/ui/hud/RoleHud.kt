@@ -1,9 +1,10 @@
 package studio.sniffa.client.ui.hud
 
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
+import studio.sniffa.Hideandseek
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Font
-import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.network.chat.Component
 import studio.sniffa.client.input.Keybindings
 import studio.sniffa.client.state.RoundState
@@ -70,15 +71,15 @@ object RoleHud {
     private var readySince = 0L
 
     fun install() {
-        HudRenderCallback.EVENT.register { graphics, _ ->
+        HudElementRegistry.addLast(Hideandseek.id("role_hud")) { graphics, _ ->
             val minecraft = Minecraft.getInstance()
 
-            if (minecraft.options.hideGui || minecraft.debugOverlay.showDebugScreen()) return@register
+            if (minecraft.gui.hud.isHidden || minecraft.debugOverlay.showDebugScreen()) return@addLast
             if (!RoundState.running) {
                 lastRemaining = -1
                 runningSince = 0L
                 wasReady = false
-                return@register
+                return@addLast
             }
 
             draw(graphics, minecraft.font, look())
@@ -124,7 +125,7 @@ object RoleHud {
         else -> Palette.TEXT
     }
 
-    private fun draw(graphics: GuiGraphics, font: Font, look: Look) {
+    private fun draw(graphics: GuiGraphicsExtractor, font: Font, look: Look) {
         val now = System.currentTimeMillis()
         if (runningSince == 0L) runningSince = now
 
@@ -185,13 +186,13 @@ object RoleHud {
         graphics.pose().scale(clockScale, clockScale)
         val glow = withAlpha(colour, (GLOW_ALPHA * (1f + 2f * tick)).toInt().coerceAtMost(0xFF))
         for ((dx, dy) in GLOW_OFFSETS) {
-            graphics.drawString(font, clock, dx, dy, glow, false)
+            graphics.text(font, clock, dx, dy, glow, false)
         }
-        graphics.drawString(font, clock, 0, 0, colour, true)
+        graphics.text(font, clock, 0, 0, colour, true)
         graphics.pose().popMatrix()
 
         val label = clockLabel()
-        graphics.drawString(font, label, textRight - font.width(label), row + CLOCK_HEIGHT - font.lineHeight, Palette.MUTED, true)
+        graphics.text(font, label, textRight - font.width(label), row + CLOCK_HEIGHT - font.lineHeight, Palette.MUTED, true)
         row += CLOCK_HEIGHT + 7
 
         bar(graphics, textLeft, row, textRight, smoothed(now), phaseColour)
@@ -206,13 +207,13 @@ object RoleHud {
             val points = it.toString()
             val pointsLeft = textRight - font.width(POINTS_LABEL) - font.width(points)
             shimmer(graphics, font, points, pointsLeft, row, now)
-            graphics.drawString(font, POINTS_LABEL, textRight - font.width(POINTS_LABEL), row, Palette.MUTED, true)
+            graphics.text(font, POINTS_LABEL, textRight - font.width(POINTS_LABEL), row, Palette.MUTED, true)
         }
 
         look.key?.let { key -> hint(graphics, font, key, look, left, top + height + HINT_GAP, now) }
     }
 
-    private fun stat(graphics: GuiGraphics, font: Font, atX: Int, row: Int, colour: Int, count: String, label: String, now: Long?): Int {
+    private fun stat(graphics: GuiGraphicsExtractor, font: Font, atX: Int, row: Int, colour: Int, count: String, label: String, now: Long?): Int {
         var x = atX
         val pipTop = row + (font.lineHeight - PIP) / 2 - 1
         rounded(graphics, x, pipTop, x + PIP, pipTop + PIP, colour)
@@ -227,18 +228,18 @@ object RoleHud {
         graphics.pose().pushMatrix()
         graphics.pose().translate(x + countWidth / 2f, row + font.lineHeight / 2f)
         graphics.pose().scale(scale, scale)
-        graphics.drawString(font, count, -countWidth / 2, -font.lineHeight / 2, countColour, true)
+        graphics.text(font, count, -countWidth / 2, -font.lineHeight / 2, countColour, true)
         graphics.pose().popMatrix()
         x += countWidth + 3
 
-        graphics.drawString(font, label, x, row, Palette.MUTED, true)
+        graphics.text(font, label, x, row, Palette.MUTED, true)
         return x + font.width(label)
     }
 
     private fun statWidth(font: Font, count: String, label: String): Int =
         PIP + PIP_GAP + font.width(count) + 3 + font.width(label)
 
-    private fun bar(graphics: GuiGraphics, from: Int, row: Int, to: Int, progress: Float, colour: Int) {
+    private fun bar(graphics: GuiGraphicsExtractor, from: Int, row: Int, to: Int, progress: Float, colour: Int) {
         rounded(graphics, from, row, to, row + BAR_HEIGHT, TRACK)
         val filled = from + ((to - from) * progress).toInt()
         if (filled <= from) return
@@ -254,7 +255,7 @@ object RoleHud {
         graphics.fill(filled - 1, row - 1, filled, row + BAR_HEIGHT + 1, HEAD)
     }
 
-    private fun hint(graphics: GuiGraphics, font: Font, key: Component, look: Look, left: Int, top: Int, now: Long) {
+    private fun hint(graphics: GuiGraphicsExtractor, font: Font, key: Component, look: Look, left: Int, top: Int, now: Long) {
         val keyWidth = font.width(key) + 2 * KEY_PADDING
         val keyBottom = top + font.lineHeight + 3
 
@@ -266,20 +267,20 @@ object RoleHud {
 
         rounded(graphics, left, top - 1, left + keyWidth, keyBottom, KEY_FACE)
         graphics.fill(left + 1, keyBottom - 1, left + keyWidth - 1, keyBottom, if (look.ready) look.colour else KEY_EDGE)
-        graphics.drawString(font, key, left + KEY_PADDING, top + 1, Palette.TEXT, false)
-        graphics.drawString(
+        graphics.text(font, key, left + KEY_PADDING, top + 1, Palette.TEXT, false)
+        graphics.text(
             font, look.action, left + keyWidth + 5, top + 1,
             if (look.ready) Palette.TEXT else Palette.MUTED, true,
         )
     }
 
-    private fun panel(graphics: GuiGraphics, left: Int, top: Int, right: Int, bottom: Int) {
+    private fun panel(graphics: GuiGraphicsExtractor, left: Int, top: Int, right: Int, bottom: Int) {
         graphics.fillGradient(left + 1, top, right - 1, bottom, PANEL_TOP, PANEL_BOTTOM)
         graphics.fillGradient(left, top + 1, left + 1, bottom - 1, PANEL_TOP, PANEL_BOTTOM)
         graphics.fillGradient(right - 1, top + 1, right, bottom - 1, PANEL_TOP, PANEL_BOTTOM)
     }
 
-    private fun rounded(graphics: GuiGraphics, left: Int, top: Int, right: Int, bottom: Int, colour: Int) {
+    private fun rounded(graphics: GuiGraphicsExtractor, left: Int, top: Int, right: Int, bottom: Int, colour: Int) {
         graphics.fill(left + 1, top, right - 1, bottom, colour)
         graphics.fill(left, top + 1, left + 1, bottom - 1, colour)
         graphics.fill(right - 1, top + 1, right, bottom - 1, colour)
@@ -288,23 +289,23 @@ object RoleHud {
     private fun spacedWidth(font: Font, text: String): Int =
         text.sumOf { font.width(it.toString()) } + LETTER_GAP * (text.length - 1).coerceAtLeast(0)
 
-    private fun spaced(graphics: GuiGraphics, font: Font, text: String, atX: Int, atY: Int, colour: Int, shadow: Boolean = true) {
+    private fun spaced(graphics: GuiGraphicsExtractor, font: Font, text: String, atX: Int, atY: Int, colour: Int, shadow: Boolean = true) {
         var x = atX
         for (character in text) {
             val piece = character.toString()
-            graphics.drawString(font, piece, x, atY, colour, shadow)
+            graphics.text(font, piece, x, atY, colour, shadow)
             x += font.width(piece) + LETTER_GAP
         }
     }
 
-    private fun shimmer(graphics: GuiGraphics, font: Font, text: String, atX: Int, atY: Int, now: Long) {
+    private fun shimmer(graphics: GuiGraphicsExtractor, font: Font, text: String, atX: Int, atY: Int, now: Long) {
         var x = atX
         val sweep = ((now % SHIMMER_MILLIS.toLong()) / SHIMMER_MILLIS).toFloat() * (text.length + 4) - 2f
         text.forEachIndexed { index, character ->
             val piece = character.toString()
             val shine = (1f - kotlin.math.abs(index - sweep) / 2f).coerceIn(0f, 1f)
             val base = blend(POINTS_FROM, POINTS_TO, index.toFloat() / (text.length - 1).coerceAtLeast(1))
-            graphics.drawString(font, piece, x, atY, blend(base, HEAD, shine * 0.6f), true)
+            graphics.text(font, piece, x, atY, blend(base, HEAD, shine * 0.6f), true)
             x += font.width(piece)
         }
     }

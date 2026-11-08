@@ -1,8 +1,9 @@
 package studio.sniffa.client.ui.hud
 
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
+import studio.sniffa.Hideandseek
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.GuiGraphicsExtractor
 import studio.sniffa.client.ui.theme.Palette
 import studio.sniffa.client.state.RoundState
 import studio.sniffa.client.zone.DangerZone
@@ -20,18 +21,18 @@ object ZoneWarning {
     private const val URGENT_SECONDS = 10
 
     fun install() {
-        HudRenderCallback.EVENT.register { graphics, _ ->
+        HudElementRegistry.addLast(Hideandseek.id("zone_warning")) { graphics, _ ->
             val minecraft = Minecraft.getInstance()
 
-            if (minecraft.options.hideGui) return@register
-            if (RoundState.role != RoundState.Role.HIDER) return@register
-            if (!DangerZone.caughtInside()) return@register
+            if (minecraft.gui.hud.isHidden) return@addLast
+            if (RoundState.role != RoundState.Role.HIDER) return@addLast
+            if (!DangerZone.caughtInside()) return@addLast
 
             draw(graphics, DangerZone.secondsLeft())
         }
     }
 
-    private fun draw(graphics: GuiGraphics, secondsLeft: Int) {
+    private fun draw(graphics: GuiGraphicsExtractor, secondsLeft: Int) {
         val period = if (secondsLeft <= URGENT_SECONDS) URGENT_PERIOD_MILLIS else CALM_PERIOD_MILLIS
         val beat = (0.5 + 0.5 * sin(System.currentTimeMillis() / period * 2.0 * PI)).toFloat()
         Vignette.draw(graphics, Palette.ERROR, EDGE_STRENGTH * (1f - PULSE_DEPTH + PULSE_DEPTH * beat))
@@ -43,12 +44,12 @@ object ZoneWarning {
 
         val y = graphics.guiHeight() - FROM_BOTTOM
 
-        graphics.drawString(
+        graphics.text(
             font, headline,
             (graphics.guiWidth() - font.width(headline)) / 2, y,
             Palette.ERROR, true,
         )
-        graphics.drawString(
+        graphics.text(
             font, detail,
             (graphics.guiWidth() - font.width(detail)) / 2, y + 12,
             Palette.TEXT, true,

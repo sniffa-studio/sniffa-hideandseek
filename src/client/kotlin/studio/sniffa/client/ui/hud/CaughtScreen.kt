@@ -2,9 +2,10 @@ package studio.sniffa.client.ui.hud
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
+import studio.sniffa.Hideandseek
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.GuiGraphicsExtractor
 import studio.sniffa.client.ui.theme.Palette
 import studio.sniffa.net.payload.CaughtPayload
 
@@ -33,20 +34,20 @@ object CaughtScreen {
 
         ClientPlayConnectionEvents.DISCONNECT.register { _, _ -> caught = null }
 
-        HudRenderCallback.EVENT.register { graphics, _ ->
-            val shown = caught ?: return@register
+        HudElementRegistry.addLast(Hideandseek.id("caught_screen")) { graphics, _ ->
+            val shown = caught ?: return@addLast
 
             val elapsed = System.currentTimeMillis() - startedAt
             if (elapsed > SHOW_MILLIS) {
                 caught = null
-                return@register
+                return@addLast
             }
 
             draw(graphics, shown, (elapsed / FADE_MILLIS).coerceIn(0f, 1f))
         }
     }
 
-    private fun draw(graphics: GuiGraphics, shown: CaughtPayload, fade: Float) {
+    private fun draw(graphics: GuiGraphicsExtractor, shown: CaughtPayload, fade: Float) {
         val font = Minecraft.getInstance().font
         val width = graphics.guiWidth()
         val height = graphics.guiHeight()
@@ -57,11 +58,11 @@ object CaughtScreen {
         graphics.pose().pushMatrix()
         graphics.pose().translate(width / 2f, height / 2f - HEADLINE_LIFT)
         graphics.pose().scale(HEADLINE_SCALE, HEADLINE_SCALE)
-        graphics.drawString(font, headline, -font.width(headline) / 2, -font.lineHeight / 2, Vignette.alpha(Palette.ERROR, fade), true)
+        graphics.text(font, headline, -font.width(headline) / 2, -font.lineHeight / 2, Vignette.alpha(Palette.ERROR, fade), true)
         graphics.pose().popMatrix()
 
         val detail = "von ${shown.seeker}  ·  Platz #${shown.place} von ${shown.total}"
-        graphics.drawString(
+        graphics.text(
             font, detail,
             (width - font.width(detail)) / 2, height / 2 + DETAIL_DROP,
             Vignette.alpha(Palette.TEXT, fade), true,
