@@ -18,8 +18,8 @@ object WinterScene {
 
     private val DRIFT: Identifier = Hideandseek.id("textures/ui/xmas/snowdrift.png")
     private val BACKGROUND: Identifier = Hideandseek.id("textures/ui/xmas/background.png")
-    private const val BACKGROUND_W = 1280
-    private const val BACKGROUND_H = 720
+    private const val BACKGROUND_W = 1920
+    private const val BACKGROUND_H = 1080
     private val TREE: Identifier = Hideandseek.id("textures/ui/xmas/tree.png")
     private val GIFTS: Identifier = Hideandseek.id("textures/ui/xmas/gifts.png")
     private val HAT: Identifier = Hideandseek.id("textures/ui/xmas/santahat.png")
