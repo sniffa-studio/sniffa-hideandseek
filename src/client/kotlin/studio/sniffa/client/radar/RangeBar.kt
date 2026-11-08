@@ -1,23 +1,23 @@
 package studio.sniffa.client.radar
 
+import com.mojang.blaze3d.PrimitiveTopology
 import com.mojang.blaze3d.pipeline.BlendFunction
+import com.mojang.blaze3d.pipeline.ColorTargetState
 import com.mojang.blaze3d.pipeline.RenderPipeline
-import com.mojang.blaze3d.platform.DepthTestFunction
-import com.mojang.blaze3d.shaders.UniformType
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
-import com.mojang.blaze3d.vertex.VertexFormat
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents
+import java.util.Optional
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents
 import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.GuiGraphics
+import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.client.renderer.BindGroupLayouts
 import net.minecraft.client.renderer.RenderPipelines
 import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.joml.Vector4f
 import studio.sniffa.Hideandseek
 import studio.sniffa.client.ui.sound.UiSound
-import java.util.OptionalInt
 
 object RangeBar {
 
@@ -41,13 +41,11 @@ object RangeBar {
         .withLocation(Hideandseek.id("pipeline/range"))
         .withVertexShader(Hideandseek.id("core/range"))
         .withFragmentShader(Hideandseek.id("core/range"))
-        .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
-        .withUniform("Projection", UniformType.UNIFORM_BUFFER)
-        .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
-        .withBlend(BlendFunction.TRANSLUCENT)
+        .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
+        .withVertexBinding(0, DefaultVertexFormat.POSITION)
+        .withPrimitiveTopology(PrimitiveTopology.QUADS)
+        .withColorTargetState(ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(false)
-        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
-        .withDepthWrite(false)
         .build()
 
     @Volatile
@@ -83,8 +81,8 @@ object RangeBar {
     fun install() {
         RenderPipelines.register(PIPELINE)
 
-        WorldRenderEvents.END_MAIN.register(WorldRenderEvents.EndMain { drawBar() })
-        HudRenderCallback.EVENT.register { graphics, _ -> drawFigure(graphics) }
+        LevelRenderEvents.END_MAIN.register(LevelRenderEvents.EndMain { drawBar() })
+        HudElementRegistry.addLast(Hideandseek.id("range_bar")) { graphics, _ -> drawFigure(graphics) }
     }
 
     private fun alive(now: Long): Float {
@@ -104,9 +102,9 @@ object RangeBar {
         }
 
         val client = Minecraft.getInstance()
-        if (client.options.hideGui) return
+        if (client.gui.hud.isHidden) return
 
-        val screen = client.mainRenderTarget
+        val screen = client.gameRenderer.mainRenderTarget()
         val colour = screen.colorTextureView ?: return
 
         val current = quad ?: ScanQuad.build().also { quad = it }
@@ -142,25 +140,25 @@ object RangeBar {
             parameters,
         )
 
-        val indices = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS)
+        val indices = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS)
 
         RenderSystem.getDevice().createCommandEncoder().createRenderPass(
             { "sniffa rangefinder" },
             colour,
-            OptionalInt.empty(),
+            Optional.empty(),
         ).use { pass ->
             pass.setPipeline(PIPELINE)
             RenderSystem.bindDefaultUniforms(pass)
             pass.setUniform("DynamicTransforms", transform)
             pass.setIndexBuffer(indices.getBuffer(current.indexCount), indices.type())
-            pass.setVertexBuffer(0, current.vertices)
-            pass.drawIndexed(0, 0, current.indexCount, 1)
+            pass.setVertexBuffer(0, current.vertices.slice())
+            pass.drawIndexed(current.indexCount, 1, 0, 0, 0)
         }
     }
 
-    private fun drawFigure(graphics: GuiGraphics) {
+    private fun drawFigure(graphics: GuiGraphicsExtractor) {
         val client = Minecraft.getInstance()
-        if (client.options.hideGui) return
+        if (client.gui.hud.isHidden) return
 
         val alive = alive(System.currentTimeMillis())
         if (alive <= 0f) return
@@ -177,7 +175,7 @@ object RangeBar {
         text.forEachIndexed { index, character ->
             val piece = character.toString()
             val shade = blend(FROM, TO, index.toFloat() / last, opacity)
-            graphics.drawString(font, piece, x, y, shade, true)
+            graphics.text(font, piece, x, y, shade, true)
             x += font.width(piece)
         }
     }

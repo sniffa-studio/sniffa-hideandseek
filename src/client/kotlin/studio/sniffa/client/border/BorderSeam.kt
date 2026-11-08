@@ -1,11 +1,11 @@
 package studio.sniffa.client.border
 
+import com.mojang.blaze3d.PrimitiveTopology
 import com.mojang.blaze3d.buffers.GpuBuffer
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.BufferBuilder
 import com.mojang.blaze3d.vertex.ByteBufferBuilder
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
-import com.mojang.blaze3d.vertex.VertexFormat
 import net.minecraft.client.Minecraft
 import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.core.BlockPos
@@ -106,7 +106,7 @@ class BorderSeam {
         val quads = pairs * 2
 
         ByteBufferBuilder(format.vertexSize * 4 * quads).use { storage ->
-            val builder = BufferBuilder(storage, VertexFormat.Mode.QUADS, format)
+            val builder = BufferBuilder(storage, PrimitiveTopology.QUADS, format)
 
             for ((from, to) in samples.zipWithNext()) {
                 if (from == null || to == null) continue

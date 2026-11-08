@@ -1,17 +1,18 @@
 package studio.sniffa.client.radar
 
+import com.mojang.blaze3d.PrimitiveTopology
 import com.mojang.blaze3d.buffers.GpuBuffer
 import com.mojang.blaze3d.pipeline.BlendFunction
+import com.mojang.blaze3d.pipeline.ColorTargetState
 import com.mojang.blaze3d.pipeline.RenderPipeline
-import com.mojang.blaze3d.platform.DepthTestFunction
-import com.mojang.blaze3d.shaders.UniformType
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.BufferBuilder
 import com.mojang.blaze3d.vertex.ByteBufferBuilder
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
-import com.mojang.blaze3d.vertex.VertexFormat
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents
+import java.util.Optional
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents
 import net.minecraft.client.Minecraft
+import net.minecraft.client.renderer.BindGroupLayouts
 import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.util.ARGB
 import org.joml.Matrix4f
@@ -19,7 +20,6 @@ import org.joml.Vector3f
 import org.joml.Vector4f
 import studio.sniffa.Hideandseek
 import studio.sniffa.client.ui.theme.Palette
-import java.util.OptionalInt
 import kotlin.math.PI
 import kotlin.math.exp
 
@@ -43,13 +43,11 @@ object CompassRose {
         .withLocation(Hideandseek.id("pipeline/compass"))
         .withVertexShader(Hideandseek.id("core/compass"))
         .withFragmentShader(Hideandseek.id("core/compass"))
-        .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
-        .withUniform("Projection", UniformType.UNIFORM_BUFFER)
-        .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
-        .withBlend(BlendFunction.ADDITIVE)
+        .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
+        .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX)
+        .withPrimitiveTopology(PrimitiveTopology.QUADS)
+        .withColorTargetState(ColorTargetState(BlendFunction.ADDITIVE))
         .withCull(false)
-        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
-        .withDepthWrite(false)
         .build()
 
     @Volatile
@@ -92,7 +90,7 @@ object CompassRose {
     fun install() {
         RenderPipelines.register(PIPELINE)
 
-        WorldRenderEvents.END_MAIN.register(WorldRenderEvents.EndMain {
+        LevelRenderEvents.END_MAIN.register(LevelRenderEvents.EndMain {
             draw()
         })
     }
@@ -119,7 +117,7 @@ object CompassRose {
 
         val partial = client.deltaTracker.getGameTimeDeltaPartialTick(true)
         val eye = player.getEyePosition(partial)
-        val camera = client.gameRenderer.mainCamera.position()
+        val camera = client.gameRenderer.mainCamera().position()
 
         val offset = Vector3f(
             (eye.x - camera.x).toFloat(),
@@ -127,7 +125,7 @@ object CompassRose {
             (eye.z - camera.z).toFloat(),
         )
 
-        val target = client.mainRenderTarget
+        val target = client.gameRenderer.mainRenderTarget()
         val colour = target.colorTextureView ?: return
 
         val current = plate ?: build().also { plate = it }
@@ -138,7 +136,7 @@ object CompassRose {
             .m02(lit.toFloat())
 
         val transform = RenderSystem.getDynamicUniforms().writeTransform(
-            RenderSystem.getModelViewMatrix(),
+            RenderSystem.getModelViewMatrixCopy(),
             Vector4f(
                 ARGB.red(Palette.BRAND) / 255f,
                 ARGB.green(Palette.BRAND) / 255f,
@@ -149,19 +147,19 @@ object CompassRose {
             parameters,
         )
 
-        val indices = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS)
+        val indices = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS)
 
         RenderSystem.getDevice().createCommandEncoder().createRenderPass(
             { "sniffa compass" },
             colour,
-            OptionalInt.empty(),
+            Optional.empty(),
         ).use { pass ->
             pass.setPipeline(PIPELINE)
             RenderSystem.bindDefaultUniforms(pass)
             pass.setUniform("DynamicTransforms", transform)
             pass.setIndexBuffer(indices.getBuffer(INDEX_COUNT), indices.type())
-            pass.setVertexBuffer(0, current)
-            pass.drawIndexed(0, 0, INDEX_COUNT, 1)
+            pass.setVertexBuffer(0, current.slice())
+            pass.drawIndexed(INDEX_COUNT, 1, 0, 0, 0)
         }
     }
 
@@ -188,7 +186,7 @@ object CompassRose {
         val format = DefaultVertexFormat.POSITION_TEX
 
         ByteBufferBuilder(format.vertexSize * 4).use { storage ->
-            val builder = BufferBuilder(storage, VertexFormat.Mode.QUADS, format)
+            val builder = BufferBuilder(storage, PrimitiveTopology.QUADS, format)
 
             builder.addVertex(-PLATE_BLOCKS, 0f, -PLATE_BLOCKS).setUv(-PLATE_BLOCKS, -PLATE_BLOCKS)
             builder.addVertex(-PLATE_BLOCKS, 0f, PLATE_BLOCKS).setUv(-PLATE_BLOCKS, PLATE_BLOCKS)

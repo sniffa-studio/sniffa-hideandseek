@@ -1,21 +1,21 @@
 package studio.sniffa.client.radar
 
+import com.mojang.blaze3d.PrimitiveTopology
 import com.mojang.blaze3d.pipeline.BlendFunction
+import com.mojang.blaze3d.pipeline.ColorTargetState
 import com.mojang.blaze3d.pipeline.RenderPipeline
-import com.mojang.blaze3d.platform.DepthTestFunction
-import com.mojang.blaze3d.shaders.UniformType
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
-import com.mojang.blaze3d.vertex.VertexFormat
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents
+import java.util.Optional
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents
 import net.minecraft.client.Minecraft
+import net.minecraft.client.renderer.BindGroupLayouts
 import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.world.phys.Vec3
 import org.joml.Matrix4f
 import org.joml.Vector3f
 import org.joml.Vector4f
 import studio.sniffa.Hideandseek
-import java.util.OptionalInt
 
 object HeatMap {
 
@@ -28,13 +28,11 @@ object HeatMap {
         .withLocation(Hideandseek.id("pipeline/heat"))
         .withVertexShader(Hideandseek.id("core/heat"))
         .withFragmentShader(Hideandseek.id("core/heat"))
-        .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
-        .withUniform("Projection", UniformType.UNIFORM_BUFFER)
-        .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
-        .withBlend(BlendFunction.ADDITIVE)
+        .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
+        .withVertexBinding(0, DefaultVertexFormat.POSITION)
+        .withPrimitiveTopology(PrimitiveTopology.QUADS)
+        .withColorTargetState(ColorTargetState(BlendFunction.ADDITIVE))
         .withCull(false)
-        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
-        .withDepthWrite(false)
         .build()
 
     @Volatile
@@ -62,7 +60,7 @@ object HeatMap {
     fun install() {
         RenderPipelines.register(PIPELINE)
 
-        WorldRenderEvents.END_MAIN.register(WorldRenderEvents.EndMain {
+        LevelRenderEvents.END_MAIN.register(LevelRenderEvents.EndMain {
             draw()
         })
     }
@@ -87,7 +85,7 @@ object HeatMap {
                     (at.x - camera.x).toFloat(),
                     (at.y - camera.y).toFloat(),
                     (at.z - camera.z).toFloat(),
-                ).mulPosition(RenderSystem.getModelViewMatrix())
+                ).mulPosition(RenderSystem.getModelViewMatrixCopy())
             }
             .toList()
     }
@@ -107,9 +105,9 @@ object HeatMap {
         if (strength <= 0f) return
 
         val client = Minecraft.getInstance()
-        val camera = client.gameRenderer.mainCamera.position()
+        val camera = client.gameRenderer.mainCamera().position()
 
-        val target = client.mainRenderTarget
+        val target = client.gameRenderer.mainRenderTarget()
         val colour = target.colorTextureView ?: return
 
         val current = quad ?: ScanQuad.build().also { quad = it }
@@ -131,25 +129,25 @@ object HeatMap {
         }
 
         val transform = RenderSystem.getDynamicUniforms().writeTransform(
-            Matrix4f(RenderSystem.getModelViewMatrix()),
+            RenderSystem.getModelViewMatrixCopy(),
             Vector4f(1f, 1f, 1f, strength),
             Vector3f(),
             parameters,
         )
 
-        val indices = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS)
+        val indices = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS)
 
         RenderSystem.getDevice().createCommandEncoder().createRenderPass(
             { "sniffa heat" },
             colour,
-            OptionalInt.empty(),
+            Optional.empty(),
         ).use { pass ->
             pass.setPipeline(PIPELINE)
             RenderSystem.bindDefaultUniforms(pass)
             pass.setUniform("DynamicTransforms", transform)
             pass.setIndexBuffer(indices.getBuffer(current.indexCount), indices.type())
-            pass.setVertexBuffer(0, current.vertices)
-            pass.drawIndexed(0, 0, current.indexCount, 1)
+            pass.setVertexBuffer(0, current.vertices.slice())
+            pass.drawIndexed(current.indexCount, 1, 0, 0, 0)
         }
     }
 }

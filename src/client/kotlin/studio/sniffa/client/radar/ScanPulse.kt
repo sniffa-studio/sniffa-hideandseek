@@ -1,8 +1,9 @@
 package studio.sniffa.client.radar
 
+import com.mojang.blaze3d.PrimitiveTopology
 import com.mojang.blaze3d.systems.RenderSystem
-import com.mojang.blaze3d.vertex.VertexFormat
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents
+import java.util.Optional
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents
 import net.minecraft.client.Minecraft
 import net.minecraft.world.phys.Vec3
 import org.joml.Matrix4f
@@ -12,7 +13,6 @@ import com.mojang.blaze3d.textures.AddressMode
 import com.mojang.blaze3d.textures.FilterMode
 import com.mojang.blaze3d.textures.GpuSampler
 import java.util.OptionalDouble
-import java.util.OptionalInt
 
 object ScanPulse {
 
@@ -66,7 +66,7 @@ object ScanPulse {
     fun install() {
         ScanPipeline.install()
 
-        WorldRenderEvents.END_MAIN.register(WorldRenderEvents.EndMain {
+        LevelRenderEvents.END_MAIN.register(LevelRenderEvents.EndMain {
             draw()
         })
     }
@@ -116,9 +116,9 @@ object ScanPulse {
         if (strength <= 0f) return
 
         val client = Minecraft.getInstance()
-        val camera = client.gameRenderer.mainCamera.position()
+        val camera = client.gameRenderer.mainCamera().position()
 
-        val target = client.mainRenderTarget
+        val target = client.gameRenderer.mainRenderTarget()
         val colour = target.colorTextureView ?: return
         val depth = target.depthTextureView ?: return
 
@@ -128,11 +128,12 @@ object ScanPulse {
             (centre.x - camera.x).toFloat(),
             (centre.y - camera.y).toFloat(),
             (centre.z - camera.z).toFloat(),
-        ).mulPosition(RenderSystem.getModelViewMatrix())
+        ).mulPosition(RenderSystem.getModelViewMatrixCopy())
 
         val parameters = Matrix4f()
             .m00(leading).m01(SPACING).m02(THICKNESS).m03(range)
             .m10(wave.seconds)
+            .m11(if (RenderSystem.getDevice().deviceInfo.isZZeroToOne) 1f else 0f)
 
         val transform = RenderSystem.getDynamicUniforms().writeTransform(
             Matrix4f(),
@@ -141,20 +142,20 @@ object ScanPulse {
             parameters,
         )
 
-        val indices = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS)
+        val indices = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS)
 
         RenderSystem.getDevice().createCommandEncoder().createRenderPass(
             { "sniffa sonar" },
             colour,
-            OptionalInt.empty(),
+            Optional.empty(),
         ).use { pass ->
             pass.setPipeline(ScanPipeline.PING)
             RenderSystem.bindDefaultUniforms(pass)
             pass.setUniform("DynamicTransforms", transform)
             pass.bindTexture("DepthSampler", depth, sampler())
             pass.setIndexBuffer(indices.getBuffer(current.indexCount), indices.type())
-            pass.setVertexBuffer(0, current.vertices)
-            pass.drawIndexed(0, 0, current.indexCount, 1)
+            pass.setVertexBuffer(0, current.vertices.slice())
+            pass.drawIndexed(current.indexCount, 1, 0, 0, 0)
         }
     }
 }

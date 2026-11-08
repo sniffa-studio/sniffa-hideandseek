@@ -1,10 +1,11 @@
 package studio.sniffa.client.border
 
+import com.mojang.blaze3d.PrimitiveTopology
 import com.mojang.blaze3d.buffers.GpuBuffer
 import com.mojang.blaze3d.pipeline.RenderPipeline
 import com.mojang.blaze3d.systems.RenderSystem
-import com.mojang.blaze3d.vertex.VertexFormat
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents
+import java.util.Optional
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents
 import net.minecraft.client.Minecraft
 import net.minecraft.util.ARGB
 import net.minecraft.world.phys.Vec3
@@ -13,7 +14,6 @@ import org.joml.Vector3f
 import org.joml.Vector4f
 import studio.sniffa.client.zone.DangerZone
 import java.util.OptionalDouble
-import java.util.OptionalInt
 
 object BorderRenderer {
 
@@ -43,8 +43,8 @@ object BorderRenderer {
         BorderPipeline.install()
         BorderEffects.install()
 
-        WorldRenderEvents.END_MAIN.register(WorldRenderEvents.EndMain {
-            val camera = Minecraft.getInstance().gameRenderer.mainCamera.position()
+        LevelRenderEvents.END_MAIN.register(LevelRenderEvents.EndMain {
+            val camera = Minecraft.getInstance().gameRenderer.mainCamera().position()
 
             val ring = BorderZone.current()
             if (ring == null) {
@@ -106,8 +106,8 @@ object BorderRenderer {
         extras.m13(scale.toFloat())
         val client = Minecraft.getInstance()
 
-        val weather = client.levelRenderer.weatherTarget
-        val target = weather ?: client.mainRenderTarget
+        val weather = client.levelRenderer.weatherTarget()
+        val target = weather ?: client.gameRenderer.mainRenderTarget()
 
         val colour = target.colorTextureView ?: return
         val depth = target.depthTextureView ?: return
@@ -119,7 +119,7 @@ object BorderRenderer {
         )
 
         val transform = RenderSystem.getDynamicUniforms().writeTransform(
-            RenderSystem.getModelViewMatrix(),
+            RenderSystem.getModelViewMatrixCopy(),
             Vector4f(
                 ARGB.red(tint) / 255f,
                 ARGB.green(tint) / 255f,
@@ -130,12 +130,12 @@ object BorderRenderer {
             extras,
         )
 
-        val indices = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS)
+        val indices = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS)
 
         RenderSystem.getDevice().createCommandEncoder().createRenderPass(
             { "sniffa border" },
             colour,
-            OptionalInt.empty(),
+            Optional.empty(),
             depth,
             OptionalDouble.empty(),
         ).use { pass ->
@@ -143,8 +143,8 @@ object BorderRenderer {
             RenderSystem.bindDefaultUniforms(pass)
             pass.setUniform("DynamicTransforms", transform)
             pass.setIndexBuffer(indices.getBuffer(indexCount), indices.type())
-            pass.setVertexBuffer(0, vertices)
-            pass.drawIndexed(0, 0, indexCount, 1)
+            pass.setVertexBuffer(0, vertices.slice())
+            pass.drawIndexed(indexCount, 1, 0, 0, 0)
         }
     }
 }

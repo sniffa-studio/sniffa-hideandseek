@@ -73,7 +73,8 @@ float speckle(float bin) {
 void main() {
     float depth = texture(DepthSampler, texCoord).r;
 
-    vec4 clip = vec4(texCoord * 2.0 - 1.0, depth * 2.0 - 1.0, 1.0);
+    float ndcDepth = TextureMat[1].y > 0.5 ? depth : depth * 2.0 - 1.0;
+    vec4 clip = vec4(texCoord * 2.0 - 1.0, ndcDepth, 1.0);
     vec4 view = InverseProjection * clip;
     view /= view.w;
 
@@ -92,7 +93,7 @@ void main() {
     vec3 fromPing = normalize(view.xyz - centre);
     float facing = FACING_FLOOR + (1.0 - FACING_FLOOR) * abs(dot(normal, fromPing));
 
-    bool hasSurface = depth < 1.0;
+    bool hasSurface = depth > 0.0;
 
     vec3 towards = normalize(view.xyz);
     float toSurface = hasSurface ? length(view.xyz) : 1.0e9;

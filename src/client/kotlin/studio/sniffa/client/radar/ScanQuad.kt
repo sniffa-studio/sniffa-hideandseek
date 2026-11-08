@@ -1,11 +1,11 @@
 package studio.sniffa.client.radar
 
+import com.mojang.blaze3d.PrimitiveTopology
 import com.mojang.blaze3d.buffers.GpuBuffer
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.BufferBuilder
 import com.mojang.blaze3d.vertex.ByteBufferBuilder
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
-import com.mojang.blaze3d.vertex.VertexFormat
 
 class ScanQuad private constructor(
     val vertices: GpuBuffer,
@@ -23,7 +23,7 @@ class ScanQuad private constructor(
             val bytes = format.vertexSize * 4
 
             ByteBufferBuilder(bytes).use { storage ->
-                val builder = BufferBuilder(storage, VertexFormat.Mode.QUADS, format)
+                val builder = BufferBuilder(storage, PrimitiveTopology.QUADS, format)
 
                 builder.addVertex(-1f, -1f, 0f)
                 builder.addVertex(1f, -1f, 0f)

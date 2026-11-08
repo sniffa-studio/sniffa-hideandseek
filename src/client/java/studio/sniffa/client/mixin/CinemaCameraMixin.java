@@ -1,8 +1,6 @@
 package studio.sniffa.client.mixin;
 
 import net.minecraft.client.Camera;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -32,9 +30,8 @@ public abstract class CinemaCameraMixin {
     @Shadow
     protected abstract void setRotation(float yRot, float xRot);
 
-    @Inject(method = "setup", at = @At("TAIL"))
-    private void hideandseek$film(Level level, Entity entity, boolean detached, boolean mirror, float partialTick,
-                                  CallbackInfo info) {
+    @Inject(method = "alignWithEntity", at = @At("TAIL"))
+    private void hideandseek$film(float partialTick, CallbackInfo info) {
         double[] frame = Cinema.frame(this.position.x, this.position.y, this.position.z, this.yRot, this.xRot);
         if (frame == null) {
             return;

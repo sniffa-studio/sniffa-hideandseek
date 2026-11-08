@@ -1,10 +1,13 @@
 package studio.sniffa.client.border
 
+import com.mojang.blaze3d.PrimitiveTopology
 import com.mojang.blaze3d.pipeline.BlendFunction
+import com.mojang.blaze3d.pipeline.ColorTargetState
+import com.mojang.blaze3d.pipeline.DepthStencilState
 import com.mojang.blaze3d.pipeline.RenderPipeline
-import com.mojang.blaze3d.shaders.UniformType
+import com.mojang.blaze3d.platform.CompareOp
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
-import com.mojang.blaze3d.vertex.VertexFormat
+import net.minecraft.client.renderer.BindGroupLayouts
 import net.minecraft.client.renderer.RenderPipelines
 import studio.sniffa.Hideandseek
 
@@ -21,18 +24,18 @@ object BorderPipeline {
             .withLocation(Hideandseek.id("pipeline/$name"))
             .withVertexShader(Hideandseek.id("core/border"))
             .withFragmentShader(Hideandseek.id(fragment))
-            .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
-            .withUniform("Projection", UniformType.UNIFORM_BUFFER)
+            .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
 
         if (animated) {
-            builder.withUniform("Globals", UniformType.UNIFORM_BUFFER)
+            builder.withBindGroupLayout(BindGroupLayouts.GLOBALS)
         }
 
         return builder
-            .withVertexFormat(DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS)
-            .withBlend(BlendFunction.TRANSLUCENT)
+            .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX)
+            .withPrimitiveTopology(PrimitiveTopology.QUADS)
+            .withColorTargetState(ColorTargetState(BlendFunction.TRANSLUCENT))
             .withCull(false)
-            .withDepthWrite(false)
+            .withDepthStencilState(DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, false))
             .build()
     }
 

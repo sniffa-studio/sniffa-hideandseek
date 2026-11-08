@@ -1,14 +1,16 @@
 package studio.sniffa.client.radar
 
+import com.mojang.blaze3d.PrimitiveTopology
+import com.mojang.blaze3d.pipeline.BindGroupLayout
 import com.mojang.blaze3d.pipeline.BlendFunction
+import com.mojang.blaze3d.pipeline.ColorTargetState
 import com.mojang.blaze3d.pipeline.RenderPipeline
-import com.mojang.blaze3d.platform.DepthTestFunction
-import com.mojang.blaze3d.shaders.UniformType
 import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
-import com.mojang.blaze3d.vertex.VertexFormat
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents
+import java.util.Optional
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents
 import net.minecraft.client.Minecraft
+import net.minecraft.client.renderer.BindGroupLayouts
 import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.resources.Identifier
 import org.joml.Matrix4f
@@ -16,7 +18,6 @@ import org.joml.Vector3f
 import org.joml.Vector4f
 import studio.sniffa.Hideandseek
 import studio.sniffa.client.ui.sound.UiSound
-import java.util.OptionalInt
 
 object HotCold {
 
@@ -36,14 +37,12 @@ object HotCold {
         .withLocation(Hideandseek.id("pipeline/hotcold"))
         .withVertexShader(Hideandseek.id("core/hotcold"))
         .withFragmentShader(Hideandseek.id("core/hotcold"))
-        .withUniform("DynamicTransforms", UniformType.UNIFORM_BUFFER)
-        .withUniform("Projection", UniformType.UNIFORM_BUFFER)
-        .withSampler("FrostSampler")
-        .withVertexFormat(DefaultVertexFormat.POSITION, VertexFormat.Mode.QUADS)
-        .withBlend(BlendFunction.TRANSLUCENT)
+        .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
+        .withBindGroupLayout(BindGroupLayout.builder().withSampler("FrostSampler").build())
+        .withVertexBinding(0, DefaultVertexFormat.POSITION)
+        .withPrimitiveTopology(PrimitiveTopology.QUADS)
+        .withColorTargetState(ColorTargetState(BlendFunction.TRANSLUCENT))
         .withCull(false)
-        .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
-        .withDepthWrite(false)
         .build()
 
     @Volatile
@@ -80,7 +79,7 @@ object HotCold {
     fun install() {
         RenderPipelines.register(PIPELINE)
 
-        WorldRenderEvents.END_MAIN.register(WorldRenderEvents.EndMain {
+        LevelRenderEvents.END_MAIN.register(LevelRenderEvents.EndMain {
             draw()
         })
     }
@@ -107,9 +106,9 @@ object HotCold {
         blip(now)
 
         val client = Minecraft.getInstance()
-        if (client.options.hideGui) return
+        if (client.gui.hud.isHidden) return
 
-        val screen = client.mainRenderTarget
+        val screen = client.gameRenderer.mainRenderTarget()
         val colour = screen.colorTextureView ?: return
 
         val current = quad ?: ScanQuad.build().also { quad = it }
@@ -125,22 +124,22 @@ object HotCold {
             parameters,
         )
 
-        val indices = RenderSystem.getSequentialBuffer(VertexFormat.Mode.QUADS)
+        val indices = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS)
 
         val frost = client.textureManager.getTexture(FROST)
 
         RenderSystem.getDevice().createCommandEncoder().createRenderPass(
             { "sniffa hot cold" },
             colour,
-            OptionalInt.empty(),
+            Optional.empty(),
         ).use { pass ->
             pass.setPipeline(PIPELINE)
             RenderSystem.bindDefaultUniforms(pass)
             pass.setUniform("DynamicTransforms", transform)
             pass.bindTexture("FrostSampler", frost.textureView, frost.sampler)
             pass.setIndexBuffer(indices.getBuffer(current.indexCount), indices.type())
-            pass.setVertexBuffer(0, current.vertices)
-            pass.drawIndexed(0, 0, current.indexCount, 1)
+            pass.setVertexBuffer(0, current.vertices.slice())
+            pass.drawIndexed(current.indexCount, 1, 0, 0, 0)
         }
     }
 
