@@ -1,6 +1,6 @@
 package studio.sniffa.client.net
 
-import net.fabricmc.fabric.api.client.networking.v1.C2SPlayChannelEvents
+import net.fabricmc.fabric.api.client.networking.v1.ServerboundPlayChannelEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.loader.api.FabricLoader
@@ -39,7 +39,7 @@ object Handshake {
             state = State.DISCONNECTED
         }
 
-        C2SPlayChannelEvents.REGISTER.register { _, _, _, channels ->
+        ServerboundPlayChannelEvents.REGISTER.register { _, _, _, channels: List<net.minecraft.resources.Identifier> ->
             if (channels.contains(HandshakePayload.ID)) sendIfPossible()
         }
     }
