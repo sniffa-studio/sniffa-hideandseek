@@ -16,7 +16,7 @@ out vec4 fragColor;
 const float TAU = 6.2831853;
 const float PERIOD_CELLS = 1.7320508;
 
-const float SHARD_CELLS = 9.2;
+const float SHARD_CELLS = 7.8;
 const float SHARD_JITTER = 0.85;
 
 const float EDGE_PIXELS = 1.6;
