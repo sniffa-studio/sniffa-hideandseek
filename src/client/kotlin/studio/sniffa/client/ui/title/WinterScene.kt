@@ -20,21 +20,15 @@ object WinterScene {
     private val TREE: Identifier = Hideandseek.id("textures/ui/xmas/tree.png")
     private val GIFTS: Identifier = Hideandseek.id("textures/ui/xmas/gifts.png")
     private val HAT: Identifier = Hideandseek.id("textures/ui/xmas/santahat.png")
-    private val SLEIGH: Identifier = Hideandseek.id("textures/ui/xmas/sleigh.png")
 
     private const val DRIFT_W = 64
     private const val DRIFT_H = 18
     private const val TREE_W = 46
     private const val TREE_H = 58
-    private const val GIFTS_W = 34
-    private const val GIFTS_H = 16
+    private const val GIFTS_W = 56
+    private const val GIFTS_H = 30
     private const val HAT_W = 29
     private const val HAT_H = 17
-    private const val SLEIGH_W = 64
-    private const val SLEIGH_H = 12
-
-    private const val SLEIGH_EVERY_MS = 26_000L
-    private const val SLEIGH_FLIGHT_MS = 11_000L
 
     private const val GIFT_MIN_WIDTH = 60
     private const val RIBBON_INSET = 14
@@ -98,7 +92,6 @@ object WinterScene {
         widgets.filter { it.visible && it is AbstractButton }.forEach { cap(graphics, it) }
         gifts.forEach { bow(graphics, it, now) }
         logoSnow(graphics, width)
-        sleigh(graphics, width, height, now)
         garland(graphics, width, now)
         hat(graphics, width, now)
         edition(graphics, width)
@@ -164,10 +157,8 @@ object WinterScene {
         val treeY = height - treeH - 8
         graphics.blit(RenderPipelines.GUI_TEXTURED, TREE, treeX, treeY, 0f, 0f, treeW, treeH,
             TREE_W, TREE_H, TREE_W, TREE_H)
-        val giftsW = GIFTS_W * 3 / 2
-        val giftsH = GIFTS_H * 3 / 2
-        graphics.blit(RenderPipelines.GUI_TEXTURED, GIFTS, treeX + treeW - 18, height - giftsH - 9, 0f, 0f,
-            giftsW, giftsH, GIFTS_W, GIFTS_H, GIFTS_W, GIFTS_H)
+        graphics.blit(RenderPipelines.GUI_TEXTURED, GIFTS, treeX + treeW - 16, height - GIFTS_H - 6, 0f, 0f,
+            GIFTS_W, GIFTS_H, GIFTS_W, GIFTS_H, GIFTS_W, GIFTS_H)
         val now = Util.getMillis()
         TREE_LIGHTS.forEachIndexed { i, (lx, ly) ->
             val phase = sin(now / 520.0 + i * 2.1)
@@ -182,8 +173,12 @@ object WinterScene {
         val glow = 0.5 + 0.5 * sin(now / 380.0)
         val starX = treeX + treeW / 2
         val starY = treeY + 6
-        graphics.fill(starX - 5, starY - 5, starX + 6, starY + 6, argb((25 + 45 * glow).toInt(), 0xFFE07A))
-        graphics.fill(starX - 3, starY - 3, starX + 4, starY + 4, argb((30 + 60 * glow).toInt(), 0xFFE07A))
+        val ray = 4 + (4 * glow).toInt()
+        val shine = argb((90 + 120 * glow).toInt(), 0xFFE07A)
+        graphics.fill(starX - 6 - ray, starY, starX - 5, starY + 1, shine)
+        graphics.fill(starX + 6, starY, starX + 7 + ray, starY + 1, shine)
+        graphics.fill(starX, starY - 6 - ray, starX + 1, starY - 5, shine)
+        graphics.fill(starX, starY + 6, starX + 1, starY + 7 + ray / 2, shine)
     }
 
     private fun cap(graphics: GuiGraphics, button: AbstractWidget) {
@@ -287,23 +282,6 @@ object WinterScene {
             graphics.fillGradient(x, centre, x + 2, centre + 5, argb(alpha, colour), argb(0, colour))
             x += 2
         }
-    }
-
-    private fun sleigh(graphics: GuiGraphics, width: Int, height: Int, now: Long) {
-        val phase = now % SLEIGH_EVERY_MS
-        if (phase >= SLEIGH_FLIGHT_MS) {
-            return
-        }
-        val p = phase / SLEIGH_FLIGHT_MS.toDouble()
-        val x = (-SLEIGH_W * 3 / 2 + p * (width + SLEIGH_W * 3)).toInt()
-        val y = (height * 0.26 - p * (height * 0.26 - 12) + 4 * sin(p * PI * 4)).toInt()
-        for (k in 1..10) {
-            val tx = x - k * 4
-            val ty = y + 9 + (2 * sin(p * 40 + k)).toInt()
-            graphics.fill(tx, ty, tx + 1, ty + 1, argb(220 - k * 20, 0xFFE07A))
-        }
-        graphics.blit(RenderPipelines.GUI_TEXTURED, SLEIGH, x, y - SLEIGH_H / 2, 0f, 0f, SLEIGH_W * 3 / 2, SLEIGH_H * 3 / 2,
-            SLEIGH_W, SLEIGH_H, SLEIGH_W, SLEIGH_H)
     }
 
     private fun wrap(graphics: GuiGraphics, button: AbstractWidget, paper: Wrap) {
