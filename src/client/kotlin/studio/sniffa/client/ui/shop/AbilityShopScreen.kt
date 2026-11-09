@@ -154,7 +154,7 @@ class AbilityShopScreen : BaseOwoScreen<FlowLayout>() {
         graphics.pose().pushMatrix()
         graphics.pose().translate(centerX, top)
         graphics.pose().scale(scale, scale)
-        graphics.text(font, text, -font.width(text) / 2, 0, Palette.BRAND, true)
+        graphics.text(font, text, -font.width(text) / 2, 0, Palette.GOLD, true)
         graphics.pose().popMatrix()
     }
 

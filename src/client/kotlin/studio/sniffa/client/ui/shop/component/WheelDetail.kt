@@ -57,7 +57,7 @@ class WheelDetail : FlowLayout(
 
         if (ability == null) {
             title.text(McText.literal("${ShopSession.points} Punkte"))
-            title.color(Color.ofArgb(if (ShopSession.known) Palette.BRAND else Palette.ERROR))
+            title.color(Color.ofArgb(if (ShopSession.known) Palette.GOLD else Palette.ERROR))
             body.text(
                 McText.literal(
                     if (!ShopSession.known) "Noch keine Punkte  ·  warte auf die Runde"
@@ -78,7 +78,7 @@ class WheelDetail : FlowLayout(
             else -> "$price Punkte"
         }
         title.text(McText.literal("${ability.displayName}  —  $label"))
-        title.color(Color.ofArgb(if (available) Palette.BRAND else Palette.ERROR))
+        title.color(Color.ofArgb(if (available) Palette.GOLD else Palette.ERROR))
         body.text(
             McText.literal(
                 when {
