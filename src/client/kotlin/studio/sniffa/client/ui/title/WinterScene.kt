@@ -34,10 +34,6 @@ object WinterScene {
     private const val LOGO_GAP = 10
     private const val LOGO_EDGE = 20
 
-    const val SPLASH_SHIFT_X = 14f
-
-    const val SPLASH_SHIFT_Y = -36f
-
     private const val GIFT_MIN_WIDTH = 60
     private const val RIBBON_INSET = 14
 

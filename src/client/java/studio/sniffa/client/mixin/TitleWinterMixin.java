@@ -48,10 +48,6 @@ public abstract class TitleWinterMixin {
                     target = "Lnet/minecraft/client/gui/components/SplashRenderer;extractRenderState(Lnet/minecraft/client/gui/GuiGraphicsExtractor;ILnet/minecraft/client/gui/Font;F)V"
             )
     )
-    private void hideandseek$splashBesideLogo(SplashRenderer splash, GuiGraphicsExtractor graphics, int width, Font font, float alpha) {
-        graphics.pose().pushMatrix();
-        graphics.pose().translate(WinterScene.SPLASH_SHIFT_X, WinterScene.SPLASH_SHIFT_Y);
-        splash.extractRenderState(graphics, width, font, alpha);
-        graphics.pose().popMatrix();
+    private void hideandseek$noSplash(SplashRenderer splash, GuiGraphicsExtractor graphics, int width, Font font, float alpha) {
     }
 }
