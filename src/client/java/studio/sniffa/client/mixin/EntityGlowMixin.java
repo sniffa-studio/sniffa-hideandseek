@@ -22,11 +22,22 @@ public abstract class EntityGlowMixin {
     @Unique
     private static final long FLICKER_MILLIS = 250L;
 
+    @Unique
+    private static final int FROST_BLUE = 0x8FD3FF;
+
     @Inject(method = "getTeamColor", at = @At("HEAD"), cancellable = true)
     private void hideandseek$noseColour(CallbackInfoReturnable<Integer> answer) {
         Entity self = (Entity) (Object) this;
+        if (CrewView.INSTANCE.knows(self)) {
+            return;
+        }
+        GlowSight glow = GlowSight.INSTANCE;
+        if (glow.active() && glow.glowing(self)) {
+            answer.setReturnValue(FROST_BLUE);
+            return;
+        }
         ScanTags tags = ScanTags.INSTANCE;
-        if (CrewView.INSTANCE.knows(self) || !tags.any() || !tags.ready() || !tags.glowing(self)) {
+        if (!tags.any() || !tags.ready() || !tags.glowing(self)) {
             return;
         }
         boolean gold = (System.currentTimeMillis() / FLICKER_MILLIS) % 2 == 0;
