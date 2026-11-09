@@ -290,7 +290,7 @@ class MapScreen(
         private const val PICK_ALLOWED = 0xD84EC471.toInt()
         private const val PICK_REFUSED = 0xD8FC301E.toInt()
         private const val PICK_WAITING = 0xC08A7A66.toInt()
-        private const val ZONE_ALLOWED = 0xB3FC301E.toInt()
+        private const val ZONE_ALLOWED = 0xB39FD4FF.toInt()
 
         private const val BORDER_OPACITY = 0xE6000000.toInt()
     }
