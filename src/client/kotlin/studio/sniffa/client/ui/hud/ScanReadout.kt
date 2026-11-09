@@ -52,9 +52,9 @@ object ScanReadout {
 
         val where = if (range > 0) "in ${if (range == 1) "1 Block" else "$range Blöcken"}" else "in der Nähe"
         val text = when {
-            count == 0 -> "niemand $where"
-            count == 1 -> "1 Verstecker $where"
-            else -> "$count Verstecker $where"
+            count == 0 -> "Rudolph wittert niemanden $where"
+            count == 1 -> "Rudolph wittert 1 Verstecker $where"
+            else -> "Rudolph wittert $count Verstecker $where"
         }
         val colour = if (count == 0) Palette.MUTED else Palette.TEXT
 

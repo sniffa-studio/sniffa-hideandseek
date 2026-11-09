@@ -207,7 +207,7 @@ void main() {
     }
 
     vec3 deep = ColorModulator.rgb * 0.4;
-    vec3 hot = mix(ColorModulator.rgb, vec3(1.0), 0.85);
+    vec3 hot = mix(ColorModulator.rgb, vec3(1.0, 0.84, 0.4), 0.85);
 
     vec3 tint = mix(deep, ColorModulator.rgb, smoothstep(0.0, 0.30, light));
     tint = mix(tint, hot, smoothstep(0.55, 1.10, crest));

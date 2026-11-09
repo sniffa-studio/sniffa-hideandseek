@@ -26,7 +26,7 @@ object ScanPulse {
     private const val FLASH_STRENGTH = 1.4f
     private const val FLASH_MILLIS = 130f
 
-    private val COLOUR = Vector3f(0.11f, 0.78f, 0.42f)
+    private val COLOUR = Vector3f(0.95f, 0.16f, 0.2f)
 
     @Volatile
     private var origin: Vec3? = null
