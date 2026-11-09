@@ -27,6 +27,8 @@ import studio.sniffa.net.payload.MapMetaPayload
 import studio.sniffa.net.payload.MapSlicePayload
 import studio.sniffa.net.payload.HeatPayload
 import studio.sniffa.net.payload.BearingPayload
+import studio.sniffa.net.payload.TracksPayload
+import studio.sniffa.client.radar.Footprints
 import studio.sniffa.net.payload.HotColdPayload
 import studio.sniffa.net.payload.PropPayload
 import studio.sniffa.net.payload.RadarPayload
@@ -89,6 +91,10 @@ object RoundSync {
             RangeBar.accept(payload.blocks, payload.live)
         }
 
+        ClientPlayNetworking.registerGlobalReceiver(TracksPayload.TYPE) { payload, _ ->
+            Footprints.accept(payload.prints)
+        }
+
         ClientPlayNetworking.registerGlobalReceiver(BearingPayload.TYPE) { payload, _ ->
             CompassRose.accept(payload.degrees, payload.live)
         }
@@ -147,6 +153,7 @@ object RoundSync {
             Props.forget()
             AbilityCooldowns.forget()
             ServerPrices.forget()
+            Footprints.forget()
             MapTexture.forget()
             ScanReadout.forget()
             SpottedWarning.forget()

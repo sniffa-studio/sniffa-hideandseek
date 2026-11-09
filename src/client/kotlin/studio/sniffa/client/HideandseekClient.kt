@@ -2,6 +2,7 @@ package studio.sniffa.client
 
 import net.fabricmc.api.ClientModInitializer
 import studio.sniffa.client.border.BorderRenderer
+import studio.sniffa.client.radar.Footprints
 import studio.sniffa.client.cinema.Cinema
 import studio.sniffa.client.compat.ShaderGuard
 import studio.sniffa.client.input.Keybindings
@@ -45,6 +46,7 @@ object HideandseekClient : ClientModInitializer {
 		BorderSync.install()
 		RoundSync.install()
 		BorderRenderer.install()
+		Footprints.install()
 		MapOverlay.install()
 		Props.install()
 		Cinema.install()
