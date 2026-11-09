@@ -25,7 +25,7 @@ object BorderRenderer {
     private val roundSeam = BorderSeam()
     private val zoneSeam = BorderSeam()
 
-    private const val ZONE_TINT = 0xFFFC301E.toInt()
+    private const val ZONE_TINT = 0xFF9FD4FF.toInt()
 
     private class Layer(val dome: Boolean) {
         var mesh: BorderMesh? = null
