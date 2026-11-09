@@ -2,6 +2,9 @@ package studio.sniffa.client.prop
 
 import com.geckolib.constant.DataTickets
 import com.geckolib.renderer.GeoObjectRenderer
+import com.geckolib.renderer.base.GeoRenderer
+import com.geckolib.renderer.layer.builtin.AutoGlowingGeoLayer
+import net.minecraft.client.renderer.SubmitNodeCollector
 import com.geckolib.renderer.base.GeoRenderState
 import com.geckolib.renderer.base.RenderPassInfo
 import com.mojang.blaze3d.vertex.PoseStack
@@ -38,11 +41,23 @@ object Props {
 
     private class PropRenderer : GeoObjectRenderer<Prop, Prop, GeoRenderState.Impl>(PropModel()) {
 
+        init {
+            withRenderLayer(Glow(this))
+        }
+
         override fun adjustRenderPose(pass: RenderPassInfo<GeoRenderState.Impl>) {
         }
 
         override fun addRenderData(animatable: Prop, relatedObject: Prop?, renderState: GeoRenderState.Impl, partialTick: Float) {
             renderState.addGeckolibData(DataTickets.TICK, animatable.age * TICKS_PER_SECOND)
+        }
+    }
+
+    private class Glow(renderer: GeoRenderer<Prop, Prop, GeoRenderState.Impl>) :
+        AutoGlowingGeoLayer<Prop, Prop, GeoRenderState.Impl>(renderer) {
+
+        override fun submitRenderTask(pass: RenderPassInfo<GeoRenderState.Impl>, collector: SubmitNodeCollector) {
+            if (PropModel.kindOf(pass.renderState()).glows) super.submitRenderTask(pass, collector)
         }
     }
 

@@ -7,9 +7,10 @@ enum class PropKind(
     private val deploy: String? = null,
     private val retract: String? = null,
     private val model: String? = null,
+    val glows: Boolean = false,
 ) {
 
-    RADAR("radar", 1.0f, "sweep", "deploy", "retract"),
+    RADAR("radar", 1.0f, "sweep", "deploy", "retract", glows = true),
     SNOWMAN("snowman", 1.0f, "watch", "deploy", "retract"),
     SNOWMAN_DISGUISE("snowman_disguise", 1.0f, "disguise", "deploy", "retract", "snowman"),
     ;
