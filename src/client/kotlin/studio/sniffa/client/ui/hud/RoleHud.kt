@@ -15,29 +15,21 @@ import kotlin.math.sin
 
 object RoleHud {
 
-    private val PANEL: Identifier = Hideandseek.id("hud/xmas_panel")
     private val GIFT: Identifier = Hideandseek.id("hud/gift")
     private val HAT: Identifier = Hideandseek.id("hud/hat")
     private val STAR: Identifier = Hideandseek.id("hud/star")
-    private val FLAKE: Identifier = Hideandseek.id("hud/flake")
 
     private const val ICON = 9
-    private const val SNOW_ABOVE = 7
 
     private const val MARGIN = 8
-    private const val PADDING = 9
-    private const val MIN_WIDTH = 150
-    private const val HEADER = 11
-    private const val PILL_PADDING = 5
     private const val LETTER_GAP = 1
     private const val CLOCK_SCALE = 2f
     private const val CLOCK_HEIGHT = 16
-    private const val BAR_HEIGHT = 2
-    private const val ROW_GAP = 7
+    private const val LINE_WIDTH = 72
+    private const val LINE_HEIGHT = 1
+    private const val SLIDE_OFFSET = 40
     private const val STAT_GAP = 12
     private const val ICON_GAP = 3
-    private const val HINT_GAP = 6
-    private const val KEY_PADDING = 4
     private const val EFFECTS_GAP = 4
 
     private const val SLIDE_MILLIS = 380f
@@ -46,20 +38,11 @@ object RoleHud {
     private const val FLASH_MILLIS = 1_200L
     private const val TICK_MILLIS = 650f
     private const val READY_MILLIS = 2_400f
-    private const val SHIMMER_MILLIS = 2_200.0
     private const val FINAL_SECONDS = 10
 
     private const val TITLE = 0xFFEAF4FF.toInt()
-    private const val PILL_FACE = 0xC0101A2E.toInt()
     private const val TRACK = 0x30FFFFFF
-    private const val BAR_FROM = 0xFF5FA8E8.toInt()
-    private const val BAR_TO = 0xFFF2F8FF.toInt()
-    private const val HEAD = 0xFFFFFFFF.toInt()
-    private const val KEY_FACE = 0xD0101A2E.toInt()
-    private const val KEY_EDGE = 0xFF5F8FC0.toInt()
     private const val GOLD = 0xFFF2C65A.toInt()
-    private const val POINTS_FROM = 0xFFE8B33A.toInt()
-    private const val POINTS_TO = 0xFFFFF1B0.toInt()
 
     private data class Look(val title: String, val colour: Int, val key: Component?, val action: String, val ready: Boolean)
 
@@ -151,69 +134,52 @@ object RoleHud {
         wasReady = look.ready
 
         val (phase, phaseColour) = phaseLabel()
-        val pillWidth = spacedWidth(font, phase) + 2 * PILL_PADDING
-        val titleWidth = 5 + spacedWidth(font, look.title)
+        val fade = ease(((now - runningSince) / SLIDE_MILLIS).coerceIn(0f, 1f))
+        val right = graphics.guiWidth() - MARGIN + ((1f - fade) * SLIDE_OFFSET).toInt()
+        var row = MARGIN
 
-        val points = RoundState.points?.toString()
-        val statsWidth = statWidth(font, remaining.toString()) + STAT_GAP + statWidth(font, RoundState.seekers.toString()) +
-            (points?.let { STAT_GAP + statWidth(font, it) } ?: 0)
-
-        val width = maxOf(MIN_WIDTH, PADDING * 2 + titleWidth + 10 + pillWidth, PADDING * 2 + statsWidth)
-        val body = PADDING + HEADER + ROW_GAP + CLOCK_HEIGHT + ROW_GAP + BAR_HEIGHT + ROW_GAP + ICON + PADDING
-
-        val slide = ease(((now - runningSince) / SLIDE_MILLIS).coerceIn(0f, 1f))
-        val right = graphics.guiWidth() - MARGIN + ((width + MARGIN) * (1f - slide)).toInt()
-        val left = right - width
-        val top = MARGIN + SNOW_ABOVE
-        val textLeft = left + PADDING
-        val textRight = right - PADDING
-
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, PANEL, left, top - SNOW_ABOVE, width, body + SNOW_ABOVE)
-
-        var row = top + PADDING
-
-        graphics.fill(textLeft, row + 2, textLeft + 3, row + 5, look.colour)
-        spaced(graphics, font, look.title, textLeft + 5, row, TITLE)
-        pill(graphics, font, phase, phaseColour, textRight - pillWidth, row - 2, textRight, row + HEADER - 1)
-        row += HEADER + ROW_GAP
+        val separator = "  ·  "
+        val headWidth = spacedWidth(font, look.title) + font.width(separator) + spacedWidth(font, phase)
+        var x = right - headWidth
+        x = spaced(graphics, font, look.title, x, row, look.colour)
+        graphics.text(font, separator, x, row, Palette.MUTED, true)
+        x += font.width(separator)
+        spaced(graphics, font, phase, x, row, phaseColour)
+        row += font.lineHeight + 3
 
         val tick = if (finalCountdown()) 1f - ((now - secondChangedAt) / TICK_MILLIS).coerceIn(0f, 1f) else 0f
         val clock = clock(RoundState.clockSeconds)
         val clockScale = CLOCK_SCALE * (1f + 0.12f * ease(tick))
-        val lift = CLOCK_HEIGHT * (clockScale / CLOCK_SCALE - 1f) / 2f
+        val clockWidth = font.width(clock) * clockScale
         graphics.pose().pushMatrix()
-        graphics.pose().translate(textLeft.toFloat(), row - lift)
+        graphics.pose().translate(right - clockWidth, row.toFloat() - CLOCK_HEIGHT * (clockScale / CLOCK_SCALE - 1f) / 2f)
         graphics.pose().scale(clockScale, clockScale)
         graphics.text(font, clock, 0, 0, clockColour(), true)
         graphics.pose().popMatrix()
 
         val label = clockLabel()
-        graphics.text(font, label, textRight - font.width(label), row + CLOCK_HEIGHT - font.lineHeight, Palette.MUTED, false)
-        row += CLOCK_HEIGHT + ROW_GAP
+        graphics.text(font, label, right - clockWidth.toInt() - 4 - font.width(label), row + CLOCK_HEIGHT - font.lineHeight - 1, Palette.MUTED, true)
+        row += CLOCK_HEIGHT + 4
 
-        bar(graphics, textLeft, row, textRight, smoothed(now), now)
-        row += BAR_HEIGHT + ROW_GAP
+        line(graphics, right - LINE_WIDTH, row, right, smoothed(now))
+        row += LINE_HEIGHT + 5
 
-        var x = textLeft
+        val points = RoundState.points?.toString()
+        val statsWidth = statWidth(font, remaining.toString()) + STAT_GAP + statWidth(font, RoundState.seekers.toString()) +
+            (points?.let { STAT_GAP + statWidth(font, it) } ?: 0)
+        x = right - statsWidth
         x = stat(graphics, font, x, row, GIFT, remaining.toString(), now)
         x += STAT_GAP
-        stat(graphics, font, x, row, HAT, RoundState.seekers.toString(), null)
-
+        x = stat(graphics, font, x, row, HAT, RoundState.seekers.toString(), null)
         if (points != null) {
-            val pointsLeft = textRight - statWidth(font, points)
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, STAR, pointsLeft, row, ICON, ICON)
-            shimmer(graphics, font, points, pointsLeft + ICON + ICON_GAP, row + 1, now)
+            x += STAT_GAP
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, STAR, x, row, ICON, ICON)
+            graphics.text(font, points, x + ICON + ICON_GAP, row + 1, GOLD, true)
         }
+        row += ICON + 6
 
-        val hintTop = top + body + HINT_GAP
-        effectsBelow = if (look.key != null) hintTop + font.lineHeight + 4 + EFFECTS_GAP else top + body + EFFECTS_GAP
-        look.key?.let { key -> hint(graphics, font, key, look, right - 2, hintTop, now) }
-    }
-
-    private fun pill(graphics: GuiGraphicsExtractor, font: Font, text: String, colour: Int, left: Int, top: Int, right: Int, bottom: Int) {
-        rounded(graphics, left, top, right, bottom, withAlpha(colour, 0x70))
-        rounded(graphics, left + 1, top + 1, right - 1, bottom - 1, PILL_FACE)
-        spaced(graphics, font, text, left + PILL_PADDING, top + 2, colour, shadow = false)
+        effectsBelow = row + (if (look.key != null) font.lineHeight + 4 else 0) + EFFECTS_GAP
+        look.key?.let { key -> hint(graphics, font, key, look, right, row, now) }
     }
 
     private fun stat(graphics: GuiGraphicsExtractor, font: Font, atX: Int, row: Int, icon: Identifier, count: String, now: Long?): Int {
@@ -236,74 +202,37 @@ object RoleHud {
 
     private fun statWidth(font: Font, count: String): Int = ICON + ICON_GAP + font.width(count)
 
-    private fun bar(graphics: GuiGraphicsExtractor, from: Int, row: Int, to: Int, progress: Float, now: Long) {
-        graphics.fill(from, row, to, row + BAR_HEIGHT, TRACK)
-        val filled = from + ((to - from) * progress).toInt()
-        if (filled <= from) return
-
-        var x = from
-        while (x < filled) {
-            val next = minOf(filled, x + 2)
-            graphics.fill(x, row, next, row + BAR_HEIGHT, blend(BAR_FROM, BAR_TO, (x - from).toFloat() / (filled - from).coerceAtLeast(1)))
-            x = next
-        }
-        val beat = 0.5f + 0.5f * sin(now / 180.0).toFloat()
-        graphics.fill(filled - 3, row - 2, filled + 3, row + BAR_HEIGHT + 2, withAlpha(HEAD, (0x18 + 0x30 * beat).toInt()))
-        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, FLAKE, filled - 4, row - 3, 8, 8)
+    private fun line(graphics: GuiGraphicsExtractor, from: Int, row: Int, to: Int, progress: Float) {
+        graphics.fill(from, row, to, row + LINE_HEIGHT, TRACK)
+        val filled = to - ((to - from) * progress).toInt()
+        if (filled < to) graphics.fill(filled, row, to, row + LINE_HEIGHT, TITLE)
     }
 
     private fun hint(graphics: GuiGraphicsExtractor, font: Font, key: Component, look: Look, right: Int, top: Int, now: Long) {
-        val keyWidth = font.width(key) + 2 * KEY_PADDING
-        val keyBottom = top + font.lineHeight + 3
-        val keyLeft = right - keyWidth
-
         val fresh = 1f - ((now - readySince) / READY_MILLIS).coerceIn(0f, 1f)
-        val edge = when {
-            look.ready && fresh > 0f -> blend(KEY_EDGE, GOLD, (0.5f + 0.5f * sin(now / 120.0).toFloat()) * fresh)
-            look.ready -> KEY_EDGE
-            else -> withAlpha(KEY_EDGE, 0x60)
+        val keyColour = when {
+            look.ready && fresh > 0f -> blend(TITLE, GOLD, (0.5f + 0.5f * sin(now / 120.0).toFloat()) * fresh)
+            look.ready -> TITLE
+            else -> Palette.MUTED
         }
-
-        rounded(graphics, keyLeft - 1, top - 2, right + 1, keyBottom + 1, edge)
-        rounded(graphics, keyLeft, top - 1, right, keyBottom, KEY_FACE)
-        graphics.text(font, key, keyLeft + KEY_PADDING, top + 1, if (look.ready) TITLE else Palette.MUTED, false)
-        graphics.text(
-            font, look.action, keyLeft - 5 - font.width(look.action), top + 1,
-            if (look.ready) TITLE else Palette.MUTED, true,
-        )
-    }
-
-    private fun rounded(graphics: GuiGraphicsExtractor, left: Int, top: Int, right: Int, bottom: Int, colour: Int) {
-        graphics.fill(left + 1, top, right - 1, bottom, colour)
-        graphics.fill(left, top + 1, left + 1, bottom - 1, colour)
-        graphics.fill(right - 1, top + 1, right, bottom - 1, colour)
+        val keyText = "[" + key.string + "]"
+        val keyWidth = font.width(keyText)
+        graphics.text(font, keyText, right - keyWidth, top, keyColour, true)
+        graphics.text(font, look.action, right - keyWidth - 4 - font.width(look.action), top, Palette.MUTED, true)
     }
 
     private fun spacedWidth(font: Font, text: String): Int =
         text.sumOf { font.width(it.toString()) } + LETTER_GAP * (text.length - 1).coerceAtLeast(0)
 
-    private fun spaced(graphics: GuiGraphicsExtractor, font: Font, text: String, atX: Int, atY: Int, colour: Int, shadow: Boolean = true) {
+    private fun spaced(graphics: GuiGraphicsExtractor, font: Font, text: String, atX: Int, atY: Int, colour: Int, shadow: Boolean = true): Int {
         var x = atX
         for (character in text) {
             val piece = character.toString()
             graphics.text(font, piece, x, atY, colour, shadow)
             x += font.width(piece) + LETTER_GAP
         }
+        return x - LETTER_GAP
     }
-
-    private fun shimmer(graphics: GuiGraphicsExtractor, font: Font, text: String, atX: Int, atY: Int, now: Long) {
-        var x = atX
-        val sweep = ((now % SHIMMER_MILLIS.toLong()) / SHIMMER_MILLIS).toFloat() * (text.length + 4) - 2f
-        text.forEachIndexed { index, character ->
-            val piece = character.toString()
-            val shine = (1f - kotlin.math.abs(index - sweep) / 2f).coerceIn(0f, 1f)
-            val base = blend(POINTS_FROM, POINTS_TO, index.toFloat() / (text.length - 1).coerceAtLeast(1))
-            graphics.text(font, piece, x, atY, blend(base, HEAD, shine * 0.6f), true)
-            x += font.width(piece)
-        }
-    }
-
-    private fun withAlpha(colour: Int, alpha: Int): Int = (alpha.coerceIn(0, 255) shl 24) or (colour and 0xFFFFFF)
 
     private fun smoothed(now: Long): Float {
         val target = RoundState.progress
