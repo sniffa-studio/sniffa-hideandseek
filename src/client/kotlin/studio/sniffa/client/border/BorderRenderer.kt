@@ -20,6 +20,8 @@ object BorderRenderer {
     private val roundBorder = Layer(dome = true)
     private val dangerZone = Layer(dome = false)
 
+    private var aurora: AuroraMesh? = null
+
     private val roundSeam = BorderSeam()
     private val zoneSeam = BorderSeam()
 
@@ -49,7 +51,10 @@ object BorderRenderer {
             val ring = BorderZone.current()
             if (ring == null) {
                 roundSeam.drop()
+                aurora?.close()
+                aurora = null
             } else {
+                drawAurora(ring, camera)
                 draw(roundBorder, BorderPipeline.RING, ring, BorderZone.tint(), camera) {
                     BorderEffects.uniforms(ring, it.columns, camera)
                 }
@@ -86,6 +91,17 @@ object BorderRenderer {
         val values = extras(current)
         values.m23(if (current.dome) BorderMesh.DOME_BASE.toFloat() else 0f)
         pass(pipeline, current.vertices, current.indexCount, ring, tint, camera, values, current.scaleFor(ring) ?: 1.0)
+    }
+
+    private fun drawAurora(ring: BorderZone.Ring, camera: Vec3) {
+        val current = aurora?.takeIf { it.scaleFor(ring) != null } ?: run {
+            aurora?.close()
+            AuroraMesh.build(ring).also { aurora = it }
+        }
+        if (current.indexCount == 0) return
+        val values = Matrix4f().zero()
+        values.m23(BorderMesh.DOME_BASE.toFloat())
+        pass(BorderPipeline.AURORA, current.vertices, current.indexCount, ring, 0xFFFFFF, camera, values, current.scaleFor(ring) ?: 1.0)
     }
 
     private fun zoneUniforms(columns: Int): Matrix4f {

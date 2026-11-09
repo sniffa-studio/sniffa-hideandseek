@@ -19,6 +19,19 @@ object BorderPipeline {
 
     val SEAM: RenderPipeline = wall("seam", "core/borderseam", animated = true)
 
+    val AURORA: RenderPipeline = RenderPipeline.builder()
+        .withLocation(Hideandseek.id("pipeline/aurora"))
+        .withVertexShader(Hideandseek.id("core/aurora"))
+        .withFragmentShader(Hideandseek.id("core/aurora"))
+        .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
+        .withBindGroupLayout(BindGroupLayouts.GLOBALS)
+        .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
+        .withPrimitiveTopology(PrimitiveTopology.QUADS)
+        .withColorTargetState(ColorTargetState(BlendFunction.LIGHTNING))
+        .withCull(false)
+        .withDepthStencilState(DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, false))
+        .build()
+
     private fun wall(name: String, fragment: String, animated: Boolean = false): RenderPipeline {
         val builder = RenderPipeline.builder()
             .withLocation(Hideandseek.id("pipeline/$name"))
@@ -43,5 +56,6 @@ object BorderPipeline {
         RenderPipelines.register(RING)
         RenderPipelines.register(ZONE)
         RenderPipelines.register(SEAM)
+        RenderPipelines.register(AURORA)
     }
 }
