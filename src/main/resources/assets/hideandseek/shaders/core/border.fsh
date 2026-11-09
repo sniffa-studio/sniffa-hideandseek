@@ -26,7 +26,7 @@ const float EDGE_GLOW_CELLS = 0.03;
 const float EDGE_GLOW_STRENGTH = 0.32;
 
 const float FILL = 0.07;
-const float FILL_FAR = 0.1;
+const float FILL_FAR = 0.035;
 const float FACET_STRENGTH = 0.55;
 const float FACET_SPREAD = 0.35;
 
@@ -55,7 +55,7 @@ const float SNOW_STRENGTH = 0.9;
 
 const float LINES_NEAR_FROM = 10.0;
 const float LINES_NEAR_TO = 34.0;
-const float LINES_FAR = 0.22;
+const float LINES_FAR = 0.1;
 
 const float BREATH_CYCLES = 600.0;
 const float BREATH_STRENGTH = 0.25;
@@ -93,6 +93,9 @@ const float VISIBLE_TO = 700.0;
 const float BEVEL_BRIGHT = 1.0;
 const float BEVEL_DARK = 0.35;
 
+const float CLEAR_FROM = 50.0;
+const float CLEAR_TO = 180.0;
+
 const float MILKY_SHARE = 0.3;
 const float MILKY_STRENGTH = 0.22;
 
@@ -107,7 +110,7 @@ const float STREAK_CYCLES = 8.0;
 const float STREAK_STRENGTH = 0.14;
 
 const float RIM_POWER = 2.6;
-const float RIM_STRENGTH = 0.4;
+const float RIM_STRENGTH = 0.32;
 
 const vec3 LIGHT = vec3(-0.55, 0.75, 0.35);
 const vec3 SHIMMER_DIRECTION = vec3(0.85, 0.3, 0.45);
@@ -342,7 +345,8 @@ void main() {
     float lift = breath + flash + HOT_LIGHT * hot * 0.5;
 
     float glass = mix(FILL_FAR, FILL, legible) * shade * (1.0 + FACET_STRENGTH * (facet - 0.5)) * (1.0 + lift) * strength;
-    float rime = (frost + milky + flash * 0.6) * strength;
+    float clearing = 1.0 - smoothstep(CLEAR_FROM, CLEAR_TO, distanceToEye);
+    float rime = ((frost + milky) * clearing + flash * 0.6) * strength;
     float glint = (edgeGlow * legible * drawn + shimmer + streak + rim) * (1.0 + lift) * strength;
     float bright = (edge * legible * drawn * (1.0 + lift) + hairline + sparkle + flake + crack) * strength;
 
