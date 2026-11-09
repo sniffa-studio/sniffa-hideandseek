@@ -57,6 +57,18 @@ object AbilityCatalog {
         sprite = Hideandseek.id("ability/fussspuren"),
     )
 
+    val SNOWMAN_SPY = Ability(
+        id = "snowman_spy",
+        displayName = "Schneemann-Spion",
+        description = "Stellt einen Schneemann auf, der 60 Sekunden lang 10 Blöcke im Blick behält und Alarm schlägt.",
+        side = Side.SEEKER,
+        cost = 7,
+        cooldownSeconds = 90,
+        icon = Items.CARVED_PUMPKIN,
+        plannedModel = "Schneemann mit Zylinder und Schal",
+        sprite = Hideandseek.id("ability/schneemann_spion"),
+    )
+
     val ELYTRA = Ability(
         id = "elytra",
         displayName = "Rentier-Schlitten",
@@ -136,6 +148,7 @@ object AbilityCatalog {
         SPEED,
         PLAYER_COMPASS,
         FOOTPRINTS,
+        SNOWMAN_SPY,
         ELYTRA,
         SWAP,
         DANGER_ZONE,
