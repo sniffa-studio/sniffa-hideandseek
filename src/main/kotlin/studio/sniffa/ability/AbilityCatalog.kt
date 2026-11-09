@@ -143,6 +143,18 @@ object AbilityCatalog {
         sprite = Hideandseek.id("ability/fruehwarnung"),
     )
 
+    val SNOWMAN_DISGUISE = Ability(
+        id = "snowman_disguise",
+        displayName = "Schneemann-Verkleidung",
+        description = "30 Sekunden lang bist du ein Schneemann. Wer stillsteht, fällt nicht auf.",
+        side = Side.HIDER,
+        cost = 5,
+        cooldownSeconds = 90,
+        icon = Items.SNOW_BLOCK,
+        plannedModel = "Schneemann-Kostüm",
+        sprite = Hideandseek.id("ability/schneemann_verkleidung"),
+    )
+
     val SEEKER_ABILITIES: List<Ability> = listOf(
         RADAR,
         SPEED,
@@ -158,6 +170,7 @@ object AbilityCatalog {
         SPRINT,
         JAMMER,
         EARLY_WARNING,
+        SNOWMAN_DISGUISE,
     )
 
     fun forSide(side: Side?): List<Ability> = when (side) {
