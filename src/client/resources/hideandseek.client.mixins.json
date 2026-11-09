@@ -14,7 +14,8 @@
 		"CinemaCameraMixin",
 		"CinemaHudMixin",
 		"CinemaCrowdMixin",
-		"CinemaHandMixin"
+		"CinemaHandMixin",
+		"StormCloudsMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
