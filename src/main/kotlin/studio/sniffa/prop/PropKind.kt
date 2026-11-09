@@ -9,6 +9,7 @@ enum class PropKind(
 ) {
 
     RADAR("radar", 1.0f, "sweep", "deploy", "retract"),
+    SNOWMAN("snowman", 1.0f, "watch", "deploy", "retract"),
     ;
 
     val asset: String get() = id
