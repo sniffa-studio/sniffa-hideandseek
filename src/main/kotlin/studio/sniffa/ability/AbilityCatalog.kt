@@ -45,6 +45,18 @@ object AbilityCatalog {
     )
 
 
+    val FOOTPRINTS = Ability(
+        id = "footprints",
+        displayName = "Fußspuren im Schnee",
+        description = "20 Sekunden lang leuchten die Fußspuren aller Verstecker im Schnee.",
+        side = Side.SEEKER,
+        cost = 6,
+        cooldownSeconds = 60,
+        icon = Items.LEATHER_BOOTS,
+        plannedModel = "Leuchtende Abdrücke im Schnee",
+        sprite = Hideandseek.id("ability/fussspuren"),
+    )
+
     val ELYTRA = Ability(
         id = "elytra",
         displayName = "Rentier-Schlitten",
@@ -123,6 +135,7 @@ object AbilityCatalog {
         RADAR,
         SPEED,
         PLAYER_COMPASS,
+        FOOTPRINTS,
         ELYTRA,
         SWAP,
         DANGER_ZONE,
