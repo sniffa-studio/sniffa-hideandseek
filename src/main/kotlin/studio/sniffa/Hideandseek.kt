@@ -22,6 +22,7 @@ import studio.sniffa.net.payload.MapTeleportPayload
 import studio.sniffa.net.payload.HeatPayload
 import studio.sniffa.net.payload.HotColdPayload
 import studio.sniffa.net.payload.PropPayload
+import studio.sniffa.net.payload.DisguisePayload
 import studio.sniffa.net.payload.PurchaseRequestPayload
 import studio.sniffa.net.payload.RadarPayload
 import studio.sniffa.net.payload.RangePayload
@@ -78,6 +79,7 @@ object Hideandseek : ModInitializer {
 		PayloadTypeRegistry.clientboundPlay().register(GlowPayload.TYPE, GlowPayload.CODEC)
 		PayloadTypeRegistry.clientboundPlay().register(CrewPayload.TYPE, CrewPayload.CODEC)
 		PayloadTypeRegistry.clientboundPlay().register(PropPayload.TYPE, PropPayload.CODEC)
+		PayloadTypeRegistry.clientboundPlay().register(DisguisePayload.TYPE, DisguisePayload.CODEC)
 		PayloadTypeRegistry.clientboundPlay().register(CooldownPayload.TYPE, CooldownPayload.CODEC)
 		PayloadTypeRegistry.clientboundPlay().register(PricesPayload.TYPE, PricesPayload.CODEC)
 		PayloadTypeRegistry.clientboundPlay().register(MapMetaPayload.TYPE, MapMetaPayload.CODEC)

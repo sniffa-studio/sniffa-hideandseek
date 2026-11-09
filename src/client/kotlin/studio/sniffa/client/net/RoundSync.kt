@@ -31,6 +31,7 @@ import studio.sniffa.net.payload.TracksPayload
 import studio.sniffa.client.radar.Footprints
 import studio.sniffa.net.payload.HotColdPayload
 import studio.sniffa.net.payload.PropPayload
+import studio.sniffa.net.payload.DisguisePayload
 import studio.sniffa.net.payload.RadarPayload
 import studio.sniffa.net.payload.RangePayload
 import studio.sniffa.net.payload.RolePayload
@@ -109,6 +110,10 @@ object RoundSync {
 
         ClientPlayNetworking.registerGlobalReceiver(PropPayload.TYPE) { payload, _ ->
             Props.accept(payload.kind, payload.x, payload.y, payload.z, payload.yaw, payload.seconds)
+        }
+
+        ClientPlayNetworking.registerGlobalReceiver(DisguisePayload.TYPE) { payload, _ ->
+            Props.wear(payload.entityId, payload.kind, payload.seconds)
         }
 
         ClientPlayNetworking.registerGlobalReceiver(GlowPayload.TYPE) { payload, _ ->
