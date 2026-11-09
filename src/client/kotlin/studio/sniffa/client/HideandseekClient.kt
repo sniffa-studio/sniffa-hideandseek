@@ -22,6 +22,7 @@ import studio.sniffa.client.ui.hud.ScanReadout
 import studio.sniffa.client.ui.hud.SpottedWarning
 import studio.sniffa.client.ui.hud.Warp
 import studio.sniffa.client.ui.hud.ZoneWarning
+import studio.sniffa.client.zone.ZoneStorm
 import studio.sniffa.client.ui.title.BackToEvent
 import studio.sniffa.client.ui.title.TitleScreenSkin
 
@@ -40,6 +41,7 @@ object HideandseekClient : ClientModInitializer {
 		ScanReadout.install()
 		SpottedWarning.install()
 		ZoneWarning.install()
+		ZoneStorm.install()
 		Warp.install()
 		CaughtScreen.install()
 		Keybindings.install()
