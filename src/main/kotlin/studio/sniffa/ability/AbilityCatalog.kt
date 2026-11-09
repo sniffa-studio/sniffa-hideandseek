@@ -29,41 +29,8 @@ object AbilityCatalog {
         sprite = Hideandseek.id("ability/tempo"),
     )
 
-    val RANDOM_PING = Ability(
-        id = "random_ping",
-        displayName = "Kaminfeuer-Blick",
-        description = "Zeigt ungefähr, wo ein zufälliger Verstecker ist — warm wie Kaminglut.",
-        side = Side.SEEKER,
-        cost = 5,
-        cooldownSeconds = 40,
-        icon = Items.FIREWORK_ROCKET,
-        plannedModel = "Kleine Signalpistole oder eigenes Ping-Gerät",
-        sprite = Hideandseek.id("ability/signalpistole"),
-    )
 
-    val HOT_COLD = Ability(
-        id = "hot_cold",
-        displayName = "Schneemann-Thermometer",
-        description = "Eiskalt oder kuschelig warm: zeigt, ob du näher kommst oder dich entfernst.",
-        side = Side.SEEKER,
-        cost = 2,
-        cooldownSeconds = 30,
-        icon = Items.BLAZE_POWDER,
-        plannedModel = "Thermometer oder Scanner",
-        sprite = Hideandseek.id("ability/hotcold"),
-    )
 
-    val NEAREST_PLAYER = Ability(
-        id = "nearest_player",
-        displayName = "Glöckchen",
-        description = "Klingelt dir, wie weit der nächste Verstecker weg ist.",
-        side = Side.SEEKER,
-        cost = 3,
-        cooldownSeconds = 30,
-        icon = Items.TARGET,
-        plannedModel = "Anzeige mit Entfernung",
-        sprite = Hideandseek.id("ability/entfernungsmesser"),
-    )
 
     val PLAYER_COMPASS = Ability(
         id = "player_compass",
@@ -77,17 +44,6 @@ object AbilityCatalog {
         sprite = Hideandseek.id("ability/kompass"),
     )
 
-    val GLOW = Ability(
-        id = "glow",
-        displayName = "Lichterkette",
-        description = "Alle Verstecker leuchten kurz auf wie eine Lichterkette.",
-        side = Side.SEEKER,
-        cost = 9,
-        cooldownSeconds = 60,
-        icon = Items.GLOWSTONE_DUST,
-        plannedModel = "Leuchtender Scanner oder UV-Gerät",
-        sprite = Hideandseek.id("ability/uv_geraet"),
-    )
 
     val ELYTRA = Ability(
         id = "elytra",
@@ -102,17 +58,6 @@ object AbilityCatalog {
         restockCost = 4,
     )
 
-    val TELEPORT = Ability(
-        id = "teleport",
-        displayName = "Durch den Kamin",
-        description = "Karte öffnen und hinrutschen wie der Weihnachtsmann.",
-        side = Side.SEEKER,
-        cost = 10,
-        cooldownSeconds = 60,
-        icon = Items.ENDER_PEARL,
-        plannedModel = "Kleines Teleport-Gerät",
-        sprite = Hideandseek.id("ability/teleport"),
-    )
 
     val SWAP = Ability(
         id = "swap",
@@ -177,13 +122,8 @@ object AbilityCatalog {
     val SEEKER_ABILITIES: List<Ability> = listOf(
         RADAR,
         SPEED,
-        RANDOM_PING,
-        HOT_COLD,
-        NEAREST_PLAYER,
         PLAYER_COMPASS,
-        GLOW,
         ELYTRA,
-        TELEPORT,
         SWAP,
         DANGER_ZONE,
     )
