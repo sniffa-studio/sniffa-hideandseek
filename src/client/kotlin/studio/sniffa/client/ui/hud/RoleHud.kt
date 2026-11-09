@@ -1,11 +1,13 @@
 package studio.sniffa.client.ui.hud
 
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry
-import studio.sniffa.Hideandseek
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Font
 import net.minecraft.client.gui.GuiGraphicsExtractor
+import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.network.chat.Component
+import net.minecraft.resources.Identifier
+import studio.sniffa.Hideandseek
 import studio.sniffa.client.input.Keybindings
 import studio.sniffa.client.state.RoundState
 import studio.sniffa.client.ui.theme.Palette
@@ -13,20 +15,30 @@ import kotlin.math.sin
 
 object RoleHud {
 
+    private val PANEL: Identifier = Hideandseek.id("hud/xmas_panel")
+    private val GIFT: Identifier = Hideandseek.id("hud/gift")
+    private val HAT: Identifier = Hideandseek.id("hud/hat")
+    private val STAR: Identifier = Hideandseek.id("hud/star")
+    private val FLAKE: Identifier = Hideandseek.id("hud/flake")
+
+    private const val ICON = 9
+    private const val SNOW_ABOVE = 7
+
     private const val MARGIN = 8
     private const val PADDING = 9
-    private const val MIN_WIDTH = 156
+    private const val MIN_WIDTH = 150
     private const val HEADER = 11
-    private const val CHIP_PADDING = 4
+    private const val PILL_PADDING = 5
     private const val LETTER_GAP = 1
     private const val CLOCK_SCALE = 2f
     private const val CLOCK_HEIGHT = 16
-    private const val BAR_HEIGHT = 3
-    private const val PIP_GAP = 4
-    private const val STATS_GAP = 10
-    private const val HINT_GAP = 5
+    private const val BAR_HEIGHT = 2
+    private const val ROW_GAP = 7
+    private const val STAT_GAP = 12
+    private const val ICON_GAP = 3
+    private const val HINT_GAP = 6
     private const val KEY_PADDING = 4
-    private const val SHADOW = 2
+    private const val EFFECTS_GAP = 4
 
     private const val SLIDE_MILLIS = 380f
     private const val POP_MILLIS = 450f
@@ -37,79 +49,17 @@ object RoleHud {
     private const val SHIMMER_MILLIS = 2_200.0
     private const val FINAL_SECONDS = 10
 
-    private const val PANEL_TOP = 0xE0122A20.toInt()
-    private const val PANEL_BOTTOM = 0xE00A1424.toInt()
-    private const val GOLD = 0xFFD9A93A.toInt()
-    private const val GOLD_LIGHT = 0xFFFFE07A.toInt()
-    private const val GOLD_DARK = 0xFF8A6418.toInt()
-    private const val SNOW = 0xFFF2F6FF.toInt()
-    private const val SNOW_SHADE = 0xFFC9D8EE.toInt()
-    private const val ICE = 0xFFA9DEFF.toInt()
-    private const val FROST_GLOW = 0xFF8FD3FF.toInt()
-    private const val CANE_RED = 0xFFC8102E.toInt()
-    private const val WIRE = 0xFF1B3A24.toInt()
-    private const val BULB_OFF = 0xFF2E3A36.toInt()
-    private const val BULB_GAP = 7
-    private const val SNOW_CAP = 3
-    private const val EFFECTS_GAP = 4
-
-    private val BULBS = intArrayOf(0xFFC8102E.toInt(), 0xFFE8B33A.toInt(), 0xFF2FA85A.toInt(), 0xFF3D9CFF.toInt())
-
-    private val GIFT = arrayOf(
-        "..g.g..",
-        "...g...",
-        "ggggggg",
-        "BBBgBBB",
-        "BBBgBBB",
-        "bbbgbbb",
-        "bbbgbbb",
-    )
-
-    private val HAT = arrayOf(
-        "....RRw",
-        "...RRR.",
-        "..RRRR.",
-        ".RRRRrr",
-        "RRRRRrr",
-        "WWWWWWW",
-        "SSSSSSS",
-    )
-
-    private val FLAKE = arrayOf(
-        "..w..",
-        "w.w.w",
-        ".www.",
-        "w.w.w",
-        "..w..",
-    )
-
-    private val HOLLY = arrayOf(
-        "LL.....LL",
-        "LLL...LLL",
-        ".LLLrLLL.",
-        "..LrRrL..",
-        "...rRr...",
-    )
-
-    private val PIXELS = mapOf(
-        'g' to 0xFFE8B33A.toInt(), 'B' to 0xFF2FA85A.toInt(), 'b' to 0xFF1E7A3F.toInt(),
-        'R' to 0xFFC8102E.toInt(), 'r' to 0xFF8E0B20.toInt(), 'w' to 0xFFF2F6FF.toInt(),
-        'W' to 0xFFF2F6FF.toInt(), 'S' to 0xFFC9D8EE.toInt(), 'L' to 0xFF2E8B57.toInt(),
-    )
-
-    private var effectsBelow = 0
-    private const val SHADOW_COLOUR = 0x50000000
-    private const val HIGHLIGHT = 0x1CFFFFFF
-    private const val CHIP_TEXT = 0xFF0B100D.toInt()
+    private const val TITLE = 0xFFEAF4FF.toInt()
+    private const val PILL_FACE = 0xC0101A2E.toInt()
+    private const val TRACK = 0x30FFFFFF
+    private const val BAR_FROM = 0xFF5FA8E8.toInt()
+    private const val BAR_TO = 0xFFF2F8FF.toInt()
     private const val HEAD = 0xFFFFFFFF.toInt()
-    private const val GLOW_ALPHA = 0x38
-    private const val KEY_FACE = 0xE6202624.toInt()
+    private const val KEY_FACE = 0xD0101A2E.toInt()
+    private const val KEY_EDGE = 0xFF5F8FC0.toInt()
+    private const val GOLD = 0xFFF2C65A.toInt()
     private const val POINTS_FROM = 0xFFE8B33A.toInt()
     private const val POINTS_TO = 0xFFFFF1B0.toInt()
-    private const val POINTS_LABEL = " ᴘᴋᴛ"
-
-    private const val HIDERS = "ᴠᴇʀꜱᴛᴇᴄᴋᴛ"
-    private const val SEEKERS = "ꜱᴜᴄʜᴇʀ"
 
     private data class Look(val title: String, val colour: Int, val key: Component?, val action: String, val ready: Boolean)
 
@@ -122,6 +72,7 @@ object RoleHud {
     private var secondChangedAt = 0L
     private var wasReady = false
     private var readySince = 0L
+    private var effectsBelow = 0
 
     fun install() {
         HudElementRegistry.addLast(Hideandseek.id("role_hud")) { graphics, _ ->
@@ -178,13 +129,7 @@ object RoleHud {
     private fun clockColour(): Int = when {
         RoundState.clock == RoundState.Clock.PAUSED -> Palette.WARNING
         finalCountdown() -> Palette.ERROR
-        else -> Palette.TEXT
-    }
-
-    private fun glowColour(): Int = when {
-        RoundState.clock == RoundState.Clock.PAUSED -> Palette.WARNING
-        finalCountdown() -> Palette.ERROR
-        else -> FROST_GLOW
+        else -> TITLE
     }
 
     private fun draw(graphics: GuiGraphicsExtractor, font: Font, look: Look) {
@@ -206,166 +151,105 @@ object RoleHud {
         wasReady = look.ready
 
         val (phase, phaseColour) = phaseLabel()
-        val chipWidth = spacedWidth(font, phase) + 2 * CHIP_PADDING
+        val pillWidth = spacedWidth(font, phase) + 2 * PILL_PADDING
+        val titleWidth = 5 + spacedWidth(font, look.title)
 
-        val pointsWidth = RoundState.points?.let { STATS_GAP + 7 + font.width(it.toString()) + font.width(POINTS_LABEL) } ?: 0
-        val statsWidth = statWidth(font, remaining.toString(), HIDERS) + STATS_GAP +
-            statWidth(font, RoundState.seekers.toString(), SEEKERS) + pointsWidth
-        val width = maxOf(
-            MIN_WIDTH,
-            PADDING * 2 + spacedWidth(font, look.title) + 12 + chipWidth,
-            PADDING * 2 + statsWidth,
-        )
-        val height = PADDING + HEADER + 7 + CLOCK_HEIGHT + 7 + BAR_HEIGHT + 9 + font.lineHeight + PADDING - 1
+        val points = RoundState.points?.toString()
+        val statsWidth = statWidth(font, remaining.toString()) + STAT_GAP + statWidth(font, RoundState.seekers.toString()) +
+            (points?.let { STAT_GAP + statWidth(font, it) } ?: 0)
 
-        val screenRight = graphics.guiWidth() - MARGIN
+        val width = maxOf(MIN_WIDTH, PADDING * 2 + titleWidth + 10 + pillWidth, PADDING * 2 + statsWidth)
+        val body = PADDING + HEADER + ROW_GAP + CLOCK_HEIGHT + ROW_GAP + BAR_HEIGHT + ROW_GAP + ICON + PADDING
+
         val slide = ease(((now - runningSince) / SLIDE_MILLIS).coerceIn(0f, 1f))
-        val right = screenRight + ((width + MARGIN) * (1f - slide)).toInt()
+        val right = graphics.guiWidth() - MARGIN + ((width + MARGIN) * (1f - slide)).toInt()
         val left = right - width
-        val top = MARGIN + SNOW_CAP
+        val top = MARGIN + SNOW_ABOVE
         val textLeft = left + PADDING
         val textRight = right - PADDING
 
-        rounded(graphics, left + SHADOW, top + SHADOW, right + SHADOW, top + height + SHADOW, SHADOW_COLOUR)
-        rounded(graphics, left - 1, top - 1, right + 1, top + height + 1, GOLD_DARK)
-        rounded(graphics, left, top, right, top + height, GOLD)
-        panel(graphics, left + 1, top + 1, right - 1, top + height - 1)
-        graphics.fill(left + 2, top + 1, right - 2, top + 2, HIGHLIGHT)
-        snowCap(graphics, left, right, top)
-        sprite(graphics, HOLLY, left - 2, top - 4)
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, PANEL, left, top - SNOW_ABOVE, width, body + SNOW_ABOVE)
 
         var row = top + PADDING
 
-        spaced(graphics, font, look.title, textLeft, row + 1, look.colour)
-        val chipLeft = textRight - chipWidth
-        candyChip(graphics, chipLeft, row - 1, textRight, row + HEADER - 1, phaseColour)
-        spaced(graphics, font, phase, chipLeft + CHIP_PADDING, row + 1, CHIP_TEXT, shadow = false)
-        row += HEADER + 7
+        graphics.fill(textLeft, row + 2, textLeft + 3, row + 5, look.colour)
+        spaced(graphics, font, look.title, textLeft + 5, row, TITLE)
+        pill(graphics, font, phase, phaseColour, textRight - pillWidth, row - 2, textRight, row + HEADER - 1)
+        row += HEADER + ROW_GAP
 
         val tick = if (finalCountdown()) 1f - ((now - secondChangedAt) / TICK_MILLIS).coerceIn(0f, 1f) else 0f
         val clock = clock(RoundState.clockSeconds)
-        val colour = clockColour()
         val clockScale = CLOCK_SCALE * (1f + 0.12f * ease(tick))
-        val lift = (CLOCK_HEIGHT * (clockScale / CLOCK_SCALE - 1f) / 2f)
+        val lift = CLOCK_HEIGHT * (clockScale / CLOCK_SCALE - 1f) / 2f
         graphics.pose().pushMatrix()
         graphics.pose().translate(textLeft.toFloat(), row - lift)
         graphics.pose().scale(clockScale, clockScale)
-        val glow = withAlpha(glowColour(), (GLOW_ALPHA * 2 * (1f + 2f * tick)).toInt().coerceAtMost(0xFF))
-        for ((dx, dy) in GLOW_OFFSETS) {
-            graphics.text(font, clock, dx, dy, glow, false)
-        }
-        graphics.text(font, clock, 0, 0, colour, true)
+        graphics.text(font, clock, 0, 0, clockColour(), true)
         graphics.pose().popMatrix()
 
         val label = clockLabel()
-        graphics.text(font, label, textRight - font.width(label), row + CLOCK_HEIGHT - font.lineHeight, Palette.MUTED, true)
-        row += CLOCK_HEIGHT + 7
+        graphics.text(font, label, textRight - font.width(label), row + CLOCK_HEIGHT - font.lineHeight, Palette.MUTED, false)
+        row += CLOCK_HEIGHT + ROW_GAP
 
-        garland(graphics, textLeft, row, textRight, smoothed(now), now)
-        row += BAR_HEIGHT + 9
+        bar(graphics, textLeft, row, textRight, smoothed(now), now)
+        row += BAR_HEIGHT + ROW_GAP
 
         var x = textLeft
-        x = stat(graphics, font, x, row, GIFT, remaining.toString(), HIDERS, now)
-        x += STATS_GAP
-        stat(graphics, font, x, row, HAT, RoundState.seekers.toString(), SEEKERS, null)
+        x = stat(graphics, font, x, row, GIFT, remaining.toString(), now)
+        x += STAT_GAP
+        stat(graphics, font, x, row, HAT, RoundState.seekers.toString(), null)
 
-        RoundState.points?.let {
-            val points = it.toString()
-            val pointsLeft = textRight - font.width(POINTS_LABEL) - font.width(points)
-            sprite(graphics, FLAKE, pointsLeft - 8, row + 1)
-            shimmer(graphics, font, points, pointsLeft, row, now)
-            graphics.text(font, POINTS_LABEL, textRight - font.width(POINTS_LABEL), row, Palette.MUTED, true)
+        if (points != null) {
+            val pointsLeft = textRight - statWidth(font, points)
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, STAR, pointsLeft, row, ICON, ICON)
+            shimmer(graphics, font, points, pointsLeft + ICON + ICON_GAP, row + 1, now)
         }
 
-        val hintTop = top + height + HINT_GAP + 1
-        effectsBelow = if (look.key != null) hintTop + font.lineHeight + 4 + EFFECTS_GAP else top + height + EFFECTS_GAP
-        look.key?.let { key -> hint(graphics, font, key, look, right, hintTop, now) }
+        val hintTop = top + body + HINT_GAP
+        effectsBelow = if (look.key != null) hintTop + font.lineHeight + 4 + EFFECTS_GAP else top + body + EFFECTS_GAP
+        look.key?.let { key -> hint(graphics, font, key, look, right - 2, hintTop, now) }
     }
 
-    private fun stat(graphics: GuiGraphicsExtractor, font: Font, atX: Int, row: Int, icon: Array<String>, count: String, label: String, now: Long?): Int {
-        var x = atX
-        sprite(graphics, icon, x, row)
-        x += icon[0].length + PIP_GAP
+    private fun pill(graphics: GuiGraphicsExtractor, font: Font, text: String, colour: Int, left: Int, top: Int, right: Int, bottom: Int) {
+        rounded(graphics, left, top, right, bottom, withAlpha(colour, 0x70))
+        rounded(graphics, left + 1, top + 1, right - 1, bottom - 1, PILL_FACE)
+        spaced(graphics, font, text, left + PILL_PADDING, top + 2, colour, shadow = false)
+    }
+
+    private fun stat(graphics: GuiGraphicsExtractor, font: Font, atX: Int, row: Int, icon: Identifier, count: String, now: Long?): Int {
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, icon, atX, row, ICON, ICON)
+        val x = atX + ICON + ICON_GAP
 
         val since = now?.let { (it - remainingChangedAt).toFloat() } ?: Float.MAX_VALUE
         val pop = 1f - (since / POP_MILLIS).coerceIn(0f, 1f)
         val scale = 1f + POP_SCALE * ease(pop)
-        val countColour = if (now != null && since < FLASH_MILLIS) blend(Palette.ERROR, Palette.TEXT, since / FLASH_MILLIS) else Palette.TEXT
+        val colour = if (now != null && since < FLASH_MILLIS) blend(Palette.ERROR, TITLE, since / FLASH_MILLIS) else TITLE
         val countWidth = font.width(count)
 
         graphics.pose().pushMatrix()
-        graphics.pose().translate(x + countWidth / 2f, row + font.lineHeight / 2f)
+        graphics.pose().translate(x + countWidth / 2f, row + 1 + font.lineHeight / 2f)
         graphics.pose().scale(scale, scale)
-        graphics.text(font, count, -countWidth / 2, -font.lineHeight / 2, countColour, true)
+        graphics.text(font, count, -countWidth / 2, -font.lineHeight / 2, colour, true)
         graphics.pose().popMatrix()
-        x += countWidth + 3
-
-        graphics.text(font, label, x, row, Palette.MUTED, true)
-        return x + font.width(label)
+        return x + countWidth
     }
 
-    private fun statWidth(font: Font, count: String, label: String): Int =
-        7 + PIP_GAP + font.width(count) + 3 + font.width(label)
+    private fun statWidth(font: Font, count: String): Int = ICON + ICON_GAP + font.width(count)
 
-    private fun garland(graphics: GuiGraphicsExtractor, from: Int, row: Int, to: Int, progress: Float, now: Long) {
-        graphics.fill(from, row, to, row + 1, WIRE)
-        val lit = from + ((to - from) * progress).toInt()
-        var x = from + 2
-        var index = 0
-        var last = -1
-        while (x < to - 1) {
-            val on = x <= lit
-            val colour = BULBS[index % BULBS.size]
-            if (on) {
-                graphics.fill(x - 1, row, x + 3, row + 5, withAlpha(colour, 0x40))
-                graphics.fill(x, row + 1, x + 2, row + 4, colour)
-                graphics.fill(x, row + 1, x + 1, row + 2, 0xC0FFFFFF.toInt())
-                last = x
-            } else {
-                graphics.fill(x, row + 1, x + 2, row + 4, BULB_OFF)
-            }
-            x += BULB_GAP
-            index++
-        }
-        if (last >= 0) {
-            val beat = 0.5f + 0.5f * sin(now / 160.0).toFloat()
-            graphics.fill(last - 2, row - 1, last + 4, row + 6, withAlpha(HEAD, (0x30 + 0x50 * beat).toInt()))
-        }
-    }
+    private fun bar(graphics: GuiGraphicsExtractor, from: Int, row: Int, to: Int, progress: Float, now: Long) {
+        graphics.fill(from, row, to, row + BAR_HEIGHT, TRACK)
+        val filled = from + ((to - from) * progress).toInt()
+        if (filled <= from) return
 
-    private fun snowCap(graphics: GuiGraphicsExtractor, left: Int, right: Int, top: Int) {
-        graphics.fill(left, top - 1, right, top + 2, SNOW)
-        graphics.fill(left + 1, top + 2, right - 1, top + 3, SNOW_SHADE)
-        var x = left
-        while (x < right) {
-            val bump = (x * 7 + 3) % 4
-            if (bump > 0) graphics.fill(x, top - 1 - bump.coerceAtMost(SNOW_CAP), minOf(x + 3, right), top - 1, SNOW)
-            if ((x * 13) % 11 == 0 && x > left + 3 && x < right - 4) {
-                graphics.fill(x, top + 3, x + 1, top + 4 + (x % 3), ICE)
-            }
-            x += 3
+        var x = from
+        while (x < filled) {
+            val next = minOf(filled, x + 2)
+            graphics.fill(x, row, next, row + BAR_HEIGHT, blend(BAR_FROM, BAR_TO, (x - from).toFloat() / (filled - from).coerceAtLeast(1)))
+            x = next
         }
-    }
-
-    private fun candyChip(graphics: GuiGraphicsExtractor, left: Int, top: Int, right: Int, bottom: Int, colour: Int) {
-        rounded(graphics, left - 1, top - 1, right + 1, bottom + 1, SNOW)
-        var x = left - 1
-        while (x < right + 1) {
-            if (((x - left) / 2) % 2 == 0) {
-                graphics.fill(x, top - 1, minOf(x + 2, right + 1), top, CANE_RED)
-                graphics.fill(x, bottom, minOf(x + 2, right + 1), bottom + 1, CANE_RED)
-            }
-            x += 2
-        }
-        rounded(graphics, left, top, right, bottom, colour)
-    }
-
-    private fun sprite(graphics: GuiGraphicsExtractor, rows: Array<String>, atX: Int, atY: Int) {
-        rows.forEachIndexed { y, line ->
-            line.forEachIndexed { x, pixel ->
-                PIXELS[pixel]?.let { graphics.fill(atX + x, atY + y, atX + x + 1, atY + y + 1, it) }
-            }
-        }
+        val beat = 0.5f + 0.5f * sin(now / 180.0).toFloat()
+        graphics.fill(filled - 3, row - 2, filled + 3, row + BAR_HEIGHT + 2, withAlpha(HEAD, (0x18 + 0x30 * beat).toInt()))
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, FLAKE, filled - 4, row - 3, 8, 8)
     }
 
     private fun hint(graphics: GuiGraphicsExtractor, font: Font, key: Component, look: Look, right: Int, top: Int, now: Long) {
@@ -374,24 +258,19 @@ object RoleHud {
         val keyLeft = right - keyWidth
 
         val fresh = 1f - ((now - readySince) / READY_MILLIS).coerceIn(0f, 1f)
-        if (look.ready && fresh > 0f) {
-            val beat = 0.5f + 0.5f * sin(now / 120.0).toFloat()
-            rounded(graphics, keyLeft - 2, top - 3, right + 2, keyBottom + 2, withAlpha(GOLD_LIGHT, (0x90 * fresh * beat).toInt()))
+        val edge = when {
+            look.ready && fresh > 0f -> blend(KEY_EDGE, GOLD, (0.5f + 0.5f * sin(now / 120.0).toFloat()) * fresh)
+            look.ready -> KEY_EDGE
+            else -> withAlpha(KEY_EDGE, 0x60)
         }
 
-        rounded(graphics, keyLeft, top - 1, right, keyBottom, if (look.ready) CANE_RED else KEY_FACE)
-        graphics.fill(keyLeft + keyWidth / 2 - 1, top - 1, keyLeft + keyWidth / 2 + 1, keyBottom, withAlpha(GOLD, if (look.ready) 0xFF else 0x55))
-        graphics.text(font, key, keyLeft + KEY_PADDING, top + 1, Palette.TEXT, true)
+        rounded(graphics, keyLeft - 1, top - 2, right + 1, keyBottom + 1, edge)
+        rounded(graphics, keyLeft, top - 1, right, keyBottom, KEY_FACE)
+        graphics.text(font, key, keyLeft + KEY_PADDING, top + 1, if (look.ready) TITLE else Palette.MUTED, false)
         graphics.text(
             font, look.action, keyLeft - 5 - font.width(look.action), top + 1,
-            if (look.ready) Palette.TEXT else Palette.MUTED, true,
+            if (look.ready) TITLE else Palette.MUTED, true,
         )
-    }
-
-    private fun panel(graphics: GuiGraphicsExtractor, left: Int, top: Int, right: Int, bottom: Int) {
-        graphics.fillGradient(left + 1, top, right - 1, bottom, PANEL_TOP, PANEL_BOTTOM)
-        graphics.fillGradient(left, top + 1, left + 1, bottom - 1, PANEL_TOP, PANEL_BOTTOM)
-        graphics.fillGradient(right - 1, top + 1, right, bottom - 1, PANEL_TOP, PANEL_BOTTOM)
     }
 
     private fun rounded(graphics: GuiGraphicsExtractor, left: Int, top: Int, right: Int, bottom: Int, colour: Int) {
@@ -451,6 +330,4 @@ object RoleHud {
         }
         return result
     }
-
-    private val GLOW_OFFSETS = listOf(-1 to 0, 1 to 0, 0 to -1, 0 to 1)
 }
