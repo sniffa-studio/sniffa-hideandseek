@@ -34,6 +34,11 @@
     "subtitle": "subtitles.hideandseek.radar_ping",
     "sounds": [{ "name": "hideandseek:radar_ping", "stream": false }]
   },
+  "cue.snowman_alarm": {
+    "category": "player",
+    "subtitle": "subtitles.hideandseek.snowman_alarm",
+    "sounds": [{ "name": "hideandseek:snowman_alarm", "stream": false }]
+  },
   "cue.tick": {
     "category": "player",
     "sounds": [{ "name": "hideandseek:tick", "stream": false }]
