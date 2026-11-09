@@ -6,6 +6,7 @@ import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.resources.Identifier
 import org.slf4j.LoggerFactory
 import studio.sniffa.net.payload.BearingPayload
+import studio.sniffa.net.payload.TracksPayload
 import studio.sniffa.net.payload.BorderPayload
 import studio.sniffa.net.payload.ClockPayload
 import studio.sniffa.net.payload.CooldownPayload
@@ -71,6 +72,7 @@ object Hideandseek : ModInitializer {
 		PayloadTypeRegistry.clientboundPlay().register(HotColdPayload.TYPE, HotColdPayload.CODEC)
 		PayloadTypeRegistry.clientboundPlay().register(RangePayload.TYPE, RangePayload.CODEC)
 		PayloadTypeRegistry.clientboundPlay().register(BearingPayload.TYPE, BearingPayload.CODEC)
+		PayloadTypeRegistry.clientboundPlay().register(TracksPayload.TYPE, TracksPayload.CODEC)
 		PayloadTypeRegistry.clientboundPlay().register(RolePayload.TYPE, RolePayload.CODEC)
 		PayloadTypeRegistry.clientboundPlay().register(SpottedPayload.TYPE, SpottedPayload.CODEC)
 		PayloadTypeRegistry.clientboundPlay().register(GlowPayload.TYPE, GlowPayload.CODEC)
