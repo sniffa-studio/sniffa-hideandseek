@@ -29,6 +29,8 @@ class AuroraMesh private constructor(
 
     private class Band(val angle: Double, val offset: Double, val bottom: Double, val height: Double)
 
+    private class Arc(val from: Double, val span: Double, val reach: Double, val bottom: Double, val height: Double)
+
     companion object {
 
         private const val SEGMENTS = 160
@@ -52,10 +54,21 @@ class AuroraMesh private constructor(
             Band(1.9, 0.44, 184.0, 58.0),
         )
 
+        private val ARCS = listOf(
+            Arc(0.2, 2.1, 1.45, 200.0, 120.0),
+            Arc(2.5, 1.9, 1.7, 215.0, 135.0),
+            Arc(4.3, 2.0, 1.55, 205.0, 125.0),
+            Arc(1.3, 1.6, 1.9, 225.0, 110.0),
+            Arc(3.6, 1.4, 2.05, 230.0, 100.0),
+        )
+
+        private const val ARC_SEGMENTS = 120
+        private const val ARC_SWAY_SHARE = 0.06
+
         fun build(ring: BorderZone.Ring): AuroraMesh {
             val format = DefaultVertexFormat.POSITION_TEX_COLOR
             val radius = ring.radius
-            val quads = BANDS.size * SEGMENTS
+            val quads = BANDS.size * SEGMENTS + ARCS.size * ARC_SEGMENTS
 
             ByteBufferBuilder(format.vertexSize * 4 * quads).use { storage ->
                 val builder = BufferBuilder(storage, PrimitiveTopology.QUADS, format)
@@ -104,6 +117,36 @@ class AuroraMesh private constructor(
                             .setUv((seed + to[3]).toFloat(), 1f).setColor(nx, nz, fadeTo, to[2].toFloat())
                         builder.addVertex(from[0].toFloat(), topFrom.toFloat(), from[1].toFloat())
                             .setUv((seed + from[3]).toFloat(), 1f).setColor(nx, nz, fadeFrom, from[2].toFloat())
+                        written++
+                    }
+                }
+
+                ARCS.forEachIndexed { index, arc ->
+                    val seed = (BANDS.size + index) * SEED_SPACING
+
+                    fun at(step: Int): DoubleArray {
+                        val s = step.toDouble() / ARC_SEGMENTS
+                        val angle = arc.from + s * arc.span
+                        val reach = arc.reach * radius * (1.0 + sin(s * TAU * 1.7 + index) * ARC_SWAY_SHARE)
+                        return doubleArrayOf(cos(angle) * reach, sin(angle) * reach, s, s * arc.span * arc.reach * radius, angle)
+                    }
+
+                    for (step in 0 until ARC_SEGMENTS) {
+                        val from = at(step)
+                        val to = at(step + 1)
+                        val nx = (cos(from[4]) * 0.5 + 0.5).toFloat()
+                        val nz = (sin(from[4]) * 0.5 + 0.5).toFloat()
+                        val top = (arc.bottom + arc.height).toFloat()
+                        val bottom = arc.bottom.toFloat()
+
+                        builder.addVertex(from[0].toFloat(), bottom, from[1].toFloat())
+                            .setUv((seed + from[3]).toFloat(), 0f).setColor(nx, nz, 1f, from[2].toFloat())
+                        builder.addVertex(to[0].toFloat(), bottom, to[1].toFloat())
+                            .setUv((seed + to[3]).toFloat(), 0f).setColor(nx, nz, 1f, to[2].toFloat())
+                        builder.addVertex(to[0].toFloat(), top, to[1].toFloat())
+                            .setUv((seed + to[3]).toFloat(), 1f).setColor(nx, nz, 1f, to[2].toFloat())
+                        builder.addVertex(from[0].toFloat(), top, from[1].toFloat())
+                            .setUv((seed + from[3]).toFloat(), 1f).setColor(nx, nz, 1f, from[2].toFloat())
                         written++
                     }
                 }
