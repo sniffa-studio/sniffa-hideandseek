@@ -5,11 +5,9 @@ import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.AbstractButton
 import net.minecraft.client.gui.components.AbstractWidget
 import net.minecraft.client.renderer.RenderPipelines
-import net.minecraft.network.chat.Component
 import net.minecraft.resources.Identifier
 import net.minecraft.util.Util
 import studio.sniffa.Hideandseek
-import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.sin
@@ -22,7 +20,7 @@ object WinterScene {
     private const val BACKGROUND_H = 1080
     private val TREE: Identifier = Hideandseek.id("textures/ui/xmas/tree.png")
     private val GIFTS: Identifier = Hideandseek.id("textures/ui/xmas/gifts.png")
-    private val HAT: Identifier = Hideandseek.id("textures/ui/xmas/santahat.png")
+    private val LOGO: Identifier = Hideandseek.id("textures/ui/xmas/logo.png")
 
     private const val DRIFT_W = 64
     private const val DRIFT_H = 18
@@ -30,8 +28,15 @@ object WinterScene {
     private const val TREE_H = 58
     private const val GIFTS_W = 56
     private const val GIFTS_H = 30
-    private const val HAT_W = 29
-    private const val HAT_H = 17
+    private const val LOGO_W = 1200
+    private const val LOGO_H = 330
+    private const val LOGO_SHOWN_W = 280
+    private const val LOGO_GAP = 10
+    private const val LOGO_EDGE = 20
+
+    const val SPLASH_SHIFT_X = 14f
+
+    const val SPLASH_SHIFT_Y = -36f
 
     private const val GIFT_MIN_WIDTH = 60
     private const val RIBBON_INSET = 14
@@ -46,16 +51,12 @@ object WinterScene {
     private const val RIBBON_DARK = 0xFFA8761C.toInt()
     private const val RIBBON_LIGHT = 0xFFFFE07A.toInt()
 
-    private const val LOGO_HALF_WIDTH = 128
-    private const val LOGO_TOP = 30
-    private const val EDITION_BOTTOM = 81
 
     private const val NIGHT = 0x081430
     private const val SNOW = 0xFFF2F6FF.toInt()
     private const val SNOW_SHADE = 0xFFDCE7F6.toInt()
     private const val ICE = 0xFFA9DEFF.toInt()
     private const val WIRE = 0xFF16301C.toInt()
-    private const val GOLD = 0xFFE8B33A.toInt()
 
     private val BULBS = intArrayOf(0xC8102E, 0xE8B33A, 0x2FA85A, 0x3D9CFF)
 
@@ -67,7 +68,6 @@ object WinterScene {
 
     const val SIGN_LIFT = 22
 
-    private val EDITION_LINE: Component = Component.literal("❄ Weihnachts-Edition ❄")
 
     private data class Layer(val count: Int, val size: Int, val minSpeed: Float, val spread: Float,
                              val sway: Float, val alpha: Int, val salt: Int)
@@ -96,11 +96,19 @@ object WinterScene {
         gifts.forEachIndexed { i, button -> wrap(graphics, button, WRAPS[i % WRAPS.size]) }
         widgets.filter { it.visible && it is AbstractButton }.forEach { cap(graphics, it) }
         gifts.forEach { bow(graphics, it, now) }
-        logoSnow(graphics, width)
         garland(graphics, width, now)
-        hat(graphics, width, now)
-        edition(graphics, width)
         snow(graphics, width, height, now, NEAR)
+    }
+
+    @JvmStatic
+    fun logo(graphics: GuiGraphicsExtractor, width: Int, height: Int, alpha: Float) {
+        val w = minOf(LOGO_SHOWN_W, width - LOGO_EDGE * 2)
+        val h = w * LOGO_H / LOGO_W
+        val buttonsTop = height / 4 + 48
+        val x = (width - w) / 2
+        val y = maxOf(4, buttonsTop - h - LOGO_GAP)
+        val colour = ((alpha.coerceIn(0f, 1f) * 255).toInt() shl 24) or 0xFFFFFF
+        graphics.blit(RenderPipelines.GUI_TEXTURED, LOGO, x, y, 0f, 0f, w, h, LOGO_W, LOGO_H, LOGO_W, LOGO_H, colour)
     }
 
     private fun backdrop(graphics: GuiGraphicsExtractor, width: Int, height: Int) {
@@ -253,35 +261,6 @@ object WinterScene {
         }
     }
 
-    private fun hat(graphics: GuiGraphicsExtractor, width: Int, now: Long) {
-        val w = HAT_W * 3 / 2
-        val h = HAT_H * 3 / 2
-        val centreX = width / 2 - LOGO_HALF_WIDTH + 22
-        val centreY = LOGO_TOP + 6 - h / 2
-        val sway = -0.14 + 0.06 * sin(now / 650.0)
-        val pose = graphics.pose()
-        pose.pushMatrix()
-        pose.translate(centreX.toFloat(), (centreY + h / 2).toFloat())
-        pose.rotate(sway.toFloat())
-        graphics.blit(RenderPipelines.GUI_TEXTURED, HAT, -w / 2, -h, 0f, 0f, w, h, HAT_W, HAT_H, HAT_W, HAT_H)
-        pose.popMatrix()
-    }
-
-    private fun logoSnow(graphics: GuiGraphicsExtractor, width: Int) {
-        val left = width / 2 - LOGO_HALF_WIDTH + 34
-        val right = width / 2 + LOGO_HALF_WIDTH - 6
-        val top = LOGO_TOP + 1
-        var x = left
-        while (x < right) {
-            val bump = hash(x / 2, 91) % 3
-            if (hash(x / 5, 17) % 9 != 0) {
-                graphics.fill(x, top - bump, x + 2, top + 2, SNOW)
-                graphics.fill(x, top + 2, x + 2, top + 3, SNOW_SHADE)
-            }
-            x += 2
-        }
-    }
-
     private fun aurora(graphics: GuiGraphicsExtractor, width: Int, height: Int, now: Long) {
         val t = now / 1000.0
         val base = height * 0.18
@@ -356,24 +335,6 @@ object WinterScene {
     private fun blend(a: Int, b: Int, t: Double): Int {
         fun ch(shift: Int) = ((a shr shift and 0xFF) * (1 - t) + (b shr shift and 0xFF) * t).toInt() and 0xFF
         return (ch(16) shl 16) or (ch(8) shl 8) or ch(0)
-    }
-
-    private fun edition(graphics: GuiGraphicsExtractor, width: Int) {
-        val font = Minecraft.getInstance().font
-        val y = EDITION_BOTTOM + 4
-        plate(graphics, font.width(EDITION_LINE), width / 2, y)
-        graphics.centeredText(font, EDITION_LINE, width / 2, y, GOLD)
-    }
-
-    fun plate(graphics: GuiGraphicsExtractor, textWidth: Int, centreX: Int, textY: Int) {
-        val left = centreX - textWidth / 2 - 7
-        val right = centreX + (textWidth + 1) / 2 + 7
-        val top = textY - 3
-        val bottom = textY + 11
-        graphics.fill(left + 1, top, right - 1, bottom, argb(0xB8, NIGHT))
-        graphics.fill(left, top + 1, right, bottom - 1, argb(0xB8, NIGHT))
-        graphics.fill(left + 2, top, right - 2, top + 1, argb(0xC0, 0xE8B33A))
-        graphics.fill(left + 2, bottom - 1, right - 2, bottom, argb(0xC0, 0xE8B33A))
     }
 
     private fun argb(alpha: Int, rgb: Int): Int = (alpha.coerceIn(0, 255) shl 24) or (rgb and 0xFFFFFF)

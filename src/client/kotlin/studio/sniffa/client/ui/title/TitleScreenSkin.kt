@@ -18,7 +18,6 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.contents.TranslatableContents
 import net.minecraft.resources.Identifier
 import studio.sniffa.Hideandseek
-import studio.sniffa.client.Settings
 import studio.sniffa.client.ui.theme.Textures
 
 object TitleScreenSkin {
@@ -42,33 +41,21 @@ object TitleScreenSkin {
     private const val LOCKUP_GAP = 4
     private const val MARGIN = 8
 
-    private const val STATUS_GAP = 10
 
     private val AFTER_OTHER_MODS = Hideandseek.id("after_other_mods")
 
-    private var statusY = 0
 
     fun install() {
         ScreenEvents.AFTER_INIT.addPhaseOrdering(Event.DEFAULT_PHASE, AFTER_OTHER_MODS)
         ScreenEvents.AFTER_INIT.register(AFTER_OTHER_MODS) { _, screen, _, _ ->
             if (screen !is TitleScreen) return@register
             rebuild(screen)
-            if (Settings.pingEventServer) EventStatus.refresh(EVENT_ADDRESS)
 
             ScreenEvents.afterExtract(screen).register { _, graphics, _, _, _ ->
                 WinterScene.front(graphics, screen.width, screen.height, Screens.getWidgets(screen))
-                EventStatus.tick()
-                status(graphics, screen)
                 sign(graphics)
             }
-            ScreenEvents.remove(screen).register { EventStatus.stop() }
         }
-    }
-
-    private fun status(graphics: GuiGraphicsExtractor, screen: TitleScreen) {
-        val line = EventStatus.line() ?: return
-        WinterScene.plate(graphics, screen.font.width(line), screen.width / 2, statusY)
-        graphics.centeredText(screen.font, line, screen.width / 2, statusY, -1)
     }
 
     private fun rebuild(screen: TitleScreen) {
@@ -118,7 +105,6 @@ object TitleScreenSkin {
             ScreenEvents.beforeExtract(screen).register { _, _, _, _, _ -> pinReplays() }
         }
 
-        statusY = anchorY + 2 * ROW_HEIGHT + ROW_GAP + STATUS_GAP
     }
 
     private fun connect(screen: Screen) {
