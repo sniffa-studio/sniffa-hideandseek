@@ -8,6 +8,10 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-24.04
+    env:
+      CDN_UPLOAD_KEY: ${{ secrets.CDN_UPLOAD_KEY }}
+      CDN_UPLOAD_SECRET: ${{ secrets.CDN_UPLOAD_SECRET }}
+      CDN_PREVIEW_FOLDER: ${{ secrets.CDN_PREVIEW_FOLDER }}
     steps:
       - name: checkout repository
         uses: actions/checkout@v6
@@ -30,3 +34,24 @@ jobs:
           name: Artifacts
           path: build/libs/
           retention-days: 14
+      - name: publish to the cdn
+        if: github.event_name == 'push' && env.CDN_UPLOAD_KEY != '' && env.CDN_UPLOAD_SECRET != '' && (github.ref == 'refs/heads/main' || env.CDN_PREVIEW_FOLDER != '')
+        run: |
+          set -euo pipefail
+          jar=$(ls build/libs/*.jar | grep -v -- '-sources\.jar$' | head -n 1)
+          if [ "$GITHUB_REF" = "refs/heads/main" ]; then
+            folder="hideandseek"
+          else
+            folder="hideandseek/$CDN_PREVIEW_FOLDER"
+          fi
+          put() {
+            curl --fail-with-body -sS -o /dev/null \
+              --aws-sigv4 "aws:amz:us-east-1:s3" --user "$CDN_UPLOAD_KEY:$CDN_UPLOAD_SECRET" \
+              -H "x-amz-content-sha256: UNSIGNED-PAYLOAD" \
+              -H "Content-Type: application/java-archive" \
+              -H "Cache-Control: $2" \
+              -T "$jar" "https://s3.sniffa.studio/downloads/$folder/$1"
+          }
+          put "$(basename "$jar")" "public, max-age=31536000, immutable"
+          put "latest.jar" "no-cache"
+          echo "Uploaded $(basename "$jar") and latest.jar to the cdn" >> "$GITHUB_STEP_SUMMARY"
