@@ -6,15 +6,17 @@ enum class PropKind(
     private val idle: String?,
     private val deploy: String? = null,
     private val retract: String? = null,
+    private val model: String? = null,
 ) {
 
     RADAR("radar", 1.0f, "sweep", "deploy", "retract"),
     SNOWMAN("snowman", 1.0f, "watch", "deploy", "retract"),
+    SNOWMAN_DISGUISE("snowman_disguise", 1.0f, "disguise", "deploy", "retract", "snowman"),
     ;
 
-    val asset: String get() = id
+    val asset: String get() = model ?: id
 
-    val texture: String get() = "textures/prop/$id.png"
+    val texture: String get() = "textures/prop/$asset.png"
 
     val idleAnimation: String? get() = blockbenchName(idle)
 

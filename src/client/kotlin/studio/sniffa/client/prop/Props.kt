@@ -13,13 +13,26 @@ import net.minecraft.util.LightCoordsUtil
 import org.slf4j.LoggerFactory
 import studio.sniffa.Hideandseek
 import studio.sniffa.prop.PropKind
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
+import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.LivingEntity
+import kotlin.math.abs
+import kotlin.math.sin
 
 object Props {
 
     private val LOGGER = LoggerFactory.getLogger("${Hideandseek.MOD_ID}/props")
 
     private val standing = CopyOnWriteArrayList<Prop>()
+
+    private val worn = ConcurrentHashMap<Int, Prop>()
+
+    private val LIGHT_SAMPLES = doubleArrayOf(0.5, 1.2, 1.9)
+
+    private const val HOP_HEIGHT = 0.22
+
+    private const val HOP_PACE = 0.55f
 
     private val renderer: GeoObjectRenderer<Prop, Prop, GeoRenderState.Impl> = PropRenderer()
 
@@ -45,8 +58,22 @@ object Props {
         standing.add(Prop(known, x, y, z, yaw, seconds))
     }
 
+    fun wear(entityId: Int, kind: String, seconds: Int) {
+        if (seconds <= 0) {
+            worn[entityId]?.endSoon()
+            return
+        }
+        val known = PropKind.byId(kind)
+        if (known == null) {
+            LOGGER.warn("Server sent a disguise this jar does not know: {}. Ignored.", kind)
+            return
+        }
+        worn[entityId] = Prop(known, 0.0, 0.0, 0.0, 0f, seconds)
+    }
+
     fun forget() {
         standing.clear()
+        worn.clear()
     }
 
     fun install() {
@@ -59,16 +86,27 @@ object Props {
         matrices: PoseStack,
         context: LevelRenderContext,
     ) {
-        if (standing.isEmpty()) return
+        if (standing.isEmpty() && worn.isEmpty()) return
 
         standing.removeIf { !it.alive() }
-        if (standing.isEmpty()) return
+        worn.values.removeIf { !it.alive() }
+        if (standing.isEmpty() && worn.isEmpty()) return
 
         val client = Minecraft.getInstance()
         val level = client.level ?: return
-        val camera = client.gameRenderer.mainCamera().position()
+        val view = client.gameRenderer.mainCamera()
+        val camera = view.position()
+        val partialTick = client.deltaTracker.getGameTimeDeltaPartialTick(false)
 
-        for (prop in standing) {
+        val dressed = worn.mapNotNull { (id, prop) ->
+            val wearer = level.getEntity(id) ?: return@mapNotNull null
+            if (wearer.isSpectator || wearer.isRemoved) return@mapNotNull null
+            if (wearer === view.entity() && !view.isDetached) return@mapNotNull null
+            follow(prop, wearer, partialTick)
+            prop
+        }
+
+        for (prop in standing + dressed) {
             matrices.pushPose()
 
             matrices.translate(prop.x - camera.x, prop.y - camera.y, prop.z - camera.z)
@@ -90,11 +128,37 @@ object Props {
         }
     }
 
+    private fun follow(prop: Prop, wearer: Entity, partialTick: Float) {
+        val at = wearer.getPosition(partialTick)
+        prop.x = at.x
+        prop.y = at.y + hop(wearer, partialTick)
+        prop.z = at.z
+        val body = if (wearer is LivingEntity) lerpDegrees(wearer.yBodyRotO, wearer.yBodyRot, partialTick) else wearer.getYRot(partialTick)
+        prop.yaw = body + 180f
+    }
+
+    private fun hop(wearer: Entity, partialTick: Float): Double {
+        if (wearer !is LivingEntity) return 0.0
+        val speed = wearer.walkAnimation.speed(partialTick).coerceIn(0f, 1f)
+        if (speed < 0.01f) return 0.0
+        return abs(sin(wearer.walkAnimation.position(partialTick) * HOP_PACE)) * speed * HOP_HEIGHT
+    }
+
+    private fun lerpDegrees(from: Float, to: Float, t: Float): Float {
+        var delta = (to - from) % 360f
+        if (delta >= 180f) delta -= 360f
+        if (delta < -180f) delta += 360f
+        return from + delta * t
+    }
+
     private fun lightAt(level: net.minecraft.world.level.Level, prop: Prop): Int {
-        val at = BlockPos.containing(prop.x, prop.y + 0.5, prop.z)
-        return LightCoordsUtil.pack(
-            level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, at),
-            level.getBrightness(net.minecraft.world.level.LightLayer.SKY, at),
-        )
+        var block = 0
+        var sky = 0
+        for (lift in LIGHT_SAMPLES) {
+            val at = BlockPos.containing(prop.x, prop.y + lift, prop.z)
+            block = maxOf(block, level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, at))
+            sky = maxOf(sky, level.getBrightness(net.minecraft.world.level.LightLayer.SKY, at))
+        }
+        return LightCoordsUtil.pack(block, sky)
     }
 }

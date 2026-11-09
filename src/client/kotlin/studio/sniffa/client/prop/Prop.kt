@@ -11,12 +11,14 @@ import studio.sniffa.prop.PropKind
 
 class Prop(
     val kind: PropKind,
-    val x: Double,
-    val y: Double,
-    val z: Double,
-    val yaw: Float,
-    private val seconds: Int,
+    var x: Double,
+    var y: Double,
+    var z: Double,
+    var yaw: Float,
+    seconds: Int,
 ) : GeoAnimatable {
+
+    private var lifetime: Double = seconds.toDouble()
 
     private val placedAt = System.currentTimeMillis()
 
@@ -24,10 +26,14 @@ class Prop(
 
     val age: Double get() = (System.currentTimeMillis() - placedAt) / 1000.0
 
-    fun alive(): Boolean = age < seconds
+    fun alive(): Boolean = age < lifetime
+
+    fun endSoon() {
+        lifetime = minOf(lifetime, age + PropKind.RETRACT_SECONDS)
+    }
 
     private val retracting: Boolean
-        get() = kind.retractAnimation != null && age >= seconds - PropKind.RETRACT_SECONDS
+        get() = kind.retractAnimation != null && age >= lifetime - PropKind.RETRACT_SECONDS
 
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar) {
         val opening = RawAnimation.begin()
