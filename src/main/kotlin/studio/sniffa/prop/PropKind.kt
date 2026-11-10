@@ -8,11 +8,13 @@ enum class PropKind(
     private val retract: String? = null,
     private val model: String? = null,
     val glows: Boolean = false,
+    val trails: Boolean = false,
 ) {
 
     RADAR("radar", 1.0f, "sweep", "deploy", "retract", glows = true),
     SNOWMAN("snowman", 1.0f, "watch", "deploy", "retract"),
     SNOWMAN_DISGUISE("snowman_disguise", 1.0f, "disguise", "deploy", "retract", "snowman"),
+    ANGEL("angel", 0.7f, "fly", "arrive", "leave", glows = true, trails = true),
     ;
 
     val asset: String get() = model ?: id

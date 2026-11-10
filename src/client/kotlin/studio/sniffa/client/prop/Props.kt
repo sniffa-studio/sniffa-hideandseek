@@ -21,6 +21,8 @@ import java.util.concurrent.CopyOnWriteArrayList
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
 import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.exp
 import kotlin.math.sin
 
 object Props {
@@ -29,13 +31,25 @@ object Props {
 
     private val standing = CopyOnWriteArrayList<Prop>()
 
-    private val worn = ConcurrentHashMap<Int, Prop>()
+    private val worn = ConcurrentHashMap<Pair<Int, String>, Prop>()
 
     private val LIGHT_SAMPLES = doubleArrayOf(0.5, 1.2, 1.9)
 
     private const val HOP_HEIGHT = 0.22
 
     private const val HOP_PACE = 0.55f
+
+    private const val TRAIL_BACK = 1.1
+
+    private const val TRAIL_UP = 1.25
+
+    private const val TRAIL_SIDE = 0.45
+
+    private const val TRAIL_SWAY = 0.25
+
+    private const val TRAIL_BOB = 0.08
+
+    private const val TRAIL_CATCH_UP = 5.0
 
     private val renderer: GeoObjectRenderer<Prop, Prop, GeoRenderState.Impl> = PropRenderer()
 
@@ -75,7 +89,7 @@ object Props {
 
     fun wear(entityId: Int, kind: String, seconds: Int) {
         if (seconds <= 0) {
-            worn[entityId]?.endSoon()
+            worn[entityId to kind]?.endSoon()
             return
         }
         val known = PropKind.byId(kind)
@@ -83,7 +97,7 @@ object Props {
             LOGGER.warn("Server sent a disguise this jar does not know: {}. Ignored.", kind)
             return
         }
-        worn[entityId] = Prop(known, 0.0, 0.0, 0.0, 0f, seconds)
+        worn[entityId to kind] = Prop(known, 0.0, 0.0, 0.0, 0f, seconds)
     }
 
     fun forget() {
@@ -113,9 +127,14 @@ object Props {
         val camera = view.position()
         val partialTick = client.deltaTracker.getGameTimeDeltaPartialTick(false)
 
-        val dressed = worn.mapNotNull { (id, prop) ->
-            val wearer = level.getEntity(id) ?: return@mapNotNull null
-            if (wearer.isSpectator || wearer.isRemoved) return@mapNotNull null
+        val dressed = worn.mapNotNull { (key, prop) ->
+            val wearer = level.getEntity(key.first) ?: return@mapNotNull null
+            if (wearer.isRemoved) return@mapNotNull null
+            if (prop.kind.trails) {
+                trail(prop, wearer, partialTick)
+                return@mapNotNull prop
+            }
+            if (wearer.isSpectator) return@mapNotNull null
             if (wearer === view.entity() && !view.isDetached) return@mapNotNull null
             follow(prop, wearer, partialTick)
             prop
@@ -150,6 +169,34 @@ object Props {
         prop.z = at.z
         val body = if (wearer is LivingEntity) lerpDegrees(wearer.yBodyRotO, wearer.yBodyRot, partialTick) else wearer.getYRot(partialTick)
         prop.yaw = body + 180f
+    }
+
+    private fun trail(prop: Prop, wearer: Entity, partialTick: Float) {
+        val at = wearer.getPosition(partialTick)
+        val yaw = if (wearer is LivingEntity) lerpDegrees(wearer.yBodyRotO, wearer.yBodyRot, partialTick) else wearer.getYRot(partialTick)
+        val radians = Math.toRadians(yaw.toDouble())
+        val backX = sin(radians) * TRAIL_BACK
+        val backZ = -cos(radians) * TRAIL_BACK
+        val side = TRAIL_SIDE + sin(prop.age * 2.2) * TRAIL_SWAY
+        val targetX = at.x + backX - cos(radians) * side
+        val targetY = at.y + TRAIL_UP + sin(prop.age * 3.0) * TRAIL_BOB
+        val targetZ = at.z + backZ - sin(radians) * side
+
+        val now = System.nanoTime()
+        if (!prop.placed) {
+            prop.x = targetX
+            prop.y = targetY
+            prop.z = targetZ
+            prop.placed = true
+        } else {
+            val seconds = ((now - prop.lastFrameNanos) / 1.0e9).coerceIn(0.0, 0.25)
+            val share = 1.0 - exp(-seconds * TRAIL_CATCH_UP)
+            prop.x += (targetX - prop.x) * share
+            prop.y += (targetY - prop.y) * share
+            prop.z += (targetZ - prop.z) * share
+        }
+        prop.lastFrameNanos = now
+        prop.yaw = yaw + 180f
     }
 
     private fun hop(wearer: Entity, partialTick: Float): Double {

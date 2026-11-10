@@ -20,6 +20,10 @@ class Prop(
 
     private var lifetime: Double = seconds.toDouble()
 
+    var placed = false
+
+    var lastFrameNanos = 0L
+
     private val placedAt = System.currentTimeMillis()
 
     private val cache: AnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this)
