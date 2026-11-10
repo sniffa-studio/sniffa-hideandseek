@@ -14,12 +14,13 @@ import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
+import kotlin.random.Random
 
 object Cinema {
 
     private const val STEP_SPACING = 1.75
     private val HEIGHTS = doubleArrayOf(1.598, 1.148, 0.798)
-    private val PLACE_COLOURS = intArrayOf(0xFFCCA120.toInt(), 0xFFC4CCD4.toInt(), 0xFFC8844E.toInt())
+    private val PLACE_COLOURS = intArrayOf(0xFFF2C65A.toInt(), 0xFFDDE6EF.toInt(), 0xFFD9884A.toInt())
     private const val SEEKER_RED = 0xFFE8394A.toInt()
 
     private const val TICK_MILLIS = 50L
@@ -35,7 +36,7 @@ object Cinema {
     private const val MOMENT_BAR_SHARE = 0.08f
     private const val CAPTION_SCALE = 2f
     private const val CAPTION_FADE_MILLIS = 300f
-    private const val CEREMONY = "ꜱɪᴇɢᴇʀᴇʜʀᴜɴɢ"
+    private const val CEREMONY = "❄ ꜱɪᴇɢᴇʀᴇʜʀᴜɴɢ ❄"
     private const val ROUND_OPENS = "ʀᴜɴᴅᴇ ʙᴇɢɪɴɴᴛ"
     private const val SEEKS = "ꜱᴜᴄʜᴛ ᴇᴜᴄʜ"
 
@@ -63,6 +64,18 @@ object Cinema {
     private const val INTRO_END_EARLY_MILLIS = 200L
 
     private const val BLACK = 0xFF000000.toInt()
+    private const val NIGHT = 0xFF0B1530.toInt()
+    private const val TRIM = 0xFFF2C65A.toInt()
+    private const val SNOW = 0xFFF4F8FF.toInt()
+    private val BULBS = intArrayOf(0xFFE8394A.toInt(), 0xFFF2C65A.toInt(), 0xFF3FBF6E.toInt(), 0xFF9FD4FF.toInt())
+    private const val BULB_GAP = 16
+    private const val BULB_SIZE = 3
+    private const val TWINKLE_MILLIS = 450L
+    private const val FLAKES = 70
+    private const val FALL_PER_SECOND = 0.09f
+    private const val SNOW_ALPHA = 0.7f
+
+    private class Flake(val x: Float, val y: Float, val size: Int, val speed: Float, val sway: Float, val alpha: Float)
 
     private class Shot(val eye: Vec3, val look: Vec3)
 
@@ -78,6 +91,7 @@ object Cinema {
         val length: Long,
         val moves: Boolean,
         val barShare: Float,
+        val flakes: List<Flake> = emptyList(),
     )
 
     @Volatile
@@ -136,7 +150,13 @@ object Cinema {
         keys += Key(held + PULL_BACK_MILLIS, wide)
         keys += Key(held + PULL_BACK_MILLIS + RETURN_MILLIS, null)
 
-        film = Film(System.currentTimeMillis(), keys, captions, CEREMONY, keys.last().at, true, BAR_SHARE)
+        val startedAt = System.currentTimeMillis()
+        val random = Random(startedAt)
+        val flakes = List(FLAKES) {
+            Flake(random.nextFloat(), random.nextFloat(), 1 + random.nextInt(2), 0.6f + random.nextFloat() * 0.8f,
+                random.nextFloat() * 6.28f, 0.35f + random.nextFloat() * 0.65f)
+        }
+        film = Film(startedAt, keys, captions, CEREMONY, keys.last().at, true, BAR_SHARE, flakes)
     }
 
     private fun intro(payload: IntroPayload) {
@@ -251,13 +271,21 @@ object Cinema {
             return
         }
 
-        graphics.fill(0, 0, width, bar, BLACK)
-        graphics.fill(0, height - bar, width, height, BLACK)
+        val festive = playing.flakes.isNotEmpty()
+        if (festive) {
+            snow(graphics, playing.flakes, now, amount)
+        }
+        val shade = if (festive) NIGHT else BLACK
+        graphics.fill(0, 0, width, bar, shade)
+        graphics.fill(0, height - bar, width, height, shade)
+        if (festive) {
+            garland(graphics, bar, now, amount)
+        }
 
         val font = Minecraft.getInstance().font
         if (playing.title.isNotEmpty()) {
             graphics.text(font, playing.title, (width - font.width(playing.title)) / 2, (bar - font.lineHeight) / 2,
-                Vignette.alpha(Palette.GOLD, amount), false)
+                Vignette.alpha(if (festive) TRIM else Palette.GOLD, amount), false)
         }
 
         val caption = playing.captions.lastOrNull { it.at <= now } ?: return
@@ -271,6 +299,38 @@ object Cinema {
         }
         drawScaled(graphics, caption.name, centreY - font.lineHeight * 0.45f * scale, scale, Vignette.alpha(caption.colour, shown))
         drawScaled(graphics, caption.detail, centreY + font.lineHeight * 0.55f * scale, 1f, Vignette.alpha(Palette.TEXT, shown))
+    }
+
+    private fun snow(graphics: GuiGraphicsExtractor, flakes: List<Flake>, now: Long, amount: Float) {
+        val width = graphics.guiWidth()
+        val height = graphics.guiHeight()
+        val seconds = now / 1000f
+        for (flake in flakes) {
+            val y = ((flake.y + seconds * FALL_PER_SECOND * flake.speed) % 1f) * height
+            val x = flake.x * width + sin(seconds * 1.4f + flake.sway) * 6f
+            graphics.fill(x.toInt(), y.toInt(), x.toInt() + flake.size, y.toInt() + flake.size,
+                Vignette.alpha(SNOW, amount * flake.alpha * SNOW_ALPHA))
+        }
+    }
+
+    private fun garland(graphics: GuiGraphicsExtractor, bar: Int, now: Long, amount: Float) {
+        val width = graphics.guiWidth()
+        val height = graphics.guiHeight()
+        val trim = Vignette.alpha(TRIM, amount)
+        graphics.fill(0, bar - 1, width, bar, trim)
+        graphics.fill(0, height - bar, width, height - bar + 1, trim)
+        val step = (now / TWINKLE_MILLIS).toInt()
+        var index = 0
+        var x = BULB_GAP / 2
+        while (x < width) {
+            val lit = (index + step) % 3 != 0
+            val colour = Vignette.alpha(BULBS[(index + step / 2) % BULBS.size], amount * if (lit) 1f else 0.35f)
+            val sag = if (index % 2 == 0) 1 else 2
+            graphics.fill(x, bar + sag, x + BULB_SIZE, bar + sag + BULB_SIZE, colour)
+            graphics.fill(x, height - bar - sag - BULB_SIZE, x + BULB_SIZE, height - bar - sag, colour)
+            index++
+            x += BULB_GAP
+        }
     }
 
     private fun drawScaled(graphics: GuiGraphicsExtractor, text: String, centreY: Float, scale: Float, colour: Int) {
