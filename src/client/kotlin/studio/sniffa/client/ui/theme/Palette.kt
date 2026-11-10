@@ -6,7 +6,7 @@ object Palette {
 
     const val MUTED = 0xFF8B9C92.toInt()
 
-    const val ERROR = 0xFFFC301E.toInt()
+    const val ERROR = 0xFFE8394A.toInt()
 
     const val WARNING = 0xFFF2B33D.toInt()
 

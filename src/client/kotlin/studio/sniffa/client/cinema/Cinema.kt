@@ -20,7 +20,7 @@ object Cinema {
     private const val STEP_SPACING = 1.75
     private val HEIGHTS = doubleArrayOf(1.598, 1.148, 0.798)
     private val PLACE_COLOURS = intArrayOf(0xFFCCA120.toInt(), 0xFFC4CCD4.toInt(), 0xFFC8844E.toInt())
-    private const val SEEKER_RED = 0xFFFC301E.toInt()
+    private const val SEEKER_RED = 0xFFE8394A.toInt()
 
     private const val TICK_MILLIS = 50L
     private const val LIFT_MILLIS = 1500L
@@ -257,7 +257,7 @@ object Cinema {
         val font = Minecraft.getInstance().font
         if (playing.title.isNotEmpty()) {
             graphics.text(font, playing.title, (width - font.width(playing.title)) / 2, (bar - font.lineHeight) / 2,
-                Vignette.alpha(Palette.MUTED, amount), false)
+                Vignette.alpha(Palette.GOLD, amount), false)
         }
 
         val caption = playing.captions.lastOrNull { it.at <= now } ?: return

@@ -5,7 +5,7 @@ import net.minecraft.world.entity.Entity
 object CrewView {
 
     private const val HIDER_COLOUR = 0x4EC471
-    private const val SEEKER_COLOUR = 0xFC301E
+    private const val SEEKER_COLOUR = 0xE8394A
 
     private const val STALE_MILLIS = 3_000L
 
