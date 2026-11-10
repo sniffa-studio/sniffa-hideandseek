@@ -138,17 +138,6 @@ object AbilityCatalog {
         sprite = Hideandseek.id("ability/schneewolke"),
     )
 
-    val AURORA = Ability(
-        id = "aurora",
-        displayName = "Polarlicht",
-        description = "Ein Polarlicht über der Stelle, auf die du schaust: Es zeigt dir, ob sich in 15 Blöcken jemand versteckt.",
-        side = Side.SEEKER,
-        cost = 6,
-        cooldownSeconds = 60,
-        icon = Items.AMETHYST_SHARD,
-        plannedModel = "Polarlicht-Vorhang",
-        sprite = Hideandseek.id("ability/polarlicht"),
-    )
 
     val SLED_DOG = Ability(
         id = "sled_dog",
@@ -234,16 +223,78 @@ object AbilityCatalog {
         sprite = Hideandseek.id("ability/wichtelgroesse"),
     )
 
+    val STAR = Ability(
+        id = "star",
+        displayName = "Weihnachtsstern",
+        description = "Ein Stern geht über der Stelle auf, auf die du schaust. 20 Sekunden lang leuchtet er golden, solange sich darunter in 15 Blöcken jemand versteckt.",
+        side = Side.SEEKER,
+        cost = 7,
+        cooldownSeconds = 75,
+        icon = Items.NETHER_STAR,
+        plannedModel = "Goldener Stern mit Lichterkette",
+        sprite = Hideandseek.id("ability/weihnachtsstern"),
+    )
+
+    val ICE_BALL = Ability(
+        id = "ice_ball",
+        displayName = "Eisball",
+        description = "Ein Schneeball zum Werfen. Wen er trifft, der friert 2 Sekunden ein und leuchtet 5 Sekunden lang.",
+        side = Side.SEEKER,
+        cost = 5,
+        cooldownSeconds = 30,
+        icon = Items.SNOWBALL,
+        plannedModel = "Eisblauer Schneeball",
+        sprite = Hideandseek.id("ability/eisball"),
+    )
+
+    val NAUGHTY_LIST = Ability(
+        id = "naughty_list",
+        displayName = "Die Liste",
+        description = "Wer war unartig? Der Verstecker, der sich am längsten nicht bewegt hat, leuchtet 5 Sekunden lang auf.",
+        side = Side.SEEKER,
+        cost = 9,
+        cooldownSeconds = 90,
+        icon = Items.WRITABLE_BOOK,
+        plannedModel = "Lange Pergamentrolle",
+        sprite = Hideandseek.id("ability/liste"),
+    )
+
+    val BELLS = Ability(
+        id = "bells",
+        displayName = "Schellenkranz",
+        description = "Häng dem nächsten Sucher in 30 Blöcken Schellen um. 15 Sekunden lang bimmelt jeder seiner Schritte.",
+        side = Side.HIDER,
+        cost = 4,
+        cooldownSeconds = 60,
+        icon = Items.BELL,
+        plannedModel = "Kranz mit Schellen",
+        sprite = Hideandseek.id("ability/schellenkranz"),
+    )
+
+    val ANGEL = Ability(
+        id = "angel",
+        displayName = "Schutzengel",
+        description = "Einmal pro Runde: Der nächste Treffer fängt dich nicht. Dein Engel schubst dich weg und du rennst 2 Sekunden schneller.",
+        side = Side.HIDER,
+        cost = 15,
+        cooldownSeconds = 300,
+        icon = Items.TOTEM_OF_UNDYING,
+        plannedModel = "Engel mit Heiligenschein",
+        sprite = Hideandseek.id("ability/schutzengel"),
+    )
+
     val SEEKER_ABILITIES: List<Ability> = listOf(
         RADAR,
         FOOTPRINTS,
+        STAR,
+        NAUGHTY_LIST,
+        SLED_DOG,
+        ICE_BALL,
         SNOWMAN_SPY,
         MISTLETOE,
-        SLED_DOG,
-        AURORA,
         SWAP,
-        DANGER_ZONE,
         ELYTRA,
+        DANGER_ZONE,
     )
 
     val HIDER_ABILITIES: List<Ability> = listOf(
@@ -255,8 +306,10 @@ object AbilityCatalog {
         FAKE_STEPS,
         DECOY,
         BLACK_ICE,
+        BELLS,
         STAR_PEARL,
         SHRINK,
+        ANGEL,
     )
 
     fun forSide(side: Side?): List<Ability> = when (side) {
