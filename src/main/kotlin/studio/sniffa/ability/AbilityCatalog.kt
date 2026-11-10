@@ -155,6 +155,30 @@ object AbilityCatalog {
         sprite = Hideandseek.id("ability/schneemann_verkleidung"),
     )
 
+    val SNOWBALL = Ability(
+        id = "snowball",
+        displayName = "Schneeball ins Gesicht",
+        description = "Der nächste Sucher in 12 Blöcken, den du siehst, bekommt einen Schneeball ins Gesicht und sieht 2 Sekunden nichts.",
+        side = Side.HIDER,
+        cost = 3,
+        cooldownSeconds = 60,
+        icon = Items.SNOWBALL,
+        plannedModel = "Schneeball mit Flugbahn",
+        sprite = Hideandseek.id("ability/schneeball"),
+    )
+
+    val SNOW_CLOUD = Ability(
+        id = "snow_cloud",
+        displayName = "Schneewolke",
+        description = "Eine dichte Schneewolke um dich herum. 8 Sekunden lang sieht niemand hinein oder hindurch.",
+        side = Side.HIDER,
+        cost = 4,
+        cooldownSeconds = 75,
+        icon = Items.POWDER_SNOW_BUCKET,
+        plannedModel = "Pulverschnee-Wolke",
+        sprite = Hideandseek.id("ability/schneewolke"),
+    )
+
     val SEEKER_ABILITIES: List<Ability> = listOf(
         RADAR,
         SPEED,
@@ -171,6 +195,8 @@ object AbilityCatalog {
         JAMMER,
         EARLY_WARNING,
         SNOWMAN_DISGUISE,
+        SNOWBALL,
+        SNOW_CLOUD,
     )
 
     fun forSide(side: Side?): List<Ability> = when (side) {

@@ -32,6 +32,10 @@ import studio.sniffa.client.radar.Footprints
 import studio.sniffa.net.payload.HotColdPayload
 import studio.sniffa.net.payload.PropPayload
 import studio.sniffa.net.payload.DisguisePayload
+import studio.sniffa.net.payload.SplatPayload
+import studio.sniffa.net.payload.CloudPayload
+import studio.sniffa.client.snow.SnowClouds
+import studio.sniffa.client.snow.SnowSplat
 import studio.sniffa.net.payload.RadarPayload
 import studio.sniffa.net.payload.RangePayload
 import studio.sniffa.net.payload.RolePayload
@@ -116,6 +120,14 @@ object RoundSync {
             Props.wear(payload.entityId, payload.kind, payload.seconds)
         }
 
+        ClientPlayNetworking.registerGlobalReceiver(SplatPayload.TYPE) { payload, _ ->
+            SnowSplat.hit(payload.ticks)
+        }
+
+        ClientPlayNetworking.registerGlobalReceiver(CloudPayload.TYPE) { payload, _ ->
+            SnowClouds.accept(payload.x, payload.y, payload.z, payload.radius, payload.seconds)
+        }
+
         ClientPlayNetworking.registerGlobalReceiver(GlowPayload.TYPE) { payload, _ ->
             GlowSight.accept(payload.entityIds, payload.seconds)
         }
@@ -156,6 +168,8 @@ object RoundSync {
             CompassRose.forget()
             ScanTags.forget()
             Props.forget()
+            SnowSplat.forget()
+            SnowClouds.forget()
             AbilityCooldowns.forget()
             ServerPrices.forget()
             Footprints.forget()
