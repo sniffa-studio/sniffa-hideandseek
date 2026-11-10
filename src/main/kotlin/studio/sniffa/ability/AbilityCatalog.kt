@@ -17,34 +17,6 @@ object AbilityCatalog {
         sprite = Hideandseek.id("ability/radar"),
     )
 
-    val SPEED = Ability(
-        id = "speed",
-        displayName = "Zuckerstange",
-        description = "Zuckerschock: kurzer Geschwindigkeitsschub.",
-        side = Side.SEEKER,
-        cost = 1,
-        cooldownSeconds = 45,
-        icon = Items.SUGAR,
-        plannedModel = "Energy-Drink, Spritze oder Booster",
-        sprite = Hideandseek.id("ability/tempo"),
-    )
-
-
-
-
-    val PLAYER_COMPASS = Ability(
-        id = "player_compass",
-        displayName = "Polarstern",
-        description = "Der Stern zeigt dir die Richtung zum nächsten Verstecker.",
-        side = Side.SEEKER,
-        cost = 8,
-        cooldownSeconds = 45,
-        icon = Items.RECOVERY_COMPASS,
-        plannedModel = "Eigener Tracker mit Pfeil auf dem Display",
-        sprite = Hideandseek.id("ability/kompass"),
-    )
-
-
     val FOOTPRINTS = Ability(
         id = "footprints",
         displayName = "Fußspuren im Schnee",
@@ -82,7 +54,6 @@ object AbilityCatalog {
         restockCost = 4,
     )
 
-
     val SWAP = Ability(
         id = "swap",
         displayName = "Wichteln",
@@ -107,24 +78,12 @@ object AbilityCatalog {
         sprite = Hideandseek.id("ability/dangerzone"),
     )
 
-    val SPRINT = Ability(
-        id = "sprint",
-        displayName = "Schlittschuhe",
-        description = "Auf Kufen: kurzer Geschwindigkeitsschub.",
-        side = Side.HIDER,
-        cost = 3,
-        cooldownSeconds = 60,
-        icon = Items.FEATHER,
-        plannedModel = "Turnschuh oder kleiner Booster",
-        sprite = Hideandseek.id("ability/sprint"),
-    )
-
     val JAMMER = Ability(
         id = "jammer",
         displayName = "Geschenkpapier",
-        description = "Gut eingepackt: Die nächste Rentier-Nase zählt dich nicht mit.",
+        description = "Gut eingepackt: 20 Sekunden lang findet dich keine Ortung des Suchers.",
         side = Side.HIDER,
-        cost = 4,
+        cost = 5,
         cooldownSeconds = 75,
         icon = Items.REDSTONE_TORCH,
         plannedModel = "Kleiner Sender mit Antenne",
@@ -179,24 +138,125 @@ object AbilityCatalog {
         sprite = Hideandseek.id("ability/schneewolke"),
     )
 
+    val AURORA = Ability(
+        id = "aurora",
+        displayName = "Polarlicht",
+        description = "Ein Polarlicht über der Stelle, auf die du schaust: Es zeigt dir, ob sich in 15 Blöcken jemand versteckt.",
+        side = Side.SEEKER,
+        cost = 6,
+        cooldownSeconds = 60,
+        icon = Items.AMETHYST_SHARD,
+        plannedModel = "Polarlicht-Vorhang",
+        sprite = Hideandseek.id("ability/polarlicht"),
+    )
+
+    val SLED_DOG = Ability(
+        id = "sled_dog",
+        displayName = "Schlittenhund",
+        description = "Ein Husky nimmt die Spur des nächsten Versteckers auf, läuft hin und bellt ihn an.",
+        side = Side.SEEKER,
+        cost = 10,
+        cooldownSeconds = 90,
+        icon = Items.BONE,
+        plannedModel = "Husky mit roter Schleife",
+        sprite = Hideandseek.id("ability/schlittenhund"),
+    )
+
+    val MISTLETOE = Ability(
+        id = "mistletoe",
+        displayName = "Mistelzweig-Falle",
+        description = "Eine Falle, die nur Sucher sehen. Tritt ein Verstecker drauf, bimmelt sie laut.",
+        side = Side.SEEKER,
+        cost = 4,
+        cooldownSeconds = 30,
+        icon = Items.AZALEA_LEAVES,
+        plannedModel = "Mistelzweig mit Beeren",
+        sprite = Hideandseek.id("ability/mistelzweig"),
+    )
+
+    val FAKE_STEPS = Ability(
+        id = "fake_steps",
+        displayName = "Wichtelschritte",
+        description = "Der Sucher hört 4 Sekunden lang Schritte direkt hinter sich.",
+        side = Side.HIDER,
+        cost = 3,
+        cooldownSeconds = 45,
+        icon = Items.LEATHER_BOOTS,
+        plannedModel = "Kleine Wichtelstiefel",
+        sprite = Hideandseek.id("ability/wichtelschritte"),
+    )
+
+    val DECOY = Ability(
+        id = "decoy",
+        displayName = "Lebkuchen-Doppelgänger",
+        description = "Ein Doppelgänger mit deinem Skin bleibt 45 Sekunden stehen. Schlägt der Sucher drauf, platzt er.",
+        side = Side.HIDER,
+        cost = 5,
+        cooldownSeconds = 90,
+        icon = Items.ARMOR_STAND,
+        plannedModel = "Lebkuchenmann",
+        sprite = Hideandseek.id("ability/lebkuchen"),
+    )
+
+    val BLACK_ICE = Ability(
+        id = "black_ice",
+        displayName = "Glatteis",
+        description = "Der nächste Sucher in 16 Blöcken, den du siehst, rutscht 4 Sekunden lang und kommt kaum vom Fleck.",
+        side = Side.HIDER,
+        cost = 7,
+        cooldownSeconds = 90,
+        icon = Items.BLUE_ICE,
+        plannedModel = "Eisfläche",
+        sprite = Hideandseek.id("ability/glatteis"),
+    )
+
+    val STAR_PEARL = Ability(
+        id = "star_pearl",
+        displayName = "Sternschnuppe",
+        description = "Eine Enderperle zum Werfen. Du landest ohne Schaden dort, wo sie aufschlägt.",
+        side = Side.HIDER,
+        cost = 7,
+        cooldownSeconds = 120,
+        icon = Items.ENDER_PEARL,
+        plannedModel = "Sternschnuppe mit Schweif",
+        sprite = Hideandseek.id("ability/sternschnuppe"),
+    )
+
+    val SHRINK = Ability(
+        id = "shrink",
+        displayName = "Wichtelgröße",
+        description = "8 Sekunden lang bist du winzig klein und passt durch jede Lücke.",
+        side = Side.HIDER,
+        cost = 8,
+        cooldownSeconds = 120,
+        icon = Items.RED_MUSHROOM,
+        plannedModel = "Wichtelmütze",
+        sprite = Hideandseek.id("ability/wichtelgroesse"),
+    )
+
     val SEEKER_ABILITIES: List<Ability> = listOf(
         RADAR,
-        SPEED,
-        PLAYER_COMPASS,
         FOOTPRINTS,
         SNOWMAN_SPY,
-        ELYTRA,
+        MISTLETOE,
+        SLED_DOG,
+        AURORA,
         SWAP,
         DANGER_ZONE,
+        ELYTRA,
     )
 
     val HIDER_ABILITIES: List<Ability> = listOf(
-        SPRINT,
+        SNOWBALL,
+        SNOW_CLOUD,
         JAMMER,
         EARLY_WARNING,
         SNOWMAN_DISGUISE,
-        SNOWBALL,
-        SNOW_CLOUD,
+        FAKE_STEPS,
+        DECOY,
+        BLACK_ICE,
+        STAR_PEARL,
+        SHRINK,
     )
 
     fun forSide(side: Side?): List<Ability> = when (side) {
