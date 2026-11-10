@@ -24,6 +24,8 @@ class Prop(
 
     var lastFrameNanos = 0L
 
+    var lastSparkleNanos = 0L
+
     private val placedAt = System.currentTimeMillis()
 
     private val cache: AnimatableInstanceCache = GeckoLibUtil.createInstanceCache(this)

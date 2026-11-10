@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents
 import net.minecraft.client.Minecraft
 import net.minecraft.core.BlockPos
+import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.util.LightCoordsUtil
 import org.slf4j.LoggerFactory
 import studio.sniffa.Hideandseek
@@ -39,17 +40,21 @@ object Props {
 
     private const val HOP_PACE = 0.55f
 
-    private const val TRAIL_BACK = 1.1
+    private const val TRAIL_BACK = 0.75
 
-    private const val TRAIL_UP = 1.25
+    private const val TRAIL_UP = 1.95
 
-    private const val TRAIL_SIDE = 0.45
+    private const val TRAIL_SIDE = 0.75
 
     private const val TRAIL_SWAY = 0.25
 
     private const val TRAIL_BOB = 0.08
 
     private const val TRAIL_CATCH_UP = 5.0
+
+    private const val SPARKLE_NANOS = 70_000_000L
+
+    private const val SPARKLE_SPREAD = 0.18
 
     private val renderer: GeoObjectRenderer<Prop, Prop, GeoRenderState.Impl> = PropRenderer()
 
@@ -197,6 +202,17 @@ object Props {
         }
         prop.lastFrameNanos = now
         prop.yaw = yaw + 180f
+        if (now - prop.lastSparkleNanos > SPARKLE_NANOS) {
+            prop.lastSparkleNanos = now
+            val random = wearer.level().random
+            wearer.level().addParticle(
+                ParticleTypes.END_ROD,
+                prop.x + (random.nextDouble() - 0.5) * SPARKLE_SPREAD,
+                prop.y + 0.25 + (random.nextDouble() - 0.5) * SPARKLE_SPREAD,
+                prop.z + (random.nextDouble() - 0.5) * SPARKLE_SPREAD,
+                0.0, -0.015, 0.0,
+            )
+        }
     }
 
     private fun hop(wearer: Entity, partialTick: Float): Double {
