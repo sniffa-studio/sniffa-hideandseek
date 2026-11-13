@@ -1,6 +1,11 @@
 package studio.sniffa.client.light
 
 import com.mojang.blaze3d.PrimitiveTopology
+import com.mojang.blaze3d.buffers.GpuBuffer
+import com.mojang.blaze3d.vertex.BufferBuilder
+import com.mojang.blaze3d.vertex.ByteBufferBuilder
+import com.mojang.blaze3d.vertex.VertexFormat
+import net.minecraft.world.phys.Vec3
 import com.mojang.blaze3d.pipeline.BlendFunction
 import com.mojang.blaze3d.pipeline.ColorTargetState
 import com.mojang.blaze3d.pipeline.DepthStencilState
@@ -45,15 +50,22 @@ object Spotlights {
     private const val WARMTH_BLUE = 0.50f
     private const val LIFT_GAIN = 5.5f
     private const val GLOW_GAIN = 0.6f
+    private const val SHAFT_DEGREES = 15.0
+    private const val SHAFT_GAIN = 0.35f
+    private const val LENS_SIZE = 0.55f
+    private const val LENS_PUSH = 0.18f
 
     private class Light(var beam: Beam) {
         var mesh: LitMesh? = null
+        var shaft: ShaftMesh? = null
         var tracing: LitFaces? = null
         var retraceAt = 0L
 
         fun close() {
             mesh?.close()
             mesh = null
+            shaft?.close()
+            shaft = null
             tracing = null
         }
     }
@@ -62,14 +74,25 @@ object Spotlights {
     private var ticks = 0
 
     private val LIFT: RenderPipeline = pipeline("spotlight_lift", BlendFunction(BlendFactor.DST_COLOR, BlendFactor.ONE, BlendFactor.ZERO, BlendFactor.ONE))
-    private val GLOW: RenderPipeline = pipeline("spotlight_glow", BlendFunction(BlendFactor.ONE, BlendFactor.ONE, BlendFactor.ZERO, BlendFactor.ONE))
+    private val ADDITIVE = BlendFunction(BlendFactor.ONE, BlendFactor.ONE, BlendFactor.ZERO, BlendFactor.ONE)
+    private val GLOW: RenderPipeline = pipeline("spotlight_glow", ADDITIVE)
 
-    private fun pipeline(name: String, blend: BlendFunction): RenderPipeline = RenderPipeline.builder()
+    private val SHAFT: RenderPipeline = pipeline("spotlight_shaft", ADDITIVE, "core/spotbeam", DefaultVertexFormat.POSITION_TEX_COLOR)
+    private val LENS: RenderPipeline = pipeline("spotlight_lens", ADDITIVE, "core/spotlens", DefaultVertexFormat.POSITION_TEX)
+
+    private var lensQuad: GpuBuffer? = null
+
+    private fun pipeline(
+        name: String,
+        blend: BlendFunction,
+        shader: String = "core/spotlight",
+        format: VertexFormat = DefaultVertexFormat.POSITION_COLOR,
+    ): RenderPipeline = RenderPipeline.builder()
         .withLocation(Hideandseek.id("pipeline/$name"))
-        .withVertexShader(Hideandseek.id("core/spotlight"))
-        .withFragmentShader(Hideandseek.id("core/spotlight"))
+        .withVertexShader(Hideandseek.id(shader))
+        .withFragmentShader(Hideandseek.id(shader))
         .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
-        .withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR)
+        .withVertexBinding(0, format)
         .withPrimitiveTopology(PrimitiveTopology.QUADS)
         .withColorTargetState(ColorTargetState(blend))
         .withCull(false)
@@ -79,6 +102,8 @@ object Spotlights {
     fun install() {
         RenderPipelines.register(LIFT)
         RenderPipelines.register(GLOW)
+        RenderPipelines.register(SHAFT)
+        RenderPipelines.register(LENS)
         ClientTickEvents.END_CLIENT_TICK.register { client -> tick(client) }
         ClientPlayConnectionEvents.DISCONNECT.register { _, client -> client.execute { forget() } }
         LevelRenderEvents.END_MAIN.register(LevelRenderEvents.EndMain { draw() })
@@ -113,6 +138,8 @@ object Spotlights {
                 val fresh = LitMesh.build(level, light.beam, tracing.faces)
                 light.mesh?.close()
                 light.mesh = fresh
+                light.shaft?.close()
+                light.shaft = ShaftMesh.build(light.beam, ShaftMesh.length(level, light.beam, REACH), SHAFT_DEGREES)
                 light.tracing = null
                 light.retraceAt = now + RETRACE_MILLIS
             }
@@ -149,24 +176,27 @@ object Spotlights {
         val depth = target.depthTextureView ?: return
 
         for (light in lights.values) {
-            val mesh = light.mesh ?: continue
-            val beam = mesh.beam
-            if (!beam.within(camera.x, camera.y, camera.z, SHOWN_WITHIN)) continue
-            val offset = Vector3f((beam.x - camera.x).toFloat(), (beam.y - camera.y).toFloat(), (beam.z - camera.z).toFloat())
-            pass(LIFT, mesh, offset, LIFT_GAIN, colour, depth)
-            pass(GLOW, mesh, offset, GLOW_GAIN, colour, depth)
+            if (!light.beam.within(camera.x, camera.y, camera.z, SHOWN_WITHIN)) continue
+            light.mesh?.let { mesh ->
+                val offset = offsetOf(mesh.beam, camera)
+                pass(LIFT, mesh.vertices, mesh.indexCount, offset, WARM, surface(mesh.beam, LIFT_GAIN), colour, depth)
+                pass(GLOW, mesh.vertices, mesh.indexCount, offset, WARM, surface(mesh.beam, GLOW_GAIN), colour, depth)
+            }
+            light.shaft?.let { shaft ->
+                val values = Matrix4f().zero().m00(SHAFT_GAIN).m01(FADE_FROM)
+                pass(SHAFT, shaft.vertices, shaft.indexCount, offsetOf(shaft.beam, camera), WARM, values, colour, depth)
+            }
+            lens(light.beam, camera, colour, depth)
         }
     }
 
-    private fun pass(
-        pipeline: RenderPipeline,
-        mesh: LitMesh,
-        offset: Vector3f,
-        gain: Float,
-        colour: GpuTextureView,
-        depth: GpuTextureView,
-    ) {
-        val axis = mesh.beam.axis
+    private val WARM = Vector4f(WARMTH_RED, WARMTH_GREEN, WARMTH_BLUE, 1f)
+
+    private fun offsetOf(beam: Beam, camera: Vec3): Vector3f =
+        Vector3f((beam.x - camera.x).toFloat(), (beam.y - camera.y).toFloat(), (beam.z - camera.z).toFloat())
+
+    private fun surface(beam: Beam, gain: Float): Matrix4f {
+        val axis = beam.axis
         val values = Matrix4f().zero()
         values.m00(axis.x)
         values.m01(axis.y)
@@ -176,10 +206,48 @@ object Spotlights {
         values.m11(cos(Math.toRadians(INNER_DEGREES)).toFloat())
         values.m12(gain)
         values.m13(FADE_FROM)
+        return values
+    }
 
+    private fun lens(beam: Beam, camera: Vec3, colour: GpuTextureView, depth: GpuTextureView) {
+        val offset = offsetOf(beam, camera)
+        val distance = offset.length()
+        if (distance < 1.0e-3f) return
+        val facing = -(offset.x * beam.axis.x + offset.y * beam.axis.y + offset.z * beam.axis.z) / distance
+        val strength = facing.coerceIn(0f, 1f).let { it * it * (3f - 2f * it) }
+        if (strength <= 0.01f) return
+        val quad = lensQuad ?: buildLensQuad().also { lensQuad = it }
+        val values = Matrix4f().zero().m00(LENS_SIZE).m01(LENS_PUSH)
+        pass(LENS, quad, 6, offset, Vector4f(WARMTH_RED, WARMTH_GREEN, WARMTH_BLUE, strength), values, colour, depth)
+    }
+
+    private fun buildLensQuad(): GpuBuffer {
+        val format = DefaultVertexFormat.POSITION_TEX
+        ByteBufferBuilder(format.vertexSize * 4).use { storage ->
+            val builder = BufferBuilder(storage, PrimitiveTopology.QUADS, format)
+            builder.addVertex(0f, 0f, 0f).setUv(-1f, -1f)
+            builder.addVertex(0f, 0f, 0f).setUv(1f, -1f)
+            builder.addVertex(0f, 0f, 0f).setUv(1f, 1f)
+            builder.addVertex(0f, 0f, 0f).setUv(-1f, 1f)
+            builder.buildOrThrow().use { mesh ->
+                return RenderSystem.getDevice().createBuffer({ "sniffa spotlight lens" }, GpuBuffer.USAGE_VERTEX, mesh.vertexBuffer())
+            }
+        }
+    }
+
+    private fun pass(
+        pipeline: RenderPipeline,
+        vertices: GpuBuffer,
+        indexCount: Int,
+        offset: Vector3f,
+        tint: Vector4f,
+        values: Matrix4f,
+        colour: GpuTextureView,
+        depth: GpuTextureView,
+    ) {
         val transform = RenderSystem.getDynamicUniforms().writeTransform(
             RenderSystem.getModelViewMatrixCopy(),
-            Vector4f(WARMTH_RED, WARMTH_GREEN, WARMTH_BLUE, 1f),
+            tint,
             offset,
             values,
         )
@@ -195,9 +263,9 @@ object Spotlights {
             pass.setPipeline(pipeline)
             RenderSystem.bindDefaultUniforms(pass)
             pass.setUniform("DynamicTransforms", transform)
-            pass.setIndexBuffer(indices.getBuffer(mesh.indexCount), indices.type())
-            pass.setVertexBuffer(0, mesh.vertices.slice())
-            pass.drawIndexed(mesh.indexCount, 1, 0, 0, 0)
+            pass.setIndexBuffer(indices.getBuffer(indexCount), indices.type())
+            pass.setVertexBuffer(0, vertices.slice())
+            pass.drawIndexed(indexCount, 1, 0, 0, 0)
         }
     }
 }

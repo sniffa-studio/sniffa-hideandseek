@@ -7,6 +7,13 @@ import org.joml.Vector3f
 
 data class Beam(val x: Double, val y: Double, val z: Double, val axis: Vector3f) {
 
+    fun across(): Pair<Vector3f, Vector3f> {
+        val helper = if (kotlin.math.abs(axis.y) > 0.9f) Vector3f(1f, 0f, 0f) else Vector3f(0f, 1f, 0f)
+        val side = Vector3f(axis).cross(helper).normalize()
+        val up = Vector3f(side).cross(axis).normalize()
+        return side to up
+    }
+
     fun within(px: Double, py: Double, pz: Double, distance: Double): Boolean {
         val dx = x - px
         val dy = y - py
