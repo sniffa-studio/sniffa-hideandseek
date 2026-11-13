@@ -26,9 +26,9 @@ class LitFaces(private val beam: Beam, private val reach: Double, private val co
     private val up: Vector3f
 
     init {
-        val helper = if (kotlin.math.abs(beam.axis.y) > 0.9f) Vector3f(1f, 0f, 0f) else Vector3f(0f, 1f, 0f)
-        side = Vector3f(beam.axis).cross(helper).normalize()
-        up = Vector3f(side).cross(beam.axis).normalize()
+        val (across, upward) = beam.across()
+        side = across
+        up = upward
     }
 
     fun trace(level: Level, budget: Int): Int {
