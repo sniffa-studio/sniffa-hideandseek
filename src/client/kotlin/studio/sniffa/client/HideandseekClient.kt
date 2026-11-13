@@ -10,6 +10,7 @@ import studio.sniffa.client.map.MapOverlay
 import studio.sniffa.client.net.BorderSync
 import studio.sniffa.client.net.Handshake
 import studio.sniffa.client.net.RoundSync
+import studio.sniffa.client.light.Spotlights
 import studio.sniffa.client.prop.Props
 import studio.sniffa.client.radar.CompassRose
 import studio.sniffa.client.radar.HeatMap
@@ -55,6 +56,7 @@ object HideandseekClient : ClientModInitializer {
 		Footprints.install()
 		MapOverlay.install()
 		Props.install()
+		Spotlights.install()
 		Cinema.install()
 	}
 }
