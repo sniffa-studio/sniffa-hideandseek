@@ -46,8 +46,8 @@ object Spotlights {
     private const val SHOWN_WITHIN = 192.0
     private const val FADE_FROM = 150f
     private const val WARMTH_RED = 1.0f
-    private const val WARMTH_GREEN = 0.80f
-    private const val WARMTH_BLUE = 0.50f
+    private const val WARMTH_GREEN = 0.70f
+    private const val WARMTH_BLUE = 0.36f
     private const val LIFT_GAIN = 5.5f
     private const val GLOW_GAIN = 0.6f
     private const val SHAFT_DEGREES = 15.0
