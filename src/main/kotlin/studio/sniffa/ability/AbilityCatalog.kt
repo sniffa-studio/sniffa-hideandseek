@@ -11,7 +11,7 @@ object AbilityCatalog {
         description = "Rudolph wittert, wie viele Verstecker in der Nähe sind — und markiert sie kurz.",
         side = Side.SEEKER,
         cost = 5,
-        cooldownSeconds = 30,
+        cooldownSeconds = 45,
         icon = Items.COMPASS,
         plannedModel = "Kleines Gerät mit Display und Radar-Anzeige",
         sprite = Hideandseek.id("ability/radar"),
@@ -34,7 +34,7 @@ object AbilityCatalog {
         displayName = "Schneemann-Spion",
         description = "Stellt einen Schneemann auf, der 60 Sekunden lang 10 Blöcke im Blick behält und Alarm schlägt.",
         side = Side.SEEKER,
-        cost = 7,
+        cost = 6,
         cooldownSeconds = 90,
         icon = Items.CARVED_PUMPKIN,
         plannedModel = "Schneemann mit Zylinder und Schal",
@@ -88,18 +88,6 @@ object AbilityCatalog {
         icon = Items.REDSTONE_TORCH,
         plannedModel = "Kleiner Sender mit Antenne",
         sprite = Hideandseek.id("ability/stoersender"),
-    )
-
-    val EARLY_WARNING = Ability(
-        id = "early_warning",
-        displayName = "Weihnachtsglöckchen",
-        description = "Bimmelt dir kurz, wie weit der Sucher weg ist.",
-        side = Side.HIDER,
-        cost = 6,
-        cooldownSeconds = 60,
-        icon = Items.BELL,
-        plannedModel = "Wanduhr oder Alarmglocke",
-        sprite = Hideandseek.id("ability/fruehwarnung"),
     )
 
     val SNOWMAN_DISGUISE = Ability(
@@ -192,7 +180,7 @@ object AbilityCatalog {
         displayName = "Glatteis",
         description = "Der nächste Sucher in 16 Blöcken, den du siehst, rutscht 4 Sekunden lang und kommt kaum vom Fleck.",
         side = Side.HIDER,
-        cost = 7,
+        cost = 6,
         cooldownSeconds = 90,
         icon = Items.BLUE_ICE,
         plannedModel = "Eisfläche",
@@ -223,25 +211,13 @@ object AbilityCatalog {
         sprite = Hideandseek.id("ability/wichtelgroesse"),
     )
 
-    val STAR = Ability(
-        id = "star",
-        displayName = "Weihnachtsstern",
-        description = "Ein Stern geht über der Stelle auf, auf die du schaust. 20 Sekunden lang leuchtet er golden, solange sich darunter in 15 Blöcken jemand versteckt.",
-        side = Side.SEEKER,
-        cost = 7,
-        cooldownSeconds = 75,
-        icon = Items.NETHER_STAR,
-        plannedModel = "Goldener Stern mit Lichterkette",
-        sprite = Hideandseek.id("ability/weihnachtsstern"),
-    )
-
     val ICE_BALL = Ability(
         id = "ice_ball",
         displayName = "Eisball",
         description = "Ein Schneeball zum Werfen. Wen er trifft, der friert 2 Sekunden ein und leuchtet 5 Sekunden lang.",
         side = Side.SEEKER,
         cost = 5,
-        cooldownSeconds = 30,
+        cooldownSeconds = 45,
         icon = Items.SNOWBALL,
         plannedModel = "Eisblauer Schneeball",
         sprite = Hideandseek.id("ability/eisball"),
@@ -252,23 +228,11 @@ object AbilityCatalog {
         displayName = "Die Liste",
         description = "Wer war unartig? Der Verstecker, der sich am längsten nicht bewegt hat, leuchtet 5 Sekunden lang auf.",
         side = Side.SEEKER,
-        cost = 9,
+        cost = 8,
         cooldownSeconds = 90,
         icon = Items.WRITABLE_BOOK,
         plannedModel = "Lange Pergamentrolle",
         sprite = Hideandseek.id("ability/liste"),
-    )
-
-    val BELLS = Ability(
-        id = "bells",
-        displayName = "Schellenkranz",
-        description = "Häng dem nächsten Sucher in 30 Blöcken Schellen um. 15 Sekunden lang bimmelt jeder seiner Schritte.",
-        side = Side.HIDER,
-        cost = 4,
-        cooldownSeconds = 60,
-        icon = Items.BELL,
-        plannedModel = "Kranz mit Schellen",
-        sprite = Hideandseek.id("ability/schellenkranz"),
     )
 
     val ANGEL = Ability(
@@ -283,15 +247,89 @@ object AbilityCatalog {
         sprite = Hideandseek.id("ability/schutzengel"),
     )
 
+    val HO_HO_HO = Ability(
+        id = "ho_ho_ho",
+        displayName = "Ho Ho Ho!",
+        description = "Dein Lachen schallt über den Schnee. Wer in 25 Blöcken steckt, muss kichern, und du hörst, wo.",
+        side = Side.SEEKER,
+        cost = 4,
+        cooldownSeconds = 45,
+        icon = Items.GOAT_HORN,
+        plannedModel = "Weihnachtsmann-Lachen",
+        sprite = Hideandseek.id("ability/hohoho"),
+    )
+
+    val GRINCH = Ability(
+        id = "grinch",
+        displayName = "Grinch",
+        description = "Klaut den Verstecker in 20 Blöcken ihre Fähigkeiten. 30 Sekunden lang geht bei ihnen nichts.",
+        side = Side.SEEKER,
+        cost = 7,
+        cooldownSeconds = 90,
+        icon = Items.SLIME_BALL,
+        plannedModel = "Grüne Grinch-Hand",
+        sprite = Hideandseek.id("ability/grinch"),
+    )
+
+    val REINDEER_SPRINT = Ability(
+        id = "reindeer_sprint",
+        displayName = "Rentier-Sprint",
+        description = "6 Sekunden lang rennst du wie ein Rentier, mit Schneestaub hinter dir.",
+        side = Side.SEEKER,
+        cost = 4,
+        cooldownSeconds = 40,
+        icon = Items.SUGAR,
+        plannedModel = "Rentier-Hufe mit Schneestaub",
+        sprite = Hideandseek.id("ability/rentiersprint"),
+    )
+
+    val SEEKER_CAM = Ability(
+        id = "seeker_cam",
+        displayName = "Sucher-Cam",
+        description = "8 Sekunden lang siehst du durch die Augen des nächsten Suchers. Dein Ebenbild hält so lange deinen Platz.",
+        side = Side.HIDER,
+        cost = 5,
+        cooldownSeconds = 90,
+        icon = Items.SPYGLASS,
+        plannedModel = "Kleine Kamera mit rotem Licht",
+        sprite = Hideandseek.id("ability/suchercam"),
+    )
+
+    val FELT_SLIPPERS = Ability(
+        id = "felt_slippers",
+        displayName = "Filzpantoffeln",
+        description = "30 Sekunden lang machst du kein Geräusch und hinterlässt keine Fußspuren. Ideal zum Umziehen.",
+        side = Side.HIDER,
+        cost = 4,
+        cooldownSeconds = 90,
+        icon = Items.LEATHER_BOOTS,
+        plannedModel = "Rote Filzpantoffeln",
+        sprite = Hideandseek.id("ability/filzpantoffeln"),
+    )
+
+    val EGGNOG = Ability(
+        id = "eggnog",
+        displayName = "Eierpunsch",
+        description = "Der nächste Sucher in 16 Blöcken, den du siehst, torkelt 5 Sekunden lang angetrunken herum.",
+        side = Side.HIDER,
+        cost = 5,
+        cooldownSeconds = 75,
+        icon = Items.MILK_BUCKET,
+        plannedModel = "Tasse Eierpunsch",
+        sprite = Hideandseek.id("ability/eierpunsch"),
+    )
+
     val SEEKER_ABILITIES: List<Ability> = listOf(
         RADAR,
+        HO_HO_HO,
         FOOTPRINTS,
-        STAR,
         NAUGHTY_LIST,
         SLED_DOG,
-        ICE_BALL,
         SNOWMAN_SPY,
         MISTLETOE,
+        ICE_BALL,
+        GRINCH,
+        REINDEER_SPRINT,
         SWAP,
         ELYTRA,
         DANGER_ZONE,
@@ -299,14 +337,15 @@ object AbilityCatalog {
 
     val HIDER_ABILITIES: List<Ability> = listOf(
         SNOWBALL,
+        FAKE_STEPS,
+        FELT_SLIPPERS,
         SNOW_CLOUD,
         JAMMER,
-        EARLY_WARNING,
         SNOWMAN_DISGUISE,
-        FAKE_STEPS,
         DECOY,
+        SEEKER_CAM,
+        EGGNOG,
         BLACK_ICE,
-        BELLS,
         STAR_PEARL,
         SHRINK,
         ANGEL,

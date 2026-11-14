@@ -15,7 +15,6 @@ import studio.sniffa.client.prop.Props
 import studio.sniffa.client.radar.CompassRose
 import studio.sniffa.client.radar.HeatMap
 import studio.sniffa.client.radar.HotCold
-import studio.sniffa.client.radar.RangeBar
 import studio.sniffa.client.radar.ScanPulse
 import studio.sniffa.client.ui.hud.CaughtScreen
 import studio.sniffa.client.ui.hud.RoleHud
@@ -37,7 +36,6 @@ object HideandseekClient : ClientModInitializer {
 		ScanPulse.install()
 		HeatMap.install()
 		HotCold.install()
-		RangeBar.install()
 		CompassRose.install()
 		TitleScreenSkin.install()
 		BackToEvent.install()
