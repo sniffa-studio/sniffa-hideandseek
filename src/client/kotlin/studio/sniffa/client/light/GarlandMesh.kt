@@ -6,11 +6,12 @@ import com.mojang.blaze3d.systems.RenderSystem
 import com.mojang.blaze3d.vertex.BufferBuilder
 import com.mojang.blaze3d.vertex.ByteBufferBuilder
 import com.mojang.blaze3d.vertex.DefaultVertexFormat
-import kotlin.math.ceil
+import org.joml.Vector3f
 import kotlin.math.floor
 
 class GarlandMesh(
     val garland: Garland,
+    val path: List<Vector3f>,
     val wire: GpuBuffer,
     val wireIndexCount: Int,
     val bulbs: GpuBuffer?,
@@ -22,34 +23,39 @@ class GarlandMesh(
         bulbs?.close()
     }
 
+    fun sameAs(other: List<Vector3f>): Boolean =
+        other.size == path.size && path.indices.all { path[it].distanceSquared(other[it]) < MOVED_SQUARED }
+
     companion object {
 
-        private const val SEGMENTS_PER_BLOCK = 3f
-        private const val FEWEST_SEGMENTS = 6
-        private const val MOST_SEGMENTS = 192
         private const val BULB_SPACING = 0.42f
         private const val BULB_DROP = 0.07f
+        private const val MOVED_SQUARED = 0.0025f
         private val CORNERS = arrayOf(floatArrayOf(-1f, -1f), floatArrayOf(1f, -1f), floatArrayOf(1f, 1f), floatArrayOf(-1f, 1f))
 
-        fun build(garland: Garland): GarlandMesh {
-            val segments = ceil(garland.length * SEGMENTS_PER_BLOCK).toInt().coerceIn(FEWEST_SEGMENTS, MOST_SEGMENTS)
-            val wire = wire(garland, segments)
-            val count = floor(garland.length / BULB_SPACING).toInt()
-            val bulbs = if (count > 0) bulbs(garland, count) else null
-            return GarlandMesh(garland, wire, segments * 6, bulbs, count * 6)
+        fun build(garland: Garland, path: List<Vector3f>): GarlandMesh {
+            val segments = path.size - 1
+            val wire = wire(path)
+            val spots = spots(path)
+            val bulbs = if (spots.isNotEmpty()) bulbs(garland, spots) else null
+            return GarlandMesh(garland, path, wire, segments * 6, bulbs, spots.size * 6)
         }
 
-        private fun wire(garland: Garland, segments: Int): GpuBuffer {
+        private fun wire(path: List<Vector3f>): GpuBuffer {
             val format = DefaultVertexFormat.POSITION_TEX_COLOR
+            val segments = path.size - 1
+            val slopes = List(path.size) { index ->
+                val before = path[(index - 1).coerceAtLeast(0)]
+                val after = path[(index + 1).coerceAtMost(path.size - 1)]
+                Vector3f(after).sub(before).let { if (it.lengthSquared() < 1.0e-8f) Vector3f(0f, 1f, 0f) else it.normalize() }
+            }
             ByteBufferBuilder(format.vertexSize * 4 * segments).use { storage ->
                 val builder = BufferBuilder(storage, PrimitiveTopology.QUADS, format)
                 for (segment in 0 until segments) {
-                    val t0 = segment / segments.toFloat()
-                    val t1 = (segment + 1) / segments.toFloat()
-                    wireVertex(builder, garland, t0, -1f)
-                    wireVertex(builder, garland, t0, 1f)
-                    wireVertex(builder, garland, t1, 1f)
-                    wireVertex(builder, garland, t1, -1f)
+                    wireVertex(builder, path[segment], slopes[segment], -1f)
+                    wireVertex(builder, path[segment], slopes[segment], 1f)
+                    wireVertex(builder, path[segment + 1], slopes[segment + 1], 1f)
+                    wireVertex(builder, path[segment + 1], slopes[segment + 1], -1f)
                 }
                 builder.buildOrThrow().use { mesh ->
                     return RenderSystem.getDevice().createBuffer({ "sniffa garland wire" }, GpuBuffer.USAGE_VERTEX, mesh.vertexBuffer())
@@ -57,21 +63,40 @@ class GarlandMesh(
             }
         }
 
-        private fun wireVertex(builder: BufferBuilder, garland: Garland, t: Float, side: Float) {
-            val point = garland.at(t)
-            val slope = garland.slope(t)
+        private fun wireVertex(builder: BufferBuilder, point: Vector3f, slope: Vector3f, side: Float) {
             builder.addVertex(point.x, point.y, point.z)
-                .setUv(side, t)
+                .setUv(side, 0f)
                 .setColor(slope.x * 0.5f + 0.5f, slope.y * 0.5f + 0.5f, slope.z * 0.5f + 0.5f, 1f)
         }
 
-        private fun bulbs(garland: Garland, count: Int): GpuBuffer {
+        fun spots(path: List<Vector3f>): List<Vector3f> {
+            var total = 0f
+            for (index in 1 until path.size) total += path[index].distance(path[index - 1])
+            val count = floor(total / BULB_SPACING).toInt()
+            if (count <= 0) return emptyList()
+            val gap = total / count
+            val spots = ArrayList<Vector3f>(count)
+            var wanted = gap * 0.5f
+            var walked = 0f
+            for (index in 1 until path.size) {
+                val from = path[index - 1]
+                val to = path[index]
+                val piece = from.distance(to)
+                while (piece > 0f && wanted <= walked + piece && spots.size < count) {
+                    spots += Vector3f(from).lerp(to, (wanted - walked) / piece)
+                    wanted += gap
+                }
+                walked += piece
+            }
+            return spots
+        }
+
+        private fun bulbs(garland: Garland, spots: List<Vector3f>): GpuBuffer {
             val format = DefaultVertexFormat.POSITION_TEX_COLOR
             val colours = garland.palette.colours
-            ByteBufferBuilder(format.vertexSize * 4 * count).use { storage ->
+            ByteBufferBuilder(format.vertexSize * 4 * spots.size).use { storage ->
                 val builder = BufferBuilder(storage, PrimitiveTopology.QUADS, format)
-                for (index in 0 until count) {
-                    val point = garland.at((index + 0.5f) / count)
+                spots.forEachIndexed { index, point ->
                     val colour = colours[index % colours.size]
                     val phase = phaseOf(index)
                     for (corner in CORNERS) {
