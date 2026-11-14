@@ -1,8 +1,10 @@
 execute unless entity @e[type=minecraft:marker,tag=lichterkette_anfang] run return run tellraw @s [{"text":"Erst den Anfang setzen: ","color":"red"},{"text":"/function sniffa:lichterkette_start","color":"yellow","click_event":{"action":"suggest_command","command":"/function sniffa:lichterkette_start"}}]
-kill @e[type=minecraft:marker,tag=sniffa_ziel]
-execute anchored eyes positioned ^ ^ ^ run function sniffa:intern/strahl
+function sniffa:intern/punkt
 execute unless entity @e[type=minecraft:marker,tag=sniffa_ziel] run return run tellraw @s {"text":"Kein Block im Blick (bis 64 Blöcke).","color":"red"}
 scoreboard objectives add sniffa_kette dummy
+execute at @e[type=minecraft:marker,tag=lichterkette_anfang,limit=1] if entity @e[type=minecraft:marker,tag=sniffa_ziel,distance=..0.5] run return run function sniffa:intern/kette_abgelehnt {grund:"Zu nah am letzten Punkt."}
+execute store result score #frei sniffa_kette run function sniffa:intern/frei
+execute if score #frei sniffa_kette matches 0 run return run function sniffa:intern/kette_abgelehnt {grund:"Da ist ein Block dazwischen, die Kette würde durchgehen. Nimm einen Punkt mit freier Sicht vom letzten Punkt aus."}
 execute store result score #ax sniffa_kette run data get entity @e[type=minecraft:marker,tag=lichterkette_anfang,limit=1] Pos[0] 1000
 execute store result score #ay sniffa_kette run data get entity @e[type=minecraft:marker,tag=lichterkette_anfang,limit=1] Pos[1] 1000
 execute store result score #az sniffa_kette run data get entity @e[type=minecraft:marker,tag=lichterkette_anfang,limit=1] Pos[2] 1000
