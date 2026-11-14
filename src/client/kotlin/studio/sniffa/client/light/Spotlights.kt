@@ -48,12 +48,13 @@ object Spotlights {
     private const val WARMTH_RED = 1.0f
     private const val WARMTH_GREEN = 0.70f
     private const val WARMTH_BLUE = 0.36f
-    private const val LIFT_GAIN = 5.5f
-    private const val GLOW_GAIN = 0.6f
+    private const val LIFT_GAIN = 3.0f
+    private const val GLOW_GAIN = 0.2f
     private const val SHAFT_DEGREES = 15.0
-    private const val SHAFT_GAIN = 0.35f
+    private const val SHAFT_GAIN = 0.16f
     private const val LENS_SIZE = 0.55f
     private const val LENS_PUSH = 0.18f
+    private const val LENS_GAIN = 0.6f
 
     private class Light(var beam: Beam) {
         var mesh: LitMesh? = null
@@ -218,7 +219,7 @@ object Spotlights {
         if (strength <= 0.01f) return
         val quad = lensQuad ?: buildLensQuad().also { lensQuad = it }
         val values = Matrix4f().zero().m00(LENS_SIZE).m01(LENS_PUSH)
-        pass(LENS, quad, 6, offset, Vector4f(WARMTH_RED, WARMTH_GREEN, WARMTH_BLUE, strength), values, colour, depth)
+        pass(LENS, quad, 6, offset, Vector4f(WARMTH_RED, WARMTH_GREEN, WARMTH_BLUE, strength * LENS_GAIN), values, colour, depth)
     }
 
     private fun buildLensQuad(): GpuBuffer {
