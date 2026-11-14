@@ -1,0 +1,1 @@
+function sniffa:lichterkette_fertig
