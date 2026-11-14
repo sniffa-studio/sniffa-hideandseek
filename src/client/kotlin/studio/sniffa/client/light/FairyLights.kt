@@ -31,8 +31,10 @@ import java.util.OptionalDouble
 object FairyLights {
 
     val ANCHOR = Hideandseek.id("props/lichterkette")
+    val TREE = Hideandseek.id("props/lichterkette_baum")
 
     private const val SCAN_EVERY_TICKS = 10
+    private const val REFIT_EVERY_TICKS = 100
     private const val SHOWN_WITHIN = 160.0
     private const val FADE_FROM = 120f
     private const val WIRE_WIDTH = 0.018f
@@ -96,13 +98,17 @@ object FairyLights {
         for (entity in level.entitiesForRendering()) {
             if (entity !is Display.ItemDisplay) continue
             val stack = entity.itemRenderState()?.itemStack() ?: continue
-            if (stack.get(DataComponents.ITEM_MODEL) != ANCHOR) continue
-            val garland = Garland.of(entity, stack) ?: continue
+            val model = stack.get(DataComponents.ITEM_MODEL)
+            if (model != ANCHOR && model != TREE) continue
+            val garland = Garland.of(entity, stack, model == TREE) ?: continue
             seen += entity.id
             val known = lit[entity.id]
-            if (known == null || known.garland != garland) {
+            val refit = garland.shape.fitsTree && ticks % REFIT_EVERY_TICKS == 0
+            if (known == null || known.garland != garland || refit) {
+                val path = garland.shape.path(level, garland.x, garland.y, garland.z)
+                if (known != null && known.garland == garland && known.sameAs(path)) continue
                 known?.close()
-                lit[entity.id] = GarlandMesh.build(garland)
+                lit[entity.id] = GarlandMesh.build(garland, path)
             }
         }
         val gone = lit.keys - seen
