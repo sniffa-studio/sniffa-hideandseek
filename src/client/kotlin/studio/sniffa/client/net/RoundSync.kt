@@ -11,7 +11,6 @@ import studio.sniffa.client.radar.GlowSight
 import studio.sniffa.client.radar.HeatMap
 import studio.sniffa.client.radar.CompassRose
 import studio.sniffa.client.radar.HotCold
-import studio.sniffa.client.radar.RangeBar
 import studio.sniffa.client.radar.ScanPulse
 import studio.sniffa.client.prop.Props
 import studio.sniffa.client.radar.ScanTags
@@ -37,7 +36,6 @@ import studio.sniffa.net.payload.CloudPayload
 import studio.sniffa.client.snow.SnowClouds
 import studio.sniffa.client.snow.SnowSplat
 import studio.sniffa.net.payload.RadarPayload
-import studio.sniffa.net.payload.RangePayload
 import studio.sniffa.net.payload.RolePayload
 import studio.sniffa.net.payload.RoundStatePayload
 import studio.sniffa.net.payload.SpottedPayload
@@ -90,10 +88,6 @@ object RoundSync {
 
         ClientPlayNetworking.registerGlobalReceiver(HotColdPayload.TYPE) { payload, _ ->
             HotCold.accept(payload.reading, payload.live)
-        }
-
-        ClientPlayNetworking.registerGlobalReceiver(RangePayload.TYPE) { payload, _ ->
-            RangeBar.accept(payload.blocks, payload.live)
         }
 
         ClientPlayNetworking.registerGlobalReceiver(TracksPayload.TYPE) { payload, _ ->
@@ -164,7 +158,6 @@ object RoundSync {
             MapState.forget()
             DangerZone.forget()
             HotCold.forget()
-            RangeBar.forget()
             CompassRose.forget()
             ScanTags.forget()
             Props.forget()

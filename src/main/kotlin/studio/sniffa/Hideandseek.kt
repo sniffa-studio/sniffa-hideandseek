@@ -27,7 +27,6 @@ import studio.sniffa.net.payload.SplatPayload
 import studio.sniffa.net.payload.CloudPayload
 import studio.sniffa.net.payload.PurchaseRequestPayload
 import studio.sniffa.net.payload.RadarPayload
-import studio.sniffa.net.payload.RangePayload
 import studio.sniffa.net.payload.RolePayload
 import studio.sniffa.net.payload.RoundStatePayload
 import studio.sniffa.net.payload.SpottedPayload
@@ -73,7 +72,6 @@ object Hideandseek : ModInitializer {
 		PayloadTypeRegistry.clientboundPlay().register(ScanWavePayload.TYPE, ScanWavePayload.CODEC)
 		PayloadTypeRegistry.clientboundPlay().register(HeatPayload.TYPE, HeatPayload.CODEC)
 		PayloadTypeRegistry.clientboundPlay().register(HotColdPayload.TYPE, HotColdPayload.CODEC)
-		PayloadTypeRegistry.clientboundPlay().register(RangePayload.TYPE, RangePayload.CODEC)
 		PayloadTypeRegistry.clientboundPlay().register(BearingPayload.TYPE, BearingPayload.CODEC)
 		PayloadTypeRegistry.clientboundPlay().register(TracksPayload.TYPE, TracksPayload.CODEC)
 		PayloadTypeRegistry.clientboundPlay().register(RolePayload.TYPE, RolePayload.CODEC)
