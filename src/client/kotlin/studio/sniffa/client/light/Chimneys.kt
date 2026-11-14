@@ -27,6 +27,8 @@ object Chimneys {
     }
 
     private val chimneys = HashMap<Int, Chimney>()
+
+    fun tops(): List<org.joml.Vector3d> = chimneys.values.map { org.joml.Vector3d(it.x, it.y, it.z) }
     private var ticks = 0
 
     fun install() {

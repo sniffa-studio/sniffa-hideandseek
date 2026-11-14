@@ -62,6 +62,10 @@ object LampGlow {
     private var batch: Batch? = null
     private var ticks = 0
 
+    @Volatile
+    var fires: List<org.joml.Vector3d> = emptyList()
+        private set
+
     private val ADDITIVE = BlendFunction(BlendFactor.ONE, BlendFactor.ONE, BlendFactor.ZERO, BlendFactor.ONE)
 
     private val HALO: RenderPipeline = pipeline("lamp_halo", "core/lamphalo")
@@ -91,6 +95,7 @@ object LampGlow {
     private fun forget() {
         batch?.close()
         batch = null
+        fires = emptyList()
     }
 
     private fun tick(client: Minecraft) {
@@ -103,6 +108,7 @@ object LampGlow {
         val camera = client.gameRenderer.mainCamera().position()
         val origin = BlockPos.containing(camera.x, camera.y, camera.z)
         val lamps = scan(level, origin)
+        fires = lamps.filter { it.kind == Kind.FIRE }.map { org.joml.Vector3d(origin.x + it.x.toDouble(), origin.y + it.y.toDouble(), origin.z + it.z.toDouble()) }
         batch?.close()
         batch = build(origin, lamps)
     }

@@ -12,7 +12,9 @@ import studio.sniffa.client.net.Handshake
 import studio.sniffa.client.net.RoundSync
 import studio.sniffa.client.light.Chimneys
 import studio.sniffa.client.light.FirRope
+import studio.sniffa.client.light.Embers
 import studio.sniffa.client.snow.Breath
+import studio.sniffa.client.snow.ColourGrade
 import studio.sniffa.client.snow.ShootingStars
 import studio.sniffa.client.light.FairyLights
 import studio.sniffa.client.light.Icicles
@@ -69,6 +71,8 @@ object HideandseekClient : ClientModInitializer {
 		FirRope.install()
 		ShootingStars.install()
 		Breath.install()
+		Embers.install()
+		ColourGrade.install()
 		Cinema.install()
 	}
 }
