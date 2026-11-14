@@ -1,0 +1,7 @@
+{
+  "condition": "minecraft:all_of",
+  "terms": [
+    {"condition": "minecraft:entity_properties", "entity": "this", "predicate": {"movement": {"horizontal_speed": {"min": 2.5}}}},
+    {"condition": "minecraft:inverted", "term": {"condition": "minecraft:entity_properties", "entity": "this", "predicate": {"flags": {"is_sneaking": true}}}}
+  ]
+}
