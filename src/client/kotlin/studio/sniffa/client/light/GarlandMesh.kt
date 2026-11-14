@@ -16,11 +16,13 @@ class GarlandMesh(
     val wireIndexCount: Int,
     val bulbs: GpuBuffer?,
     val bulbIndexCount: Int,
+    val fir: FirRope.Built?,
 ) : AutoCloseable {
 
     override fun close() {
         wire.close()
         bulbs?.close()
+        fir?.close()
     }
 
     fun sameAs(other: List<Vector3f>): Boolean =
@@ -33,12 +35,17 @@ class GarlandMesh(
         private const val MOVED_SQUARED = 0.0025f
         private val CORNERS = arrayOf(floatArrayOf(-1f, -1f), floatArrayOf(1f, -1f), floatArrayOf(1f, 1f), floatArrayOf(-1f, 1f))
 
-        fun build(garland: Garland, path: List<Vector3f>): GarlandMesh {
+        fun build(garland: Garland, path: List<Vector3f>, light: Float): GarlandMesh {
             val segments = path.size - 1
             val wire = wire(path)
-            val spots = spots(path)
+            val fir = if (garland.palette == Garland.Palette.TANNE) FirRope.build(path, light) else null
+            var spots = spots(path)
+            if (fir != null) {
+                spots = spots.filterIndexed { index, _ -> index % 2 == 0 }.filter { FirRope.avoidsBows(it, path) }
+                    .mapIndexed { index, spot -> Vector3f(spot).add(0f, 0.04f + (phaseOf(index + 7) - 0.5f) * 0.1f, 0f) }
+            }
             val bulbs = if (spots.isNotEmpty()) bulbs(garland, spots) else null
-            return GarlandMesh(garland, path, wire, segments * 6, bulbs, spots.size * 6)
+            return GarlandMesh(garland, path, wire, segments * 6, bulbs, spots.size * 6, fir)
         }
 
         private fun wire(path: List<Vector3f>): GpuBuffer {

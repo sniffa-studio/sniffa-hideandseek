@@ -108,7 +108,9 @@ object FairyLights {
                 val path = garland.shape.path(level, garland.x, garland.y, garland.z)
                 if (known != null && known.garland == garland && known.sameAs(path)) continue
                 known?.close()
-                lit[entity.id] = GarlandMesh.build(garland, path)
+                val middle = path[path.size / 2]
+                val sky = level.getMaxLocalRawBrightness(net.minecraft.core.BlockPos.containing(garland.x + middle.x, garland.y + middle.y, garland.z + middle.z)) / 15f
+                lit[entity.id] = GarlandMesh.build(garland, path, 0.42f + 0.58f * sky * kotlin.math.sqrt(sky))
             }
         }
         val gone = lit.keys - seen
@@ -130,7 +132,13 @@ object FairyLights {
             val garland = mesh.garland
             if (!garland.within(camera.x, camera.y, camera.z, SHOWN_WITHIN)) continue
             val offset = offsetOf(garland, camera)
-            pass(WIRE, mesh.wire, mesh.wireIndexCount, offset, WIRE_COLOUR, wireValues, colour, depth)
+            val fir = mesh.fir
+            if (fir != null) {
+                pass(FirRope.ROPE, fir.rope, fir.ropeCount, offset, Vector4f(1f), Matrix4f().zero(), colour, depth)
+                fir.bows?.let { pass(FirRope.BOW, it, fir.bowCount, offset, Vector4f(1f), Matrix4f().zero(), colour, depth) }
+            } else {
+                pass(WIRE, mesh.wire, mesh.wireIndexCount, offset, WIRE_COLOUR, wireValues, colour, depth)
+            }
             mesh.bulbs?.let { pass(BULBS, it, mesh.bulbIndexCount, offset, bulbTint, bulbValues, colour, depth) }
         }
     }
