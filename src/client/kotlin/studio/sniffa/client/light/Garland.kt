@@ -1,5 +1,6 @@
 package studio.sniffa.client.light
 
+import net.minecraft.core.BlockPos
 import net.minecraft.core.component.DataComponents
 import net.minecraft.world.entity.Display
 import net.minecraft.world.item.ItemStack
@@ -25,7 +26,6 @@ data class Garland(
     sealed interface Shape {
         val centre: Vector3f
         val reach: Float
-        val fitsTree: Boolean
         fun path(level: BlockGetter?, x: Double, y: Double, z: Double): List<Vector3f>
     }
 
@@ -33,16 +33,32 @@ data class Garland(
 
         override val centre: Vector3f get() = Vector3f(span).mul(0.5f)
         override val reach: Float get() = span.length() * 0.5f
-        override val fitsTree: Boolean get() = false
-
         override fun path(level: BlockGetter?, x: Double, y: Double, z: Double): List<Vector3f> {
             val steps = (span.length() * 4f).toInt().coerceIn(8, 256)
-            return List(steps + 1) { at(it / steps.toFloat()) }
+            if (level == null) return sample(steps, sag)
+            for (share in SAG_TRIES) {
+                val points = sample(steps, sag * share)
+                if (clear(level, points, x, y, z)) return points
+            }
+            return sample(steps, 0f)
         }
 
-        fun at(t: Float): Vector3f {
-            val drop = sag * 4f * t * (1f - t)
-            return Vector3f(span.x * t, span.y * t - drop, span.z * t)
+        private fun sample(steps: Int, drop: Float): List<Vector3f> = List(steps + 1) { at(it / steps.toFloat(), drop) }
+
+        fun at(t: Float, drop: Float = sag): Vector3f {
+            val down = drop * 4f * t * (1f - t)
+            return Vector3f(span.x * t, span.y * t - down, span.z * t)
+        }
+
+        private fun clear(level: BlockGetter, points: List<Vector3f>, x: Double, y: Double, z: Double): Boolean {
+            val pos = BlockPos.MutableBlockPos()
+            val first = points.first()
+            val last = points.last()
+            for (point in points) {
+                if (point.distance(first) < END_ROOM || point.distance(last) < END_ROOM) continue
+                if (solidAt(level, pos, x + point.x, y + point.y, z + point.z)) return false
+            }
+            return true
         }
     }
 
@@ -50,8 +66,6 @@ data class Garland(
 
         override val centre: Vector3f get() = Vector3f(0f, TreeFit.TALLEST * 0.5f, 0f)
         override val reach: Float get() = TreeFit.TALLEST * 0.5f + radius
-        override val fitsTree: Boolean get() = true
-
         override fun path(level: BlockGetter?, x: Double, y: Double, z: Double): List<Vector3f> =
             TreeFit.spiral(level, x, y, z, height, radius, turns)
     }
@@ -67,6 +81,8 @@ data class Garland(
 
     companion object {
 
+        private val SAG_TRIES = floatArrayOf(1f, 0.7f, 0.45f, 0.25f, 0.1f, 0f)
+        private const val END_ROOM = 0.3f
         private const val LONGEST = 64f
         private const val SHORTEST = 0.5f
         private const val SAG_BASE = 0.12f
@@ -99,6 +115,18 @@ data class Garland(
             if (!height.isFinite() || !radius.isFinite() || !turns.isFinite()) return null
             if (height < 0f || height > TreeFit.TALLEST || radius < 0.5f || radius > WIDEST || turns < 0f || turns > 30f) return null
             return Spiral(height, radius, turns)
+        }
+
+        fun solidAt(level: BlockGetter, pos: BlockPos.MutableBlockPos, px: Double, py: Double, pz: Double): Boolean {
+            pos.set(kotlin.math.floor(px).toInt(), kotlin.math.floor(py).toInt(), kotlin.math.floor(pz).toInt())
+            val state = level.getBlockState(pos)
+            if (state.isAir) return false
+            val shape = state.getCollisionShape(level, pos)
+            if (shape.isEmpty) return false
+            val lx = px - pos.x
+            val ly = py - pos.y
+            val lz = pz - pos.z
+            return shape.toAabbs().any { it.contains(lx, ly, lz) }
         }
 
         fun sagFor(span: Vector3f): Float {

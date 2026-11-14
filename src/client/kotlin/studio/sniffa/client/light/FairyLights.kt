@@ -103,7 +103,7 @@ object FairyLights {
             val garland = Garland.of(entity, stack, model == TREE) ?: continue
             seen += entity.id
             val known = lit[entity.id]
-            val refit = garland.shape.fitsTree && ticks % REFIT_EVERY_TICKS == 0
+            val refit = ticks % REFIT_EVERY_TICKS == 0
             if (known == null || known.garland != garland || refit) {
                 val path = garland.shape.path(level, garland.x, garland.y, garland.z)
                 if (known != null && known.garland == garland && known.sameAs(path)) continue
