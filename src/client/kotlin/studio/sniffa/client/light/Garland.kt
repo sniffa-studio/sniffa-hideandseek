@@ -21,6 +21,7 @@ data class Garland(
         WARM(listOf(Vector3f(1f, 0.74f, 0.38f))),
         KALT(listOf(Vector3f(0.7f, 0.86f, 1f))),
         ROT_GRUEN(listOf(Vector3f(1f, 0.16f, 0.1f), Vector3f(0.2f, 1f, 0.3f))),
+        TANNE(listOf(Vector3f(1f, 0.74f, 0.38f))),
     }
 
     sealed interface Shape {
