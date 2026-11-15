@@ -19,7 +19,7 @@ SHEET = 1024
 MAX_FACE = 64
 PAD = 2
 NUDGE = 0.04
-NO_EDGES = {'bildschirm', 'band_schwarz', 'glaskugel', 'netz', 'stern_weiss', 'stern_rot', 'eis_flaeche', 'flamme_tief', 'flamme_kern', 'eiszapfen', 'feder', 'feder_hell', 'sack', 'schneeball', 'glas', 'lampen', 'stern', 'flamme', 'glut', 'schnee_rand', 'bonbons', 'kugeln', 'tanne', 'beere'}
+NO_EDGES = {'warnstreifen', 'riffel', 'bildschirm', 'band_schwarz', 'glaskugel', 'netz', 'stern_weiss', 'stern_rot', 'eis_flaeche', 'flamme_tief', 'flamme_kern', 'eiszapfen', 'feder', 'feder_hell', 'sack', 'schneeball', 'glas', 'lampen', 'stern', 'flamme', 'glut', 'schnee_rand', 'bonbons', 'kugeln', 'tanne', 'beere'}
 RIVETS = {'eisen', 'kessel'}
 
 
@@ -388,6 +388,21 @@ def glass_globe(img, rnd):
             img.putpixel((x, y), (215, 238, 250, alpha))
 
 
+def tread_plate(img, rnd):
+    for y in range(TILE):
+        for x in range(TILE):
+            c = hexcolour('#5d6266')
+            if (x + y) % 6 == 0 and x % 3 != 2 or (x - y) % 6 == 3 and y % 3 != 2:
+                c = hexcolour('#7c8287')
+            img.putpixel((x, y), c)
+
+
+def hazard_stripes(img, rnd):
+    for y in range(TILE):
+        for x in range(TILE):
+            img.putpixel((x, y), hexcolour('#f2c230') if ((x + y) // 3) % 2 == 0 else hexcolour('#202022'))
+
+
 def belt(img, rnd):
     for y in range(TILE):
         for x in range(TILE):
@@ -615,6 +630,10 @@ def build_atlas():
     atlas.add('schild_puffer', lettered(hexcolour('#2f1a0c'), hexcolour('#f2c14e'), 'PUFFER', 64, 14, size=2), density=64 / 46, span=2)
     atlas.add('schild_werkstatt', lettered(hexcolour('#2f1a0c'), hexcolour('#f2c14e'), 'WICHTEL', 64, 14, size=2), density=64 / 46, span=2)
     atlas.add('band_schwarz', belt)
+    atlas.add('riffel', tread_plate)
+    atlas.add('warnstreifen', hazard_stripes)
+    atlas.add('schild_fabrik', lettered(hexcolour('#2f1a0c'), hexcolour('#f2c14e'), 'GESCHENKE', 64, 14, size=2, gap=0), density=64 / 40, span=2)
+    atlas.add('schild_presse', lettered(hexcolour('#1b2a4a'), hexcolour('#f2c14e'), 'SPIELZEUG', 64, 12, size=2, gap=0), density=64 / 48, span=2)
     atlas.add('bildschirm', screen)
     atlas.add('kiste_schild', lettered(hexcolour('#c9a26a'), hexcolour('#7a1420'), 'NORDPOL', 32, 9), density=32 / 7)
     atlas.add('creme', flat(hexcolour('#efe3c8'), 0.04))
@@ -3261,6 +3280,278 @@ def pipe_wall():
     return b
 
 
+def octagon(cx, cz, r, y0, y1, mat, faces=None, emit=0):
+    side = 2 * r * math.tan(math.radians(22.5))
+    return [
+        Box((cx - r, y0, cz - side / 2), (cx + r, y1, cz + side / 2), mat, faces=faces, emit=emit),
+        Box((cx - side / 2, y0, cz - r), (cx + side / 2, y1, cz + r), mat, faces=faces, emit=emit),
+        Box((cx - side / 2, y0, cz - r), (cx + side / 2, y1, cz + r), mat, faces=faces, emit=emit, rotation=((cx, y0, cz), (0, 45, 0))),
+        Box((cx - r, y0, cz - side / 2), (cx + r, y1, cz + side / 2), mat, faces=faces, emit=emit, rotation=((cx, y0, cz), (0, 45, 0))),
+    ]
+
+
+def band_ring(cx, cz, r, y, h, mat):
+    return octagon(cx, cz, r + 0.4, y, y + h, mat)
+
+
+def rivets(x0, x1, y, z, step=4):
+    return [Box((x - 0.4, y - 0.4, z - 0.4), (x + 0.4, y + 0.4, z), 'messing') for x in frange(x0, x1, step)]
+
+
+def frange(a, b, step):
+    out = []
+    v = a
+    while v <= b + 1e-6:
+        out.append(v)
+        v += step
+    return out
+
+
+def pipe_run(points, r, mat):
+    b = []
+    for p0, p1 in zip(points, points[1:]):
+        lo = [min(p0[i], p1[i]) - r for i in range(3)]
+        hi = [max(p0[i], p1[i]) + r for i in range(3)]
+        b.append(Box(tuple(lo), tuple(hi), mat))
+    for p in points[1:-1]:
+        b.append(Box((p[0] - r - 0.5, p[1] - r - 0.5, p[2] - r - 0.5), (p[0] + r + 0.5, p[1] + r + 0.5, p[2] + r + 0.5), 'messing'))
+    return b
+
+
+def valve_wheel(x, y, z, r=3):
+    b = ring((x, y, z), r, 0.9, 0.8, 8, 'apfel')
+    b += [Box((x - r, y - 0.35, z - 0.3), (x + r, y + 0.35, z + 0.3), 'apfel'), Box((x - 0.35, y - r, z - 0.3), (x + 0.35, y + r, z + 0.3), 'apfel'),
+          Box((x - 0.8, y - 0.8, z - 0.6), (x + 0.8, y + 0.8, z + 0.6), 'messing')]
+    return b
+
+
+def big_gauge(x, y, z, r=3.4):
+    return [
+        Box((x - r, y - r, z - 0.8), (x + r, y + r, z), 'messing'),
+        Box((x - r + 0.8, y - r + 0.8, z - 0.9), (x + r - 0.8, y + r - 0.8, z - 0.8), 'zuckerguss'),
+        Box((x - 0.2, y - 0.2, z - 1.0), (x + r - 1.4, y + 0.2, z - 0.9), 'apfel', rotation=((x, y, z - 0.95), (0, 0, 40))),
+        Box((x - 0.5, y - 0.5, z - 1.1), (x + 0.5, y + 0.5, z - 0.9), 'kohle'),
+    ]
+
+
+def gear(r, teeth, thick, mat='messing'):
+    b = ring((0, 0, 0), r, r * 0.22, thick, max(12, teeth), mat)
+    for k in range(teeth):
+        b.append(Box((-r * 0.13, r, -thick / 2), (r * 0.13, r + r * 0.2, thick / 2), mat, rotation=((0, 0, 0), (0, 0, k * 360 / teeth))))
+    for k in range(3):
+        b.append(Box((-r * 0.1, -r, -thick * 0.35), (r * 0.1, r, thick * 0.35), mat, rotation=((0, 0, 0), (0, 0, k * 60))))
+    b.append(Box((-r * 0.25, -r * 0.25, -thick * 0.7), (r * 0.25, r * 0.25, thick * 0.7), 'eisen'))
+    return b
+
+
+def placed(boxes, dx, dy, dz):
+    for box in boxes:
+        box.a = (box.a[0] + dx, box.a[1] + dy, box.a[2] + dz)
+        box.b = (box.b[0] + dx, box.b[1] + dy, box.b[2] + dz)
+        if box.rotation:
+            o, ang = box.rotation
+            box.rotation = ((o[0] + dx, o[1] + dy, o[2] + dz), ang)
+    return boxes
+
+
+def hazard(x0, z0, x1, z1, y):
+    w = 1.6
+    return [
+        Box((x0 - 0.2, y - 0.6, z0 - 0.2), (x1 + 0.2, y + 0.2, z0 + w), 'warnstreifen'),
+        Box((x0 - 0.2, y - 0.6, z1 - w), (x1 + 0.2, y + 0.2, z1 + 0.2), 'warnstreifen'),
+        Box((x0 - 0.2, y - 0.6, z0 + w), (x0 + w, y + 0.2, z1 - w), 'warnstreifen'),
+        Box((x1 - w, y - 0.6, z0 + w), (x1 + 0.2, y + 0.2, z1 - w), 'warnstreifen'),
+    ]
+
+
+def mega_wrapper():
+    b = [
+        Box((-56, 0, -40), (56, 4, 40), 'kessel', faces={'up': 'riffel'}),
+        *hazard(-56, -40, 56, 40, 4),
+    ]
+    b += [
+        Box((-44, 4, -20), (20, 76, 28), 'lack_rot'),
+        Box((-44, 4, -28), (20, 24, -20), 'lack_rot'),
+        Box((-44, 52, -28), (20, 76, -20), 'lack_rot'),
+        Box((-44, 24, -28), (-36, 52, -20), 'lack_rot'),
+        Box((12, 24, -28), (20, 52, -20), 'lack_rot'),
+        Box((-36, 24, -20.6), (12, 52, -20), 'kohle'),
+        Box((-36, 24, -28.2), (12, 52, -27.6), 'glaskugel', shade=False),
+        Box((-37, 23, -28.8), (13, 24.4, -27.4), 'messing'),
+        Box((-37, 51.6, -28.8), (13, 53, -27.4), 'messing'),
+        Box((-12.6, 24, -28.6), (-11.4, 52, -27.6), 'messing'),
+    ]
+    for y in (14, 62, 74):
+        b.append(Box((-44.6, y, -28.6), (20.6, y + 2, 28.6), 'messing'))
+    for x in (-44.6, 18.6):
+        for z in (-28.6, 26.6):
+            b.append(Box((x, 4, z), (x + 2, 76, z + 2), 'eisen'))
+    b += rivets(-42, 18, 58, -28)
+    b += rivets(-42, 18, 18, -28)
+    b += [Box((-35, 24.6, -26), (11, 26, -21), 'band_schwarz')]
+    for k, x in enumerate((-30, -20, -6, 4)):
+        b += gift(x, -23.5, 5, 5, 4, 26, ('papier_rot', 'papier_gold', 'papier_blau', 'papier_gruen')[k], ('band_rot', 'band_gold', 'band_blau', 'band_gruen')[k], turn=k * 12)
+    b += soft([Box((-35.5, 50, -27.4), (11.5, 51, -21), 'glut', emit=13)])
+    b += [
+        Box((-40, 76, -24), (16, 82, 24), 'kupfer'),
+        Box((-36, 82, -20), (12, 88, 20), 'kupfer'),
+        Box((-32, 88, -16), (8, 94, 16), 'kupfer'),
+        Box((-40.4, 81, -24.4), (16.4, 82.6, 24.4), 'messing'),
+        Box((-32.4, 93, -16.4), (8.4, 94.6, 16.4), 'messing'),
+        Box((-28, 94, -12), (4, 95, 12), 'kohle'),
+    ]
+    for k, (x, z) in enumerate(((-22, -6), (-10, 4), (-16, 8), (-4, -6), (-24, 6))):
+        b += gift(x, z, 6, 5, 6, 94.5, ('papier_rot', 'papier_lila', 'papier_gold', 'papier_blau', 'papier_weiss')[k], ('band_rot', 'band_lila', 'band_gold', 'band_blau', 'band_weiss')[k], turn=k * 20 - 30, bow=k % 2 == 0)
+    b += soft([
+        Box((-42, 64, -29.4), (-2, 74, -28.6), 'holz_dunkel', faces={'north': 'schild_fabrik'}, uv={'north': (0, 0)}),
+        Box((-42.6, 63.4, -29.6), (-1.4, 64.2, -28.4), 'messing'),
+        Box((-42.6, 73.8, -29.6), (-1.4, 74.6, -28.4), 'messing'),
+    ])
+    b += pipe_run([(14, 76, 14), (14, 100, 14), (30, 100, 14), (30, 110, 14)], 3, 'kupfer')
+    b += pipe_run([(-38, 76, 18), (-38, 104, 18), (-38, 104, 30), (-38, 110, 30)], 2.4, 'eisen')
+    b += pipe_run([(-44, 40, 10), (-52, 40, 10), (-52, 4, 10)], 2.2, 'kupfer')
+    b += valve_wheel(-52, 30, 7.4)
+    b += [
+        Box((20, 4, -12), (56, 16, 12), 'eisen'),
+        Box((20, 16, -10.6), (56, 17, 10.6), 'band_schwarz'),
+        Box((20, 15.6, -12.4), (56, 17.6, -10.6), 'lack_gelb'),
+        Box((20, 15.6, 10.6), (56, 17.6, 12.4), 'lack_gelb'),
+        Box((20, 17, -12), (28, 40, 12), 'lack_rot'),
+        Box((20.6, 17, -9), (21.2, 30, 9), 'kohle'),
+        Box((19.6, 39.6, -12.4), (28.4, 41, 12.4), 'messing'),
+    ]
+    for k, x in enumerate((34, 44, 52)):
+        b += gift(x, 0, 7, 6, 7, 17, ('papier_gruen', 'papier_rot', 'papier_gold')[k], ('band_gruen', 'band_rot', 'band_gold')[k], turn=k * 15 - 10)
+    b += big_gauge(-38, 36, -28)
+    b += big_gauge(-38, 46, -28)
+    colours = ['rot', 'gelb', 'gruen', 'blau', 'warm', 'rot', 'gelb', 'gruen']
+    for k, x in enumerate(range(-40, 18, 7)):
+        b += soft([lamp_dot(x, 10, -28, colours[k % 8], 1.8)])
+    b += [Box((-20, 4, -40), (4, 10, -32), 'kessel'), Box((-20.4, 9.6, -40.4), (4.4, 11, -31.6), 'messing')]
+    for k in range(6):
+        b += soft([lamp_dot(-17 + k * 3.8, 12.2, -33, colours[k], 1.4)])
+    b.append(Box((-17 + 5 * 3.8 - 0.6, 11, -36), (-17 + 5 * 3.8 + 0.6, 16, -35), 'eisen', rotation=((-17 + 5 * 3.8, 11, -35.5), (-20, 0, 0))))
+    return b
+
+
+def mega_wrapper_gear():
+    return gear(11, 12, 3)
+
+
+def candy_works():
+    b = [Box((-40, 0, -40), (40, 4, 40), 'kessel', faces={'up': 'riffel'}), *hazard(-40, -40, 40, 40, 4)]
+    for k, (cx, mat) in enumerate(((-20, 'apfel'), (20, 'zuckerguss'))):
+        b += octagon(cx, 14, 15, 4, 70, mat)
+        for y in (20, 40, 60):
+            b += band_ring(cx, 14, 15, y, 2, 'messing')
+        b += octagon(cx, 14, 16, 70, 74, 'eisen')
+        b += octagon(cx, 14, 8, 74, 80, 'eisen')
+        b += pipe_run([(cx, 66, 29), (cx, 92, 29), (0, 92, 29), (0, 104, 29)], 2.6, 'kupfer')
+        b += [Box((cx - 5, 30, -1.6), (cx + 5, 44, -0.8), 'glaskugel', shade=False), Box((cx - 4.4, 30.4, -1), (cx + 4.4, 38, -0.2), mat, emit=6)]
+        b += big_gauge(cx, 52, -1)
+    b += [Box((-8, 4, -36), (8, 60, -20), 'lack_gruen'), Box((-8.4, 58, -36.4), (8.4, 61, -19.6), 'messing'), Box((-8.4, 4, -36.4), (8.4, 8, -19.6), 'messing')]
+    b += [Box((-5, 60, -33), (5, 100, -23), 'glaskugel', shade=False)]
+    for k in range(20):
+        y = 61 + k * 1.9
+        b.append(Box((-2.2, y, -29.2), (2.2, y + 1.9, -26.8), 'apfel' if k % 2 == 0 else 'zuckerguss', rotation=((0, y, -28), (0, k * 32, 0))))
+    b += [Box((-6, 100, -34), (6, 104, -22), 'messing')]
+    b += [
+        Box((-36, 4, -40), (36, 12, -36), 'eisen'),
+        Box((-36, 12, -39.6), (36, 13, -36.4), 'band_schwarz'),
+    ]
+    for k, x in enumerate(range(-32, 33, 6)):
+        b.append(Box((x - 0.6, 13, -39), (x + 0.6, 14.2, -37), 'zucker', rotation=((x, 13.6, -38), (0, 90, 0))))
+        b += arc((x, 13.6, -36.4), 1.2, 270, 90, 3, 1, 1.2, 'zucker')
+    for k, x in enumerate((-28, -18, 18, 28)):
+        b += soft([lamp_dot(x, 8, -36, ('rot', 'gruen', 'gelb', 'blau')[k], 1.8)])
+    b += [Box((-40, 4, 30), (40, 40, 40), 'eisen'), Box((-40.4, 38, 29.6), (40.4, 41, 40.4), 'messing')]
+    return b
+
+
+def candy_stirrer():
+    b = [Box((-1, -4, -1), (1, 5, 1), 'messing'), Box((-2.4, 5, -2.4), (2.4, 7, 2.4), 'eisen')]
+    for k in range(4):
+        b.append(Box((-7, -0.6, -0.6), (7, 0.6, 0.6), 'messing', rotation=((0, 0, 0), (0, k * 45, 0))))
+    for k in range(8):
+        a = math.radians(k * 45)
+        b.append(Box((7 * math.cos(a) - 1, -1, 7 * math.sin(a) - 1), (7 * math.cos(a) + 1, 1, 7 * math.sin(a) + 1), 'apfel' if k % 2 else 'zuckerguss'))
+    return b
+
+
+def boiler():
+    b = [Box((-40, 0, -32), (40, 4, 32), 'kessel', faces={'up': 'riffel'}), *hazard(-40, -32, 40, 32, 4)]
+    for x in (-28, -8, 12, 28):
+        b += [Box((x - 3, 4, -14), (x + 3, 20, 14), 'eisen')]
+    tank = []
+    for k in range(4):
+        tank.append(Box((-36, -18, -7.5), (36, 18, 7.5), 'kupfer', rotation=((0, 0, 0), (k * 45, 0, 0))))
+    for x in (-30, -12, 6, 24):
+        for k in range(4):
+            tank.append(Box((x - 1, -19.4, -8), (x + 1, 19.4, 8), 'messing', rotation=((0, 0, 0), (k * 45, 0, 0))))
+    b += placed(tank, 0, 38, 0)
+    b += [Box((-38, 22, -18), (-34, 54, 18), 'eisen'), Box((34, 22, -18), (38, 54, 18), 'eisen')]
+    b += [
+        Box((-40, 4, -32), (-12, 34, -14), 'kessel'),
+        Box((-36, 8, -32.4), (-16, 26, -32), 'eisen'),
+        Box((-34, 10, -32.6), (-18, 24, -32.4), 'glut', emit=15, shade=False),
+        Box((-35, 9, -32.8), (-17, 10, -32.4), 'messing'),
+        Box((-35, 24, -32.8), (-17, 25, -32.4), 'messing'),
+    ]
+    for x in (-31, -26, -21):
+        b.append(Box((x - 0.5, 10, -32.9), (x + 0.5, 24, -32.6), 'kohle'))
+    b += pipe_run([(-26, 34, -23), (-26, 70, -23), (-26, 110, -23)], 4, 'eisen')
+    b += [Box((-31, 104, -28), (-21, 108, -18), 'messing')]
+    b += pipe_run([(20, 56, 0), (20, 76, 0), (36, 76, 0), (36, 110, 0)], 3, 'kupfer')
+    b += pipe_run([(-8, 56, 0), (-8, 66, 0), (-8, 66, -26), (8, 66, -26), (8, 20, -26)], 2.2, 'eisen')
+    b += valve_wheel(8, 40, -28.6, 4)
+    b += big_gauge(-2, 46, -18.6, 4.4)
+    b += big_gauge(4, 30, -18.6, 3.4)
+    b += [Box((24.8, 34.8, -24.6), (27.2, 37.2, -17), 'eisen')]
+    for k, x in enumerate((-6, 0, 6)):
+        b += soft([lamp_dot(x + 26, 14, -32, ('rot', 'gelb', 'gruen')[k], 2)])
+    b += [Box((14, 4, -32), (38, 22, -24), 'kessel'), Box((13.6, 21.6, -32.4), (38.4, 23, -23.6), 'messing')]
+    return b
+
+
+def boiler_gear():
+    return gear(10, 10, 2.6, 'eisen')
+
+
+def giant_press():
+    b = [Box((-40, 0, -32), (40, 6, 32), 'kessel', faces={'up': 'riffel'}), *hazard(-40, -32, 40, 32, 6)]
+    for x in (-36, 24):
+        b += [Box((x, 6, -4), (x + 12, 96, 16), 'lack_blau'), Box((x - 0.4, 40, -4.4), (x + 12.4, 42, 16.4), 'messing'), Box((x - 0.4, 70, -4.4), (x + 12.4, 72, 16.4), 'messing')]
+        b += rivets(x + 2, x + 10, 30, -4, 4)
+        b += rivets(x + 2, x + 10, 60, -4, 4)
+    b += [
+        Box((-40, 96, -8), (40, 108, 20), 'lack_blau'),
+        Box((-40.4, 95, -8.4), (40.4, 97, 20.4), 'messing'),
+        Box((-40.4, 107, -8.4), (40.4, 109, 20.4), 'messing'),
+        Box((-6, 52, -2), (6, 96, 10), 'messing'),
+        Box((-18, 40, -8), (18, 52, 14), 'eisen'),
+        Box((-18.4, 39, -8.4), (18.4, 40, 14.4), 'kohle'),
+        Box((-22, 6, -12), (22, 14, 14), 'eisen'),
+        Box((-20, 14, -10), (20, 15, 12), 'band_schwarz'),
+    ]
+    b += placed(rocking_horse(0, 0, 0, 1.4, 'lack_rot'), 0, 15, 1)
+    b += soft([
+        Box((-24, 98, -8.8), (24, 106, -8.2), 'holz_dunkel', faces={'north': 'schild_presse'}, uv={'north': (0, 0)}),
+    ])
+    for k, x in enumerate((-32, -28, 28, 32)):
+        b += soft([lamp_dot(x, 86, -4, ('rot', 'gelb', 'gruen', 'blau')[k], 2)])
+    b += big_gauge(-30, 50, -4)
+    b += [Box((28.8, 58.8, -5.6), (31.2, 61.2, -4), 'eisen')]
+    b += pipe_run([(-30, 108, 6), (-30, 110, 6)], 3, 'kupfer')
+    for k, x in enumerate((-30, 30)):
+        b += [Box((x - 4, 6, -30), (x + 4, 12, -22), 'kessel')]
+        b += gift(x, -26, 6, 6, 6, 12, ('papier_gruen', 'papier_rot')[k], ('band_gruen', 'band_rot')[k], turn=15)
+    return b
+
+
+def press_wheel():
+    return gear(11, 10, 3, 'eisen')
+
+
 STALLS = {
     'marktstand': ('Glühweinstand', 'rot', 'schild_gluehwein', gluehwein_big, []),
     'stand_lebkuchen': ('Lebkuchenstand', 'gruen', 'schild_lebkuchen', lebkuchen_big, []),
@@ -3620,6 +3911,17 @@ def build_props():
                               ('kontrollpult', 'Kontrollpult', control_desk), ('spielzeugregal', 'Spielzeugregal', toy_shelf), ('kistenstapel', 'Kistenstapel', crate_stack)):
         boxes = maker()
         result.append(Prop(art, auto_parts(art, boxes), footprint_of(boxes), title=title))
+    def giant(art, title, body, extras):
+        boxes = body()
+        parts = auto_parts(art, boxes)
+        for name, maker, offset, tag in extras:
+            parts.append(Part(name, placed(maker(), offset[0] * 16, offset[1] * 16, offset[2] * 16), offset, tags=(tag,)))
+        result.append(Prop(art, parts, footprint_of(boxes), title=title))
+
+    giant('riesen_verpackung', 'Riesen-Verpackungsmaschine', mega_wrapper, [('riesen_verpackung_rad', mega_wrapper_gear, (0.625, 3.9375, -1.906), 'deko_dreh_z')])
+    giant('riesen_zuckerwerk', 'Zuckerstangenwerk', candy_works, [('ruehrwerk_l', candy_stirrer, (-1.25, 5.25, 0.875), 'deko_dreh'), ('ruehrwerk_r', candy_stirrer, (1.25, 5.25, 0.875), 'deko_dreh')])
+    giant('dampfkessel', 'Dampfkessel', boiler, [('dampfkessel_rad', boiler_gear, (1.625, 2.25, -1.625), 'deko_dreh_z')])
+    giant('riesen_presse', 'Riesenpresse', giant_press, [('riesen_presse_rad', press_wheel, (1.875, 3.75, -0.40625), 'deko_dreh_z')])
     gear = Prop('zahnrad', [Part('zahnrad_halter', wall_gear_mount(), (0, 0, 0)), Part('zahnrad_rad', wall_gear(), (0, 0.5, 0), tags=('deko_dreh_z',))], [], title='Zahnrad')
     gear.wall = True
     result.append(gear)
