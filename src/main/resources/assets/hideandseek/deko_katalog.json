@@ -13,487 +13,873 @@
 			"art": "stand_bratapfel",
 			"title": "Bratapfelstand",
 			"category": "St\u00e4nde",
-			"icon": "hideandseek:props/deko/icon/stand_bratapfel"
+			"icon": "hideandseek:props/deko/icon/stand_bratapfel",
+			"text": "Holzbude mit dampfenden Brat\u00e4pfeln und Vanilleso\u00dfe",
+			"size": "5 \u00d7 6 Bl\u00f6cke, 5 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "stand_wurst",
 			"title": "Bratwurststand",
 			"category": "St\u00e4nde",
-			"icon": "hideandseek:props/deko/icon/stand_wurst"
+			"icon": "hideandseek:props/deko/icon/stand_wurst",
+			"text": "Grillbude mit Bratw\u00fcrsten, Senf und Rauch",
+			"size": "5 \u00d7 6 Bl\u00f6cke, 5 hoch",
+			"place": "Boden",
+			"features": [
+				"raucht"
+			]
 		},
 		{
 			"art": "stand_brezeln",
 			"title": "Brezelstand",
 			"category": "St\u00e4nde",
-			"icon": "hideandseek:props/deko/icon/stand_brezeln"
+			"icon": "hideandseek:props/deko/icon/stand_brezeln",
+			"text": "Bude mit Brezeln an Stangen und im Korb",
+			"size": "5 \u00d7 6 Bl\u00f6cke, 5 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "stand_crepes",
 			"title": "Cr\u00eapesstand",
 			"category": "St\u00e4nde",
-			"icon": "hideandseek:props/deko/icon/stand_crepes"
+			"icon": "hideandseek:props/deko/icon/stand_crepes",
+			"text": "Cr\u00eapes mit Nougat, Erdbeeren und Banane",
+			"size": "5 \u00d7 6 Bl\u00f6cke, 5 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "marktstand",
 			"title": "Gl\u00fchweinstand",
 			"category": "St\u00e4nde",
-			"icon": "hideandseek:props/deko/icon/marktstand"
+			"icon": "hideandseek:props/deko/icon/marktstand",
+			"text": "Gl\u00fchwein in Bechern, Topf mit Kelle, Lichter an der Traufe",
+			"size": "5 \u00d7 6 Bl\u00f6cke, 5 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "stand_honig",
 			"title": "Honigstand",
 			"category": "St\u00e4nde",
-			"icon": "hideandseek:props/deko/icon/stand_honig"
+			"icon": "hideandseek:props/deko/icon/stand_honig",
+			"text": "Honiggl\u00e4ser, Waben und Bienenwachskerzen",
+			"size": "5 \u00d7 6 Bl\u00f6cke, 5 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "stand_kakao",
 			"title": "Kakaostand",
 			"category": "St\u00e4nde",
-			"icon": "hideandseek:props/deko/icon/stand_kakao"
+			"icon": "hideandseek:props/deko/icon/stand_kakao",
+			"text": "Hei\u00dfer Kakao mit Sahne in bunten Bechern",
+			"size": "5 \u00d7 6 Bl\u00f6cke, 5 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "stand_puffer",
 			"title": "Kartoffelpufferstand",
 			"category": "St\u00e4nde",
-			"icon": "hideandseek:props/deko/icon/stand_puffer"
+			"icon": "hideandseek:props/deko/icon/stand_puffer",
+			"text": "Kartoffelpuffer mit Apfelmus aus der Pfanne",
+			"size": "5 \u00d7 6 Bl\u00f6cke, 5 hoch",
+			"place": "Boden",
+			"features": [
+				"raucht"
+			]
 		},
 		{
 			"art": "stand_kerzen",
 			"title": "Kerzenstand",
 			"category": "St\u00e4nde",
-			"icon": "hideandseek:props/deko/icon/stand_kerzen"
+			"icon": "hideandseek:props/deko/icon/stand_kerzen",
+			"text": "Kerzen in allen Farben und Gr\u00f6\u00dfen",
+			"size": "5 \u00d7 6 Bl\u00f6cke, 5 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "stand_kugeln",
 			"title": "Kugelstand",
 			"category": "St\u00e4nde",
-			"icon": "hideandseek:props/deko/icon/stand_kugeln"
+			"icon": "hideandseek:props/deko/icon/stand_kugeln",
+			"text": "Christbaumkugeln, Sterne und Glaskugeln",
+			"size": "5 \u00d7 6 Bl\u00f6cke, 5 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "stand_lebkuchen",
 			"title": "Lebkuchenstand",
 			"category": "St\u00e4nde",
-			"icon": "hideandseek:props/deko/icon/stand_lebkuchen"
+			"icon": "hideandseek:props/deko/icon/stand_lebkuchen",
+			"text": "Lebkuchenherzen mit Zuckerguss",
+			"size": "5 \u00d7 6 Bl\u00f6cke, 5 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "stand_mandeln",
 			"title": "Mandelstand",
 			"category": "St\u00e4nde",
-			"icon": "hideandseek:props/deko/icon/stand_mandeln"
+			"icon": "hideandseek:props/deko/icon/stand_mandeln",
+			"text": "Gebrannte Mandeln in T\u00fcten",
+			"size": "5 \u00d7 6 Bl\u00f6cke, 5 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "stand_raclette",
 			"title": "Raclettestand",
 			"category": "St\u00e4nde",
-			"icon": "hideandseek:props/deko/icon/stand_raclette"
+			"icon": "hideandseek:props/deko/icon/stand_raclette",
+			"text": "Schmelzender Raclettek\u00e4se mit Kartoffeln",
+			"size": "5 \u00d7 6 Bl\u00f6cke, 5 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "stand_schoko",
 			"title": "Schokofruchtstand",
 			"category": "St\u00e4nde",
-			"icon": "hideandseek:props/deko/icon/stand_schoko"
+			"icon": "hideandseek:props/deko/icon/stand_schoko",
+			"text": "Schokofr\u00fcchte am Spie\u00df",
+			"size": "5 \u00d7 6 Bl\u00f6cke, 5 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "stand_spielzeug",
 			"title": "Spielzeugstand",
 			"category": "St\u00e4nde",
-			"icon": "hideandseek:props/deko/icon/stand_spielzeug"
+			"icon": "hideandseek:props/deko/icon/stand_spielzeug",
+			"text": "Holzspielzeug, Teddys und Schaukelpferde",
+			"size": "5 \u00d7 6 Bl\u00f6cke, 5 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "stand_sterne",
 			"title": "Sternestand",
 			"category": "St\u00e4nde",
-			"icon": "hideandseek:props/deko/icon/stand_sterne"
+			"icon": "hideandseek:props/deko/icon/stand_sterne",
+			"text": "Strohsterne und Herrnhuter Sterne",
+			"size": "5 \u00d7 6 Bl\u00f6cke, 5 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "stand_strick",
 			"title": "Strickstand",
 			"category": "St\u00e4nde",
-			"icon": "hideandseek:props/deko/icon/stand_strick"
+			"icon": "hideandseek:props/deko/icon/stand_strick",
+			"text": "M\u00fctzen, Schals und Socken",
+			"size": "5 \u00d7 6 Bl\u00f6cke, 5 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "stand_post",
 			"title": "Wichtelpost",
 			"category": "St\u00e4nde",
-			"icon": "hideandseek:props/deko/icon/stand_post"
+			"icon": "hideandseek:props/deko/icon/stand_post",
+			"text": "Briefstapel und Pakete der Wichtelpost",
+			"size": "5 \u00d7 6 Bl\u00f6cke, 5 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "stand_werkstatt",
 			"title": "Wichtelwerkstatt",
 			"category": "St\u00e4nde",
-			"icon": "hideandseek:props/deko/icon/stand_werkstatt"
+			"icon": "hideandseek:props/deko/icon/stand_werkstatt",
+			"text": "Werkbank mit halb fertigem Spielzeug",
+			"size": "5 \u00d7 6 Bl\u00f6cke, 5 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "adventskranz",
 			"title": "Adventskranz",
 			"category": "Markt",
-			"icon": "hideandseek:props/deko/icon/adventskranz"
+			"icon": "hideandseek:props/deko/icon/adventskranz",
+			"text": "Tannenkranz mit vier Kerzen",
+			"size": "3 \u00d7 3 Bl\u00f6cke, 1 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "brunnen",
 			"title": "Brunnen",
 			"category": "Markt",
-			"icon": "hideandseek:props/deko/icon/brunnen"
+			"icon": "hideandseek:props/deko/icon/brunnen",
+			"text": "Zugefrorener Brunnen mit Eiszapfen",
+			"size": "3 \u00d7 3 Bl\u00f6cke, 3 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "christbaumverkauf",
 			"title": "Christbaumverkauf",
 			"category": "Markt",
-			"icon": "hideandseek:props/deko/icon/christbaumverkauf"
+			"icon": "hideandseek:props/deko/icon/christbaumverkauf",
+			"text": "Tannen zum Mitnehmen mit Preisschild",
+			"size": "5 \u00d7 2 Bl\u00f6cke, 3 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "eingangstor",
 			"title": "Eingangstor",
 			"category": "Markt",
-			"icon": "hideandseek:props/deko/icon/eingangstor"
+			"icon": "hideandseek:props/deko/icon/eingangstor",
+			"text": "Gro\u00dfes Markttor mit Schild und Lichtern",
+			"size": "7 \u00d7 1 Bl\u00f6cke, 5 hoch",
+			"place": "Boden",
+			"features": [
+				"leuchtet"
+			]
 		},
 		{
 			"art": "eisbahn",
 			"title": "Eisbahn",
 			"category": "Markt",
-			"icon": "hideandseek:props/deko/icon/eisbahn"
+			"icon": "hideandseek:props/deko/icon/eisbahn",
+			"text": "Kleine Eisfl\u00e4che mit Bande und Laternen",
+			"size": "5 \u00d7 3 Bl\u00f6cke, 3 hoch",
+			"place": "Boden",
+			"features": [
+				"leuchtet"
+			]
 		},
 		{
 			"art": "engel",
 			"title": "Engel",
 			"category": "Markt",
-			"icon": "hideandseek:props/deko/icon/engel"
+			"icon": "hideandseek:props/deko/icon/engel",
+			"text": "Engelsfigur mit Fl\u00fcgeln und Heiligenschein",
+			"size": "3 \u00d7 1 Bl\u00f6cke, 3 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "karussell",
 			"title": "Kinderkarussell",
 			"category": "Markt",
-			"icon": "hideandseek:props/deko/icon/karussell"
+			"icon": "hideandseek:props/deko/icon/karussell",
+			"text": "Kinderkarussell, das sich dreht",
+			"size": "3 \u00d7 3 Bl\u00f6cke, 4 hoch",
+			"place": "Boden",
+			"features": [
+				"bewegt sich"
+			]
 		},
 		{
 			"art": "lebkuchenhaus",
 			"title": "Lebkuchenhaus",
 			"category": "Markt",
-			"icon": "hideandseek:props/deko/icon/lebkuchenhaus"
+			"icon": "hideandseek:props/deko/icon/lebkuchenhaus",
+			"text": "Lebkuchenhaus mit Zuckerguss und Bonbons",
+			"size": "3 \u00d7 3 Bl\u00f6cke, 2 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "maronenofen",
 			"title": "Maronenofen",
 			"category": "Markt",
-			"icon": "hideandseek:props/deko/icon/maronenofen"
+			"icon": "hideandseek:props/deko/icon/maronenofen",
+			"text": "Ofen f\u00fcr hei\u00dfe Maronen mit Rauch",
+			"size": "3 \u00d7 1 Bl\u00f6cke, 3 hoch",
+			"place": "Boden",
+			"features": [
+				"leuchtet",
+				"raucht"
+			]
 		},
 		{
 			"art": "nussknacker",
 			"title": "Nussknacker",
 			"category": "Markt",
-			"icon": "hideandseek:props/deko/icon/nussknacker"
+			"icon": "hideandseek:props/deko/icon/nussknacker",
+			"text": "Gro\u00dfer Nussknacker in roter Uniform",
+			"size": "2 \u00d7 1 Bl\u00f6cke, 4 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "pinguin",
 			"title": "Pinguin",
 			"category": "Markt",
-			"icon": "hideandseek:props/deko/icon/pinguin"
+			"icon": "hideandseek:props/deko/icon/pinguin",
+			"text": "Pinguin mit Schal und M\u00fctze",
+			"size": "1 \u00d7 1 Block, 2 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "rentier",
 			"title": "Rentier",
 			"category": "Markt",
-			"icon": "hideandseek:props/deko/icon/rentier"
+			"icon": "hideandseek:props/deko/icon/rentier",
+			"text": "Rentier mit Geweih",
+			"size": "1 \u00d7 4 Bl\u00f6cke, 3 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "schlitten",
 			"title": "Schlitten",
 			"category": "Markt",
-			"icon": "hideandseek:props/deko/icon/schlitten"
+			"icon": "hideandseek:props/deko/icon/schlitten",
+			"text": "Holzschlitten mit Geschenken",
+			"size": "2 \u00d7 1 Bl\u00f6cke, 2 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "schneekugel",
 			"title": "Schneekugel",
 			"category": "Markt",
-			"icon": "hideandseek:props/deko/icon/schneekugel"
+			"icon": "hideandseek:props/deko/icon/schneekugel",
+			"text": "Riesige Schneekugel mit Dorf darin",
+			"size": "3 \u00d7 3 Bl\u00f6cke, 2 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "schneemann",
 			"title": "Schneemann",
 			"category": "Markt",
-			"icon": "hideandseek:props/deko/icon/schneemann"
+			"icon": "hideandseek:props/deko/icon/schneemann",
+			"text": "Schneemann mit Karottennase und Hut",
+			"size": "3 \u00d7 2 Bl\u00f6cke, 3 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "sterntor",
 			"title": "Sterntor",
 			"category": "Markt",
-			"icon": "hideandseek:props/deko/icon/sterntor"
+			"icon": "hideandseek:props/deko/icon/sterntor",
+			"text": "Bogen mit Sternen und \u201eFrohe Weihnachten\u201c",
+			"size": "5 \u00d7 1 Bl\u00f6cke, 6 hoch",
+			"place": "Boden",
+			"features": [
+				"leuchtet"
+			]
 		},
 		{
 			"art": "tannenbaum",
 			"title": "Tannenbaum",
 			"category": "Markt",
-			"icon": "hideandseek:props/deko/icon/tannenbaum"
+			"icon": "hideandseek:props/deko/icon/tannenbaum",
+			"text": "Geschm\u00fcckte Tanne im K\u00fcbel",
+			"size": "3 \u00d7 3 Bl\u00f6cke, 3 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "vogelhaus",
 			"title": "Vogelhaus",
 			"category": "Markt",
-			"icon": "hideandseek:props/deko/icon/vogelhaus"
+			"icon": "hideandseek:props/deko/icon/vogelhaus",
+			"text": "Vogelhaus mit Schneedach",
+			"size": "1 \u00d7 1 Block, 2 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "krippe",
 			"title": "Weihnachtskrippe",
 			"category": "Markt",
-			"icon": "hideandseek:props/deko/icon/krippe"
+			"icon": "hideandseek:props/deko/icon/krippe",
+			"text": "Stall mit Krippe und Stroh",
+			"size": "5 \u00d7 3 Bl\u00f6cke, 4 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "weihnachtsstern",
 			"title": "Weihnachtsstern",
 			"category": "Markt",
-			"icon": "hideandseek:props/deko/icon/weihnachtsstern"
+			"icon": "hideandseek:props/deko/icon/weihnachtsstern",
+			"text": "Weihnachtsstern im Topf",
+			"size": "1 \u00d7 1 Block, 1 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "briefkasten",
 			"title": "Wunschzettel-Briefkasten",
 			"category": "Markt",
-			"icon": "hideandseek:props/deko/icon/briefkasten"
+			"icon": "hideandseek:props/deko/icon/briefkasten",
+			"text": "Briefkasten f\u00fcr Wunschzettel",
+			"size": "1 \u00d7 1 Block, 2 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "zuckerstange",
 			"title": "Zuckerstange",
 			"category": "Markt",
-			"icon": "hideandseek:props/deko/icon/zuckerstange"
+			"icon": "hideandseek:props/deko/icon/zuckerstange",
+			"text": "Riesige Zuckerstange",
+			"size": "2 \u00d7 1 Bl\u00f6cke, 3 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "doppellaterne",
 			"title": "Doppellaterne",
 			"category": "Licht",
-			"icon": "hideandseek:props/deko/icon/doppellaterne"
+			"icon": "hideandseek:props/deko/icon/doppellaterne",
+			"text": "Laterne mit zwei K\u00f6pfen",
+			"size": "3 \u00d7 1 Bl\u00f6cke, 4 hoch",
+			"place": "Boden",
+			"features": [
+				"leuchtet"
+			]
 		},
 		{
 			"art": "feuerkorb",
 			"title": "Feuerkorb",
 			"category": "Licht",
-			"icon": "hideandseek:props/deko/icon/feuerkorb"
+			"icon": "hideandseek:props/deko/icon/feuerkorb",
+			"text": "Feuerkorb mit Glut und Funken",
+			"size": "1 \u00d7 1 Block, 2 hoch",
+			"place": "Boden",
+			"features": [
+				"leuchtet",
+				"raucht"
+			]
 		},
 		{
 			"art": "lichterbogen",
 			"title": "Lichterbogen",
 			"category": "Licht",
-			"icon": "hideandseek:props/deko/icon/lichterbogen"
+			"icon": "hideandseek:props/deko/icon/lichterbogen",
+			"text": "Bogen voller Lichter",
+			"size": "5 \u00d7 1 Bl\u00f6cke, 3 hoch",
+			"place": "Boden",
+			"features": [
+				"leuchtet"
+			]
 		},
 		{
 			"art": "schwibbogen",
 			"title": "Schwibbogen",
 			"category": "Licht",
-			"icon": "hideandseek:props/deko/icon/schwibbogen"
+			"icon": "hideandseek:props/deko/icon/schwibbogen",
+			"text": "Erzgebirgischer Lichterbogen mit Kerzen",
+			"size": "3 \u00d7 1 Bl\u00f6cke, 2 hoch",
+			"place": "Boden",
+			"features": [
+				"leuchtet"
+			]
 		},
 		{
 			"art": "laterne",
 			"title": "Stra\u00dfenlaterne",
 			"category": "Licht",
-			"icon": "hideandseek:props/deko/icon/laterne"
+			"icon": "hideandseek:props/deko/icon/laterne",
+			"text": "Stra\u00dfenlaterne mit warmem Licht",
+			"size": "1 \u00d7 1 Block, 3 hoch",
+			"place": "Boden",
+			"features": [
+				"leuchtet"
+			]
 		},
 		{
 			"art": "pyramide",
 			"title": "Weihnachtspyramide",
 			"category": "Licht",
-			"icon": "hideandseek:props/deko/icon/pyramide"
+			"icon": "hideandseek:props/deko/icon/pyramide",
+			"text": "Weihnachtspyramide, die sich dreht",
+			"size": "3 \u00d7 3 Bl\u00f6cke, 6 hoch",
+			"place": "Boden",
+			"features": [
+				"bewegt sich",
+				"leuchtet"
+			]
 		},
 		{
 			"art": "bank",
 			"title": "Bank",
 			"category": "Bauteile",
-			"icon": "hideandseek:props/deko/icon/bank"
+			"icon": "hideandseek:props/deko/icon/bank",
+			"text": "Holzbank f\u00fcr zwei",
+			"size": "2 \u00d7 1 Bl\u00f6cke, 2 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "bande",
 			"title": "Eisbahn-Bande",
 			"category": "Bauteile",
-			"icon": "hideandseek:props/deko/bande_gerade"
+			"icon": "hideandseek:props/deko/icon/bande",
+			"text": "Rot-wei\u00dfe Eisbahn-Bande, St\u00fcck f\u00fcr St\u00fcck",
+			"size": "1 \u00d7 1 Block, verbindet sich",
+			"place": "Boden",
+			"features": [
+				"verbindet sich mit Nachbarn"
+			]
 		},
 		{
 			"art": "eislaeufer",
 			"title": "Eisl\u00e4ufer",
 			"category": "Bauteile",
-			"icon": "hideandseek:props/deko/eislaeufer_1"
+			"icon": "hideandseek:props/deko/icon/eislaeufer",
+			"text": "Schlittschuhl\u00e4ufer, der Kreise zieht",
+			"size": "Kreis mit 4 Bl\u00f6cken Radius",
+			"place": "Boden",
+			"features": [
+				"bewegt sich"
+			]
 		},
 		{
 			"art": "holzstapel",
 			"title": "Holzstapel",
 			"category": "Bauteile",
-			"icon": "hideandseek:props/deko/icon/holzstapel"
+			"icon": "hideandseek:props/deko/icon/holzstapel",
+			"text": "Gestapeltes Brennholz",
+			"size": "3 \u00d7 1 Bl\u00f6cke, 2 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "holzzaun",
 			"title": "Holzzaun",
 			"category": "Bauteile",
-			"icon": "hideandseek:props/deko/holzzaun_gerade"
+			"icon": "hideandseek:props/deko/icon/holzzaun",
+			"text": "Lattenzaun mit Schneekante, St\u00fcck f\u00fcr St\u00fcck",
+			"size": "1 \u00d7 1 Block, verbindet sich",
+			"place": "Boden",
+			"features": [
+				"verbindet sich mit Nachbarn"
+			]
 		},
 		{
 			"art": "zaun",
 			"title": "Marktzaun",
 			"category": "Bauteile",
-			"icon": "hideandseek:props/deko/icon/zaun"
+			"icon": "hideandseek:props/deko/icon/zaun",
+			"text": "Niedriger Marktzaun",
+			"size": "3 \u00d7 1 Bl\u00f6cke, 2 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "schneehaufen",
 			"title": "Schneehaufen",
 			"category": "Bauteile",
-			"icon": "hideandseek:props/deko/icon/schneehaufen"
+			"icon": "hideandseek:props/deko/icon/schneehaufen",
+			"text": "Zusammengeschobener Schnee",
+			"size": "3 \u00d7 1 Bl\u00f6cke, 2 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "sitzgruppe",
 			"title": "Sitzgruppe",
 			"category": "Bauteile",
-			"icon": "hideandseek:props/deko/icon/sitzgruppe"
+			"icon": "hideandseek:props/deko/icon/sitzgruppe",
+			"text": "Tisch mit B\u00e4nken unter einem Dach",
+			"size": "3 \u00d7 3 Bl\u00f6cke, 3 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "stehtisch",
 			"title": "Stehtisch",
 			"category": "Bauteile",
-			"icon": "hideandseek:props/deko/icon/stehtisch"
+			"icon": "hideandseek:props/deko/icon/stehtisch",
+			"text": "Stehtisch mit Bechern",
+			"size": "1 \u00d7 1 Block, 2 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "wegweiser",
 			"title": "Wegweiser",
 			"category": "Bauteile",
-			"icon": "hideandseek:props/deko/icon/wegweiser"
-		},
-		{
-			"art": "geschenk_klein",
-			"title": "Geschenk",
-			"category": "Geschenke",
-			"icon": "hideandseek:props/deko/icon/geschenk_klein"
-		},
-		{
-			"art": "geschenk_mittel",
-			"title": "Geschenk",
-			"category": "Geschenke",
-			"icon": "hideandseek:props/deko/icon/geschenk_mittel"
+			"icon": "hideandseek:props/deko/icon/wegweiser",
+			"text": "Wegweiser mit Schildern",
+			"size": "3 \u00d7 1 Bl\u00f6cke, 3 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "geschenk_gross",
-			"title": "Geschenk",
+			"title": "Geschenk gro\u00df",
 			"category": "Geschenke",
-			"icon": "hideandseek:props/deko/icon/geschenk_gross"
+			"icon": "hideandseek:props/deko/icon/geschenk_gross",
+			"text": "Gro\u00dfes Geschenk, Farbe w\u00e4hlbar",
+			"size": "2 \u00d7 2 Bl\u00f6cke, 2 hoch",
+			"place": "Boden",
+			"features": [
+				"Farbe mit \u201eGeschenk umf\u00e4rben\u201c"
+			]
+		},
+		{
+			"art": "geschenk_klein",
+			"title": "Geschenk klein",
+			"category": "Geschenke",
+			"icon": "hideandseek:props/deko/icon/geschenk_klein",
+			"text": "Kleines Geschenk, Farbe w\u00e4hlbar",
+			"size": "1 \u00d7 1 Block, 1 hoch",
+			"place": "Boden",
+			"features": [
+				"Farbe mit \u201eGeschenk umf\u00e4rben\u201c"
+			]
+		},
+		{
+			"art": "geschenk_mittel",
+			"title": "Geschenk mittel",
+			"category": "Geschenke",
+			"icon": "hideandseek:props/deko/icon/geschenk_mittel",
+			"text": "Mittleres Geschenk, Farbe w\u00e4hlbar",
+			"size": "1 \u00d7 1 Block, 1 hoch",
+			"place": "Boden",
+			"features": [
+				"Farbe mit \u201eGeschenk umf\u00e4rben\u201c"
+			]
 		},
 		{
 			"art": "geschenksack",
 			"title": "Geschenksack",
 			"category": "Geschenke",
-			"icon": "hideandseek:props/deko/icon/geschenksack"
+			"icon": "hideandseek:props/deko/icon/geschenksack",
+			"text": "Prall gef\u00fcllter Geschenksack",
+			"size": "3 \u00d7 2 Bl\u00f6cke, 2 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "geschenkstapel",
 			"title": "Geschenkstapel",
 			"category": "Geschenke",
-			"icon": "hideandseek:props/deko/icon/geschenkstapel"
+			"icon": "hideandseek:props/deko/icon/geschenkstapel",
+			"text": "Stapel aus Geschenken",
+			"size": "2 \u00d7 2 Bl\u00f6cke, 3 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "dampfkessel",
 			"title": "Dampfkessel",
 			"category": "Fabrik",
-			"icon": "hideandseek:props/deko/icon/dampfkessel"
+			"icon": "hideandseek:props/deko/icon/dampfkessel",
+			"text": "Riesiger Kupferkessel mit Dampf und Warnlicht",
+			"size": "5 \u00d7 5 Bl\u00f6cke, 7 hoch",
+			"place": "Boden",
+			"features": [
+				"bewegt sich",
+				"raucht"
+			]
 		},
 		{
 			"art": "fliessband",
 			"title": "Flie\u00dfband",
 			"category": "Fabrik",
-			"icon": "hideandseek:props/deko/icon/fliessband"
+			"icon": "hideandseek:props/deko/icon/fliessband",
+			"text": "Flie\u00dfband, drei Bl\u00f6cke lang",
+			"size": "3 \u00d7 1 Bl\u00f6cke, 1 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "geschenkkiste",
 			"title": "Geschenkkiste",
 			"category": "Fabrik",
-			"icon": "hideandseek:props/deko/icon/geschenkkiste"
+			"icon": "hideandseek:props/deko/icon/geschenkkiste",
+			"text": "Kiste am Bandende, Pakete fallen hinein",
+			"size": "1 \u00d7 2 Bl\u00f6cke, 1 hoch",
+			"place": "Boden",
+			"features": [
+				"bewegt sich"
+			]
 		},
 		{
 			"art": "kistenstapel",
 			"title": "Kistenstapel",
 			"category": "Fabrik",
-			"icon": "hideandseek:props/deko/icon/kistenstapel"
+			"icon": "hideandseek:props/deko/icon/kistenstapel",
+			"text": "Gestapelte Holzkisten",
+			"size": "3 \u00d7 3 Bl\u00f6cke, 2 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "kontrollpult",
 			"title": "Kontrollpult",
 			"category": "Fabrik",
-			"icon": "hideandseek:props/deko/icon/kontrollpult"
+			"icon": "hideandseek:props/deko/icon/kontrollpult",
+			"text": "Pult mit Kn\u00f6pfen und Bildschirm",
+			"size": "3 \u00d7 1 Bl\u00f6cke, 2 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "riesen_verpackung",
 			"title": "Riesen-Verpackungsmaschine",
 			"category": "Fabrik",
-			"icon": "hideandseek:props/deko/icon/riesen_verpackung"
+			"icon": "hideandseek:props/deko/icon/riesen_verpackung",
+			"text": "Riesen-Verpackungsmaschine mit Auswurf f\u00fcrs Paketband",
+			"size": "7 \u00d7 5 Bl\u00f6cke, 7 hoch",
+			"place": "Boden",
+			"features": [
+				"bewegt sich"
+			]
 		},
 		{
 			"art": "riesen_presse",
 			"title": "Riesenpresse",
 			"category": "Fabrik",
-			"icon": "hideandseek:props/deko/icon/riesen_presse"
+			"icon": "hideandseek:props/deko/icon/riesen_presse",
+			"text": "Riesenpresse, die stempelt und Funken spr\u00fcht",
+			"size": "5 \u00d7 5 Bl\u00f6cke, 7 hoch",
+			"place": "Boden",
+			"features": [
+				"bewegt sich"
+			]
 		},
 		{
 			"art": "spielzeugpresse",
 			"title": "Spielzeugpresse",
 			"category": "Fabrik",
-			"icon": "hideandseek:props/deko/icon/spielzeugpresse"
+			"icon": "hideandseek:props/deko/icon/spielzeugpresse",
+			"text": "Kleine Presse f\u00fcr Spielzeug",
+			"size": "3 \u00d7 3 Bl\u00f6cke, 3 hoch",
+			"place": "Boden",
+			"features": [
+				"bewegt sich"
+			]
 		},
 		{
 			"art": "spielzeugregal",
 			"title": "Spielzeugregal",
 			"category": "Fabrik",
-			"icon": "hideandseek:props/deko/icon/spielzeugregal"
+			"icon": "hideandseek:props/deko/icon/spielzeugregal",
+			"text": "Regal voller Spielzeug",
+			"size": "3 \u00d7 1 Bl\u00f6cke, 3 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "verpackungsmaschine",
 			"title": "Verpackungsmaschine",
 			"category": "Fabrik",
-			"icon": "hideandseek:props/deko/icon/verpackungsmaschine"
+			"icon": "hideandseek:props/deko/icon/verpackungsmaschine",
+			"text": "Verpackungsmaschine mit Glasfenster",
+			"size": "4 \u00d7 3 Bl\u00f6cke, 3 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "zuckerstangenmaschine",
 			"title": "Zuckerstangenmaschine",
 			"category": "Fabrik",
-			"icon": "hideandseek:props/deko/icon/zuckerstangenmaschine"
+			"icon": "hideandseek:props/deko/icon/zuckerstangenmaschine",
+			"text": "Maschine f\u00fcr Zuckerstangen",
+			"size": "3 \u00d7 3 Bl\u00f6cke, 3 hoch",
+			"place": "Boden",
+			"features": []
 		},
 		{
 			"art": "riesen_zuckerwerk",
 			"title": "Zuckerstangenwerk",
 			"category": "Fabrik",
-			"icon": "hideandseek:props/deko/icon/riesen_zuckerwerk"
+			"icon": "hideandseek:props/deko/icon/riesen_zuckerwerk",
+			"text": "Zuckerstangenwerk mit R\u00fchrwerken",
+			"size": "5 \u00d7 5 Bl\u00f6cke, 7 hoch",
+			"place": "Boden",
+			"features": [
+				"bewegt sich"
+			]
 		},
 		{
 			"art": "deckenlichter",
 			"title": "Deckenlichter",
 			"category": "Wand/Decke",
-			"icon": "hideandseek:props/deko/icon/deckenlichter"
+			"icon": "hideandseek:props/deko/icon/deckenlichter",
+			"text": "Lichterkette unter der Decke",
+			"size": "3 \u00d7 1",
+			"place": "Decke (Decke anschauen)",
+			"features": [
+				"leuchtet"
+			]
 		},
 		{
 			"art": "deckenrohr",
 			"title": "Deckenrohr",
 			"category": "Wand/Decke",
-			"icon": "hideandseek:props/deko/icon/deckenrohr"
+			"icon": "hideandseek:props/deko/icon/deckenrohr",
+			"text": "Rohrleitung unter der Decke",
+			"size": "3 \u00d7 1",
+			"place": "Decke (Decke anschauen)",
+			"features": []
 		},
 		{
 			"art": "fabriklampe",
 			"title": "Fabriklampe",
 			"category": "Wand/Decke",
-			"icon": "hideandseek:props/deko/icon/fabriklampe"
+			"icon": "hideandseek:props/deko/icon/fabriklampe",
+			"text": "H\u00e4ngelampe mit echtem Licht",
+			"size": "1 \u00d7 1",
+			"place": "Decke (Decke anschauen)",
+			"features": [
+				"leuchtet"
+			]
 		},
 		{
 			"art": "rohrleitung",
 			"title": "Rohrleitung",
 			"category": "Wand/Decke",
-			"icon": "hideandseek:props/deko/icon/rohrleitung"
+			"icon": "hideandseek:props/deko/icon/rohrleitung",
+			"text": "Rohrleitung an der Wand",
+			"size": "3 \u00d7 1",
+			"place": "Wand (Wand anschauen)",
+			"features": []
 		},
 		{
 			"art": "tuerkranz",
 			"title": "T\u00fcrkranz",
 			"category": "Wand/Decke",
-			"icon": "hideandseek:props/deko/icon/tuerkranz"
+			"icon": "hideandseek:props/deko/icon/tuerkranz",
+			"text": "Kranz f\u00fcr Haust\u00fcren",
+			"size": "1 \u00d7 1",
+			"place": "Wand (Wand anschauen)",
+			"features": []
 		},
 		{
 			"art": "wandlaterne",
 			"title": "Wandlaterne",
 			"category": "Wand/Decke",
-			"icon": "hideandseek:props/deko/icon/wandlaterne"
+			"icon": "hideandseek:props/deko/icon/wandlaterne",
+			"text": "Laterne an der Wand",
+			"size": "1 \u00d7 1",
+			"place": "Wand (Wand anschauen)",
+			"features": [
+				"leuchtet"
+			]
 		},
 		{
 			"art": "zahnrad",
 			"title": "Zahnrad",
 			"category": "Wand/Decke",
-			"icon": "hideandseek:props/deko/icon/zahnrad"
+			"icon": "hideandseek:props/deko/icon/zahnrad",
+			"text": "Zahnrad an der Wand, das sich dreht",
+			"size": "1 \u00d7 1",
+			"place": "Wand (Wand anschauen)",
+			"features": [
+				"bewegt sich"
+			]
 		}
 	]
 }

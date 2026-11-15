@@ -2,14 +2,17 @@ package studio.sniffa.client.ui.deko
 
 import com.google.gson.JsonParser
 import net.fabricmc.loader.api.FabricLoader
+import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.EditBox
 import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.input.KeyEvent
 import net.minecraft.client.input.MouseButtonEvent
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.Identifier
+import net.minecraft.util.FormattedCharSequence
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import org.lwjgl.glfw.GLFW
@@ -18,30 +21,41 @@ import java.io.InputStreamReader
 
 class DekoScreen : Screen(Component.literal("Deko")) {
 
-    data class Entry(val art: String, val title: String, val category: String, val icon: ItemStack)
+    class Entry(
+        val command: String,
+        val title: String,
+        val category: String,
+        val icon: ItemStack,
+        val text: String,
+        val size: String?,
+        val place: String?,
+        val features: List<String>,
+    )
 
-    private data class Tool(val label: String, val command: String)
+    private class Hit(val x: Int, val y: Int, val w: Int, val h: Int, val action: () -> Unit, val lore: List<FormattedCharSequence>?)
 
-    private data class Hit(val x: Int, val y: Int, val w: Int, val h: Int, val action: () -> Unit, val tip: String?)
-
-    private val entries = load()
-    private val categories = listOf(ALL) + entries.map { it.category }.distinct()
-    private var category = remembered
+    private val entries = load() + TOOLS
+    private val categories = entries.map { it.category }.distinct()
+    private var category: String? = remembered
+    private var page = 0
     private var query = ""
-    private var scroll = 0
     private val hits = ArrayList<Hit>()
     private lateinit var search: EditBox
 
     private val shown: List<Entry>
-        get() = entries.filter { (category == ALL || it.category == category) && (query.isBlank() || it.title.contains(query, true) || it.art.contains(query, true)) }
+        get() = when {
+            query.isNotBlank() -> entries.filter { it.title.contains(query, true) || it.text.contains(query, true) || it.command.contains(query, true) }
+            category != null -> entries.filter { it.category == category }
+            else -> emptyList()
+        }
 
     override fun init() {
-        search = EditBox(font, width - PAD - SEARCH_W, PAD, SEARCH_W, 16, Component.literal("Suchen"))
+        search = EditBox(font, 0, 0, SEARCH_W, 14, Component.literal("Suchen"))
         search.setHint(Component.literal("Suchen …"))
         search.setValue(query)
         search.setResponder { value ->
             query = value
-            scroll = 0
+            page = 0
         }
         addRenderableWidget(search)
     }
@@ -51,96 +65,126 @@ class DekoScreen : Screen(Component.literal("Deko")) {
     }
 
     override fun extractRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, delta: Float) {
-        super.extractRenderState(graphics, mouseX, mouseY, delta)
         hits.clear()
-        graphics.text(font, "Deko setzen", PAD, PAD + 4, GOLD, true)
-        val hint = "Erst auf den Boden schauen, dann wählen"
-        val hintX = PAD + font.width("Deko setzen") + 10
-        if (hintX + font.width(hint) < width - PAD - SEARCH_W - 8) graphics.text(font, hint, hintX, PAD + 4, MUTED, false)
+        val columns = ((width - 2 * MARGIN - 2 * INNER) / SLOT).coerceIn(4, 15)
+        val panelW = columns * SLOT + 2 * INNER
+        val panelX = (width - panelW) / 2
+        val panelY = MARGIN
+        val panelH = height - 2 * MARGIN
+        graphics.fill(panelX - 1, panelY - 1, panelX + panelW + 1, panelY + panelH + 1, FRAME)
+        graphics.fill(panelX, panelY, panelX + panelW, panelY + panelH, PANEL)
+        graphics.fill(panelX, panelY, panelX + panelW, panelY + HEADER, PANEL_HEAD)
 
-        var x = PAD
-        var tabY = PAD + 24
-        for (name in categories) {
-            val w = font.width(name) + 12
-            if (x + w > width - PAD) {
-                x = PAD
-                tabY += 20
+        search.setX(panelX + panelW - INNER - SEARCH_W)
+        search.setY(panelY + 5)
+        super.extractRenderState(graphics, mouseX, mouseY, delta)
+
+        val gridTop = panelY + HEADER + 24
+        val gridBottom = panelY + panelH - 22
+        val rows = ((gridBottom - gridTop) / SLOT).coerceAtLeast(1)
+        val gridX = panelX + INNER
+
+        if (query.isBlank() && category == null) {
+            graphics.text(font, "Deko-Katalog", panelX + INNER, panelY + 8, GOLD, true)
+            graphics.text(font, "Kategorie wählen", panelX + INNER, panelY + HEADER + 8, MUTED, false)
+            home(graphics, gridX, gridTop, columns, mouseX, mouseY)
+            footer(graphics, panelX, panelY + panelH - 18, panelW, "Erst auf den Boden schauen, dann wählen. Esc schließt.")
+        } else {
+            val title = if (query.isNotBlank()) "Suche: $query" else category!!
+            graphics.text(font, font.plainSubstrByWidth(title, panelW - SEARCH_W - 3 * INNER), panelX + INNER, panelY + 8, GOLD, true)
+            button(graphics, "‹ Kategorien", panelX + INNER, panelY + HEADER + 4, mouseX, mouseY) {
+                category = null
+                remembered = null
+                query = ""
+                search.setValue("")
+                page = 0
             }
-            val active = name == category
-            graphics.fill(x, tabY, x + w, tabY + 16, if (active) TAB_ACTIVE else TAB)
-            graphics.text(font, name, x + 6, tabY + 4, if (active) INK_DARK else INK, false)
-            hits += Hit(x, tabY, w, 16, {
-                category = name
-                remembered = name
-                scroll = 0
-            }, null)
-            x += w + 4
+            val list = shown
+            val perPage = rows * columns
+            val pages = ((list.size + perPage - 1) / perPage).coerceAtLeast(1)
+            page = page.coerceIn(0, pages - 1)
+            val label = "Seite ${page + 1} von $pages"
+            val nextX = panelX + panelW - INNER - 16
+            val labelX = nextX - 6 - font.width(label)
+            button(graphics, "‹", labelX - 6 - 16, panelY + HEADER + 4, mouseX, mouseY, page > 0) { page-- }
+            graphics.text(font, label, labelX, panelY + HEADER + 8, INK, false)
+            button(graphics, "›", nextX, panelY + HEADER + 4, mouseX, mouseY, page < pages - 1) { page++ }
+            if (list.isEmpty()) graphics.centeredText(font, "Nichts gefunden", panelX + panelW / 2, gridTop + 20, MUTED)
+            for ((slot, entry) in list.drop(page * perPage).take(perPage).withIndex()) {
+                val sx = gridX + (slot % columns) * SLOT
+                val sy = gridTop + (slot / columns) * SLOT
+                slot(graphics, entry.icon, sx, sy, mouseX, mouseY)
+                hits += Hit(sx, sy, SLOT - 2, SLOT - 2, { run(entry.command) }, lore(entry))
+            }
+            footer(graphics, panelX, panelY + panelH - 18, panelW, "${list.size} Teile · Klick setzt an der angeschauten Stelle · Mausrad blättert")
         }
 
-        val toolRows = ArrayList<MutableList<Pair<Tool, Int>>>()
-        var rowWidth = 0
-        for (tool in TOOLS) {
-            val w = font.width(tool.label) + 12
-            if (toolRows.isEmpty() || rowWidth + w > width - 2 * PAD) {
-                toolRows += ArrayList<Pair<Tool, Int>>()
-                rowWidth = 0
-            }
-            toolRows.last() += tool to w
-            rowWidth += w + 4
-        }
-        val toolTop = height - PAD - toolRows.size * 20 + 4
-        for ((rowIndex, row) in toolRows.withIndex()) {
-            x = PAD
-            for ((tool, w) in row) {
-                drawTool(graphics, tool, x, toolTop + rowIndex * 20, w, mouseX, mouseY)
-                x += w + 4
-            }
-        }
-
-        val top = tabY + 24
-        val bottom = toolTop - 8
-        val columns = ((width - 2 * PAD) / CELL).coerceAtLeast(1)
-        val left = (width - columns * CELL) / 2
-        val list = shown
-        val rows = (list.size + columns - 1) / columns
-        val visibleRows = ((bottom - top) / CELL).coerceAtLeast(1)
-        scroll = scroll.coerceIn(0, (rows - visibleRows).coerceAtLeast(0))
-        if (list.isEmpty()) {
-            graphics.centeredText(font, "Nichts gefunden", width / 2, top + 20, MUTED)
-        }
-        for ((index, entry) in list.withIndex()) {
-            val row = index / columns - scroll
-            if (row < 0 || row >= visibleRows) continue
-            val cx = left + (index % columns) * CELL
-            val cy = top + row * CELL
-            val hover = mouseX in cx until cx + CELL - 4 && mouseY in cy until cy + CELL - 4
-            graphics.fill(cx, cy, cx + CELL - 4, cy + CELL - 4, if (hover) CELL_HOVER else CELL_BG)
-            graphics.pose().pushMatrix()
-            graphics.pose().translate((cx + (CELL - 4) / 2 - 16).toFloat(), (cy + 3).toFloat())
-            graphics.pose().scale(2f, 2f)
-            graphics.item(entry.icon, 0, 0)
-            graphics.pose().popMatrix()
-            val label = font.plainSubstrByWidth(entry.title, ((CELL - 6) / LABEL).toInt())
-            graphics.pose().pushMatrix()
-            graphics.pose().translate((cx + (CELL - 4) / 2).toFloat(), (cy + CELL - 13).toFloat())
-            graphics.pose().scale(LABEL, LABEL)
-            graphics.centeredText(font, label, 0, 0, INK)
-            graphics.pose().popMatrix()
-            hits += Hit(cx, cy, CELL - 4, CELL - 4, { run(entry.art) }, "${entry.title}  ·  /function sniffa:${entry.art}")
-        }
-        if (rows > visibleRows) {
-            graphics.text(font, "${scroll + 1}–${(scroll + visibleRows).coerceAtMost(rows)} von $rows Reihen · Mausrad", PAD, bottom - 2, MUTED, false)
-        }
-        hits.firstOrNull { mouseX in it.x until it.x + it.w && mouseY in it.y until it.y + it.h && it.tip != null }?.let {
-            graphics.setTooltipForNextFrame(Component.literal(it.tip!!), mouseX, mouseY)
+        hits.firstOrNull { it.lore != null && mouseX in it.x until it.x + it.w && mouseY in it.y until it.y + it.h }?.let {
+            graphics.setTooltipForNextFrame(it.lore!!, mouseX, mouseY)
         }
     }
 
-    private fun drawTool(graphics: GuiGraphicsExtractor, tool: Tool, x: Int, y: Int, w: Int, mouseX: Int, mouseY: Int) {
-        val hover = mouseX in x until x + w && mouseY in y until y + 16
-        graphics.fill(x, y, x + w, y + 16, if (hover) TOOL_HOVER else TOOL)
-        graphics.text(font, tool.label, x + 6, y + 4, INK, false)
-        hits += Hit(x, y, w, 16, { run(tool.command) }, "/function sniffa:${tool.command}")
+    private fun home(graphics: GuiGraphicsExtractor, x0: Int, y0: Int, columns: Int, mouseX: Int, mouseY: Int) {
+        val perRow = (columns / 3).coerceAtLeast(1)
+        val tileW = columns * SLOT / perRow
+        for ((index, name) in categories.withIndex()) {
+            val tx = x0 + (index % perRow) * tileW
+            val ty = y0 + (index / perRow) * (SLOT + 4)
+            val hover = mouseX in tx until tx + tileW - 4 && mouseY in ty until ty + SLOT
+            graphics.fill(tx, ty, tx + tileW - 4, ty + SLOT, if (hover) SLOT_HOVER else SLOT_BG)
+            val icon = entries.firstOrNull { it.command == CATEGORY_ICON[name] }?.icon ?: entries.first { it.category == name }.icon
+            drawIcon(graphics, icon, tx + 3, ty + 3)
+            val count = entries.count { it.category == name }
+            graphics.text(font, name, tx + SLOT + 2, ty + 10, if (hover) INK_DARK else INK, false)
+            graphics.text(font, "$count Teile", tx + SLOT + 2, ty + 22, if (hover) INK_DARK else MUTED, false)
+            hits += Hit(tx, ty, tileW - 4, SLOT, {
+                category = name
+                remembered = name
+                page = 0
+            }, null)
+        }
+    }
+
+    private fun slot(graphics: GuiGraphicsExtractor, icon: ItemStack, x: Int, y: Int, mouseX: Int, mouseY: Int) {
+        val hover = mouseX in x until x + SLOT - 2 && mouseY in y until y + SLOT - 2
+        graphics.fill(x, y, x + SLOT - 2, y + SLOT - 2, if (hover) SLOT_HOVER else SLOT_BG)
+        graphics.fill(x, y, x + SLOT - 2, y + 1, SLOT_EDGE)
+        graphics.fill(x, y, x + 1, y + SLOT - 2, SLOT_EDGE)
+        drawIcon(graphics, icon, x + 2, y + 2)
+    }
+
+    private fun drawIcon(graphics: GuiGraphicsExtractor, icon: ItemStack, x: Int, y: Int) {
+        graphics.pose().pushMatrix()
+        graphics.pose().translate(x.toFloat(), y.toFloat())
+        graphics.pose().scale(2f, 2f)
+        graphics.item(icon, 0, 0)
+        graphics.pose().popMatrix()
+    }
+
+    private fun button(graphics: GuiGraphicsExtractor, label: String, x: Int, y: Int, mouseX: Int, mouseY: Int, active: Boolean = true, action: () -> Unit) {
+        val w = (font.width(label) + 10).coerceAtLeast(16)
+        val hover = active && mouseX in x until x + w && mouseY in y until y + 16
+        graphics.fill(x, y, x + w, y + 16, if (!active) BUTTON_OFF else if (hover) SLOT_HOVER else BUTTON)
+        graphics.text(font, label, x + (w - font.width(label)) / 2, y + 4, if (!active) MUTED else if (hover) INK_DARK else INK, false)
+        if (active) hits += Hit(x, y, w, 16, action, null)
+    }
+
+    private fun footer(graphics: GuiGraphicsExtractor, x: Int, y: Int, w: Int, text: String) {
+        graphics.text(font, font.plainSubstrByWidth(text, w - 2 * INNER), x + INNER, y + 5, MUTED, false)
+    }
+
+    private fun lore(entry: Entry): List<FormattedCharSequence> {
+        val lines = ArrayList<Component>()
+        lines += Component.literal(entry.title).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)
+        if (entry.text.isNotBlank()) lines += Component.literal(entry.text).withStyle(ChatFormatting.GRAY)
+        lines += Component.empty()
+        entry.size?.let { lines += Component.literal("Größe: ").withStyle(ChatFormatting.DARK_AQUA).append(Component.literal(it).withStyle(ChatFormatting.WHITE)) }
+        entry.place?.let { lines += Component.literal("Platz: ").withStyle(ChatFormatting.DARK_AQUA).append(Component.literal(it).withStyle(ChatFormatting.WHITE)) }
+        for (feature in entry.features) lines += Component.literal("✦ $feature").withStyle(ChatFormatting.YELLOW)
+        if (entry.size != null || entry.place != null || entry.features.isNotEmpty()) lines += Component.empty()
+        lines += Component.literal(if (entry.category == TOOLS_CATEGORY) "Klick: benutzen" else "Klick: setzen").withStyle(ChatFormatting.GREEN)
+        lines += Component.literal("/function sniffa:${entry.command}").withStyle(ChatFormatting.DARK_GRAY)
+        return lines.flatMap { line -> font.split(line, LORE_WIDTH).ifEmpty { listOf(FormattedCharSequence.EMPTY) } }
     }
 
     override fun mouseClicked(event: MouseButtonEvent, doubled: Boolean): Boolean {
@@ -156,11 +200,20 @@ class DekoScreen : Screen(Component.literal("Deko")) {
     }
 
     override fun mouseScrolled(mouseX: Double, mouseY: Double, horizontalAmount: Double, verticalAmount: Double): Boolean {
-        if (verticalAmount != 0.0) {
-            scroll += if (verticalAmount < 0) 1 else -1
+        if (verticalAmount != 0.0 && (category != null || query.isNotBlank())) {
+            page = (page + if (verticalAmount < 0) 1 else -1).coerceAtLeast(0)
             return true
         }
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount)
+    }
+
+    override fun keyPressed(event: KeyEvent): Boolean {
+        if (event.key() == GLFW.GLFW_KEY_BACKSPACE && !search.isFocused && category != null) {
+            category = null
+            remembered = null
+            return true
+        }
+        return super.keyPressed(event)
     }
 
     override fun isPauseScreen(): Boolean = false
@@ -172,38 +225,60 @@ class DekoScreen : Screen(Component.literal("Deko")) {
     }
 
     companion object {
-        private const val ALL = "Alle"
-        private const val PAD = 12
-        private const val CELL = 56
-        private const val SEARCH_W = 140
-        private const val LABEL = 0.75f
-        private const val BACKDROP = 0xD0101521.toInt()
-        private const val TAB = 0xFF2A3245.toInt()
-        private const val TAB_ACTIVE = 0xFFF2C14E.toInt()
-        private const val TOOL = 0xFF34303C.toInt()
-        private const val TOOL_HOVER = 0xFF4A4352.toInt()
-        private const val CELL_BG = 0x60FFFFFF
-        private const val CELL_HOVER = 0xA0F2C14E.toInt()
+        private const val MARGIN = 16
+        private const val INNER = 10
+        private const val HEADER = 24
+        private const val SLOT = 38
+        private const val SEARCH_W = 120
+        private const val LORE_WIDTH = 220
+        private const val BACKDROP = 0xB0080B12.toInt()
+        private const val FRAME = 0xFF8C6A2E.toInt()
+        private const val PANEL = 0xF01A1F2B.toInt()
+        private const val PANEL_HEAD = 0xFF262D3D.toInt()
+        private const val SLOT_BG = 0xFF2C3446.toInt()
+        private const val SLOT_EDGE = 0xFF151A24.toInt()
+        private const val SLOT_HOVER = 0xFFF2C14E.toInt()
+        private const val BUTTON = 0xFF34303C.toInt()
+        private const val BUTTON_OFF = 0xFF23212A.toInt()
         private const val GOLD = 0xFFF2C14E.toInt()
         private const val INK = 0xFFF1EDE4.toInt()
         private const val INK_DARK = 0xFF1A1410.toInt()
-        private const val MUTED = 0xFFA9B1C2.toInt()
+        private const val MUTED = 0xFF9AA3B5.toInt()
+        private const val TOOLS_CATEGORY = "Werkzeuge"
         private val ALLOWED = setOf("jakubxyz", "corvinderayri", "p2pe")
-        private var remembered = ALL
+        private var remembered: String? = null
 
-        private val TOOLS = listOf(
-            Tool("Entfernen", "deko_weg"),
-            Tool("Geschenk umfärben", "deko_farbe"),
-            Tool("Eisläufer klein", "eislaeufer_klein"),
-            Tool("Eisläufer groß", "eislaeufer_gross"),
-            Tool("Lichterkette Anfang", "lichterkette_start"),
-            Tool("Lichterkette Ende", "lichterkette_ende"),
-            Tool("Baum-Lichterkette", "lichterkette_baum"),
-            Tool("Eiszapfen Anfang", "eiszapfen_start"),
-            Tool("Eiszapfen Ende", "eiszapfen_ende"),
-            Tool("Rauch", "rauch"),
-            Tool("Scheinwerfer", "scheinwerfer"),
+        private val CATEGORY_ICON = mapOf(
+            "Stände" to "marktstand",
+            "Markt" to "karussell",
+            "Licht" to "laterne",
+            "Bauteile" to "holzzaun",
+            "Geschenke" to "geschenkstapel",
+            "Fabrik" to "riesen_verpackung",
+            "Wand/Decke" to "tuerkranz",
+            TOOLS_CATEGORY to "deko_weg",
         )
+
+        private fun tool(command: String, title: String, text: String, icon: String): Entry {
+            val stack = ItemStack(Items.STICK)
+            stack.set(DataComponents.ITEM_MODEL, Identifier.parse(icon))
+            return Entry(command, title, TOOLS_CATEGORY, stack, text, null, null, emptyList())
+        }
+
+        private val TOOLS: List<Entry>
+            get() = listOf(
+                tool("deko_weg", "Entfernen", "Entfernt das angeschaute Teil. Zäune und Banden verbinden sich danach neu.", "minecraft:barrier"),
+                tool("deko_farbe", "Geschenk umfärben", "Gibt dem angeschauten Geschenk die nächste Farbe.", "minecraft:red_dye"),
+                tool("eislaeufer_klein", "Eisläufer, kleiner Kreis", "Läufer zieht Kreise mit 3 Blöcken Radius um die angeschaute Stelle.", "hideandseek:props/deko/eislaeufer_2"),
+                tool("eislaeufer_gross", "Eisläufer, großer Kreis", "Läufer zieht Kreise mit 6 Blöcken Radius um die angeschaute Stelle.", "hideandseek:props/deko/eislaeufer_3"),
+                tool("lichterkette_start", "Lichterkette: Anfang", "Setzt den Anfang einer Lichterkette an den angeschauten Punkt.", "minecraft:glowstone_dust"),
+                tool("lichterkette_ende", "Lichterkette: nächster Punkt", "Spannt die Kette zum angeschauten Punkt. Mehrmals für lange Ketten.", "minecraft:glowstone_dust"),
+                tool("lichterkette_baum", "Baum-Lichterkette", "Schmückt den angeschauten Baum mit einer Lichterspirale.", "minecraft:spruce_sapling"),
+                tool("eiszapfen_start", "Eiszapfen: Anfang", "Anfang einer Eiszapfen-Reihe an einer Dachkante.", "minecraft:ice"),
+                tool("eiszapfen_ende", "Eiszapfen: Ende", "Ende der Eiszapfen-Reihe.", "minecraft:ice"),
+                tool("rauch", "Schornsteinrauch", "Rauch aus dem angeschauten Schornstein.", "minecraft:campfire"),
+                tool("scheinwerfer", "Scheinwerfer", "Setzt einen Scheinwerfer auf den angeschauten Block.", "hideandseek:props/scheinwerfer_kopf"),
+            )
 
         fun allowed(client: Minecraft): Boolean =
             FabricLoader.getInstance().isDevelopmentEnvironment || client.user.name.lowercase() in ALLOWED
@@ -215,7 +290,16 @@ class DekoScreen : Screen(Component.literal("Deko")) {
                 val item = element.asJsonObject
                 val stack = ItemStack(Items.STICK)
                 stack.set(DataComponents.ITEM_MODEL, Identifier.parse(item.get("icon").asString))
-                Entry(item.get("art").asString, item.get("title").asString, item.get("category").asString, stack)
+                Entry(
+                    item.get("art").asString,
+                    item.get("title").asString,
+                    item.get("category").asString,
+                    stack,
+                    item.get("text")?.asString ?: "",
+                    item.get("size")?.asString,
+                    item.get("place")?.asString,
+                    item.getAsJsonArray("features")?.map { it.asString } ?: emptyList(),
+                )
             }
         }
     }
