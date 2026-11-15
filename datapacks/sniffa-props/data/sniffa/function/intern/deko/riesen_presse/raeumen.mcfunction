@@ -21,10 +21,6 @@ execute if block ^1 ^ ^1 minecraft:barrier run setblock ^1 ^ ^1 minecraft:air st
 execute if block ^1 ^ ^ minecraft:barrier run setblock ^1 ^ ^ minecraft:air strict
 execute if block ^1 ^ ^-1 minecraft:barrier run setblock ^1 ^ ^-1 minecraft:air strict
 execute if block ^1 ^ ^-2 minecraft:barrier run setblock ^1 ^ ^-2 minecraft:air strict
-execute if block ^1 ^2 ^ minecraft:barrier run setblock ^1 ^2 ^ minecraft:air strict
-execute if block ^1 ^2 ^-1 minecraft:barrier run setblock ^1 ^2 ^-1 minecraft:air strict
-execute if block ^1 ^3 ^ minecraft:barrier run setblock ^1 ^3 ^ minecraft:air strict
-execute if block ^1 ^3 ^-1 minecraft:barrier run setblock ^1 ^3 ^-1 minecraft:air strict
 execute if block ^1 ^6 ^ minecraft:barrier run setblock ^1 ^6 ^ minecraft:air strict
 execute if block ^1 ^6 ^-1 minecraft:barrier run setblock ^1 ^6 ^-1 minecraft:air strict
 execute if block ^ ^ ^2 minecraft:barrier run setblock ^ ^ ^2 minecraft:air strict
@@ -33,12 +29,12 @@ execute if block ^ ^ ^ minecraft:barrier run setblock ^ ^ ^ minecraft:air strict
 execute if block ^ ^ ^-1 minecraft:barrier run setblock ^ ^ ^-1 minecraft:air strict
 execute if block ^ ^ ^-2 minecraft:barrier run setblock ^ ^ ^-2 minecraft:air strict
 execute if block ^ ^1 ^ minecraft:barrier run setblock ^ ^1 ^ minecraft:air strict
-execute if block ^ ^2 ^ minecraft:barrier run setblock ^ ^2 ^ minecraft:air strict
-execute if block ^ ^2 ^-1 minecraft:barrier run setblock ^ ^2 ^-1 minecraft:air strict
 execute if block ^ ^3 ^ minecraft:barrier run setblock ^ ^3 ^ minecraft:air strict
 execute if block ^ ^3 ^-1 minecraft:barrier run setblock ^ ^3 ^-1 minecraft:air strict
 execute if block ^ ^4 ^ minecraft:barrier run setblock ^ ^4 ^ minecraft:air strict
+execute if block ^ ^4 ^-1 minecraft:barrier run setblock ^ ^4 ^-1 minecraft:air strict
 execute if block ^ ^5 ^ minecraft:barrier run setblock ^ ^5 ^ minecraft:air strict
+execute if block ^ ^5 ^-1 minecraft:barrier run setblock ^ ^5 ^-1 minecraft:air strict
 execute if block ^ ^6 ^ minecraft:barrier run setblock ^ ^6 ^ minecraft:air strict
 execute if block ^ ^6 ^-1 minecraft:barrier run setblock ^ ^6 ^-1 minecraft:air strict
 execute if block ^-1 ^ ^2 minecraft:barrier run setblock ^-1 ^ ^2 minecraft:air strict
@@ -46,10 +42,6 @@ execute if block ^-1 ^ ^1 minecraft:barrier run setblock ^-1 ^ ^1 minecraft:air 
 execute if block ^-1 ^ ^ minecraft:barrier run setblock ^-1 ^ ^ minecraft:air strict
 execute if block ^-1 ^ ^-1 minecraft:barrier run setblock ^-1 ^ ^-1 minecraft:air strict
 execute if block ^-1 ^ ^-2 minecraft:barrier run setblock ^-1 ^ ^-2 minecraft:air strict
-execute if block ^-1 ^2 ^ minecraft:barrier run setblock ^-1 ^2 ^ minecraft:air strict
-execute if block ^-1 ^2 ^-1 minecraft:barrier run setblock ^-1 ^2 ^-1 minecraft:air strict
-execute if block ^-1 ^3 ^ minecraft:barrier run setblock ^-1 ^3 ^ minecraft:air strict
-execute if block ^-1 ^3 ^-1 minecraft:barrier run setblock ^-1 ^3 ^-1 minecraft:air strict
 execute if block ^-1 ^6 ^ minecraft:barrier run setblock ^-1 ^6 ^ minecraft:air strict
 execute if block ^-1 ^6 ^-1 minecraft:barrier run setblock ^-1 ^6 ^-1 minecraft:air strict
 execute if block ^-2 ^ ^2 minecraft:barrier run setblock ^-2 ^ ^2 minecraft:air strict
