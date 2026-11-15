@@ -3032,6 +3032,83 @@ def ice_rink():
     return b
 
 
+def rink_board():
+    b = [
+        Box((-24, 0, -1), (24, 8, 1), 'bande'),
+        Box((-24, 8, -1.2), (24, 9, 1.2), 'holz_hell'),
+        snow_cap(-24, -1.2, 24, 1.2, 9, 0.4),
+    ]
+    for x in (-12, 12):
+        b.append(Box((x - 0.8, 0, -1.5), (x + 0.8, 9.6, 1.5), 'holz_dunkel'))
+    return b
+
+
+def rink_corner():
+    b = [
+        Box((-1.8, 0, -1.8), (1.8, 11, 1.8), 'holz_dunkel'),
+        Box((-2.1, 11, -2.1), (2.1, 11.6, 2.1), 'schnee'),
+        Box((1.8, 0, -1), (8, 8, 1), 'bande'),
+        Box((1.8, 8, -1.2), (8, 9, 1.2), 'holz_hell'),
+        snow_cap(1.8, -1.2, 8, 1.2, 9, 0.4),
+        Box((-1, 0, 1.8), (1, 8, 8), 'bande'),
+        Box((-1.2, 8, 1.8), (1.2, 9, 8), 'holz_hell'),
+        snow_cap(-1.2, 1.8, 1.2, 8, 9, 0.4),
+    ]
+    return b
+
+
+SKATERS = [
+    ('lack_rot', 'strick_gruen', 'aus'),
+    ('lack_blau', 'schal', 'aus'),
+    ('lack_gruen', 'strick_blau', 'hinten'),
+    ('lack_lila', 'strick_gruen', 'aus'),
+]
+
+
+def skater(number):
+    coat, knit, pose = SKATERS[number - 1]
+    b = []
+    for side in (-1, 1):
+        x = side * 2
+        b += [
+            Box((x - 0.6, 0, -3.2), (x + 0.6, 0.6, 3), 'eisen'),
+            Box((x - 1, 0.6, -2.4), (x + 1, 3.6, 2), 'kohle'),
+            Box((x - 1.2, 3.6, -1.2), (x + 1.2, 11.5, 1.2), 'kohle'),
+        ]
+    b += [
+        Box((-3.9, 10, -2.5), (3.9, 13, 2.5), coat),
+        Box((-3.6, 13, -2.2), (3.6, 20, 2.2), coat),
+        Box((-0.4, 11, -2.7), (0.4, 19, -2.2), 'messing'),
+        Box((-3.2, 19.2, -2.7), (3.2, 20.8, 2.7), knit),
+        Box((1.2, 15, -3.1), (2.6, 19.2, -2.7), knit),
+        Box((-2.4, 20.8, -2.4), (2.4, 25.4, 2.4), 'creme'),
+        Box((-1.4, 23, -2.7), (-0.6, 23.8, -2.4), 'kohle'),
+        Box((0.6, 23, -2.7), (1.4, 23.8, -2.4), 'kohle'),
+        Box((-2.7, 24.6, -2.7), (2.7, 27.2, 2.7), knit),
+        Box((-2.9, 24.4, -2.9), (2.9, 25.6, 2.9), 'zuckerguss'),
+        Box((-1, 27.2, -1), (1, 29, 1), 'zuckerguss'),
+    ]
+    for side in (-1, 1):
+        shoulder = side * 3.6
+        if pose == 'aus':
+            turn = ((shoulder, 18.6, 0), (0, 0, -side * 24))
+            low, high = sorted((shoulder, side * 10.6))
+            hand_low, hand_high = sorted((side * 10.6, side * 12.4))
+            b += [
+                Box((low, 17.4, -1.1), (high, 19.8, 1.1), coat, rotation=turn),
+                Box((hand_low, 17.3, -1.2), (hand_high, 19.9, 1.2), knit, rotation=turn),
+            ]
+        else:
+            turn = ((shoulder, 18.6, 0), (-25, 0, 0))
+            low, high = sorted((shoulder, shoulder + side * 2.2))
+            b += [
+                Box((low, 12, -1.1), (high, 19.8, 1.1), coat, rotation=turn),
+                Box((low - 0.1, 10.4, -1.2), (high + 0.1, 12, 1.2), knit, rotation=turn),
+            ]
+    clean(b)
+    return b
+
+
 def reindeer_pen():
     b = []
     for x in (-30, -15, 15, 30):
@@ -4247,6 +4324,9 @@ def build_props():
         result.append(prop)
     boxes = conveyor()
     result.append(Prop('fliessband', auto_parts('fliessband', boxes), footprint_of(boxes), title='Fließband'))
+    for art, title, maker in (('bande', 'Eisbahn-Bande', rink_board), ('bande_ecke', 'Bandenecke', rink_corner)):
+        boxes = maker()
+        result.append(Prop(art, auto_parts(art, boxes), footprint_of(boxes), title=title))
     crate = gift_crate()
     kiste = Prop('geschenkkiste', auto_parts('geschenkkiste', crate), footprint_of(crate), title='Geschenkkiste')
     kiste.extra = ['function sniffa:intern/deko/paket/legen']
@@ -4386,6 +4466,9 @@ def main():
         for colour in GIFT_COLOURS:
             name = f'geschenk_{size}_{colour}'
             models.append((name, model_json(sheet, gift_model(size, colour), shift, name)))
+    for number in range(1, len(SKATERS) + 1):
+        name = f'eislaeufer_{number}'
+        models.append((name, model_json(sheet, skater(number), (-8, 8, -8), name)))
     for number in range(1, len(PAKETE) + 1):
         name = f'paket_{number}'
         models.append((name, model_json(sheet, paket(number), (-8, -8, -8), name)))
