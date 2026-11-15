@@ -1,0 +1,6 @@
+execute if data storage sniffa:deko {args:{nr:0}} run data modify storage sniffa:deko args.farbe set value "rot"
+execute if data storage sniffa:deko {args:{nr:1}} run data modify storage sniffa:deko args.farbe set value "gruen"
+execute if data storage sniffa:deko {args:{nr:2}} run data modify storage sniffa:deko args.farbe set value "blau"
+execute if data storage sniffa:deko {args:{nr:3}} run data modify storage sniffa:deko args.farbe set value "gold"
+execute if data storage sniffa:deko {args:{nr:4}} run data modify storage sniffa:deko args.farbe set value "lila"
+execute if data storage sniffa:deko {args:{nr:5}} run data modify storage sniffa:deko args.farbe set value "weiss"
