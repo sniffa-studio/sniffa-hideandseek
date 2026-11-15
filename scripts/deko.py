@@ -17,6 +17,8 @@ TEXTURE = 'hideandseek:item/props/deko'
 JITTER = 0.0
 SHEET = 1024
 MAX_FACE = 64
+PAD = 2
+NUDGE = 0.04
 NO_EDGES = {'flamme_tief', 'flamme_kern', 'eiszapfen', 'feder', 'feder_hell', 'sack', 'schneeball', 'glas', 'lampen', 'stern', 'flamme', 'glut', 'schnee_rand', 'bonbons', 'kugeln', 'tanne', 'beere'}
 RIVETS = {'eisen', 'kessel'}
 
@@ -608,12 +610,12 @@ class FaceSheet:
         x = y = row = 0
         placed = {}
         for key in keys:
-            pw, ph = key[1], key[2]
+            pw, ph = key[1] + 2 * PAD, key[2] + 2 * PAD
             if x + pw > SHEET:
                 x = 0
                 y += row
                 row = 0
-            placed[key] = (x, y)
+            placed[key] = (x + PAD, y + PAD)
             x += pw
             row = max(row, ph)
         height = y + row
@@ -623,7 +625,20 @@ class FaceSheet:
         self.height = size
         self.image = Image.new('RGBA', (SHEET, size), (0, 0, 0, 0))
         for key, (px, py) in placed.items():
-            self.image.paste(self.paint(key), (px, py))
+            region = self.paint(key)
+            w, h = region.size
+            padded = Image.new('RGBA', (w + 2 * PAD, h + 2 * PAD))
+            padded.paste(region.resize((w + 2 * PAD, h + 2 * PAD), Image.NEAREST), (0, 0))
+            for k in range(PAD):
+                padded.paste(region.crop((0, 0, w, 1)), (PAD, k))
+                padded.paste(region.crop((0, h - 1, w, h)), (PAD, h + PAD + k))
+            strip = padded.crop((PAD, 0, PAD + 1, h + 2 * PAD))
+            strip_r = padded.crop((PAD + w - 1, 0, PAD + w, h + 2 * PAD))
+            for k in range(PAD):
+                padded.paste(strip, (k, 0))
+                padded.paste(strip_r, (w + PAD + k, 0))
+            padded.paste(region, (PAD, PAD))
+            self.image.paste(padded, (px - PAD, py - PAD))
         self.slots = placed
 
     def uv(self, key):
@@ -640,6 +655,9 @@ def model_json(sheet, boxes, shift, seed, check=True):
         b = [box.b[i] - shift[i] for i in range(3)]
         lo = [round(min(a[i], b[i]), 4) for i in range(3)]
         hi = [round(max(a[i], b[i]), 4) for i in range(3)]
+        if check:
+            lo = [max(v, -16) if v > -16 - 2 * NUDGE else v for v in lo]
+            hi = [min(v, 32) if v < 32 + 2 * NUDGE else v for v in hi]
         for value in lo + hi:
             if check and (value < -16 or value > 32):
                 raise ValueError(f'out of range {lo} {hi} for {box.mat}')
@@ -747,7 +765,9 @@ GIFT_SIZES = {
 def gift_model(size, colour):
     spec = GIFT_SIZES[size]
     cx, cz = spec['centre']
-    return gift(cx, cz, spec['w'], spec['h'], spec['w'], 0, 'papier_' + colour, 'band_' + colour)
+    boxes = gift(cx, cz, spec['w'], spec['h'], spec['w'], 0, 'papier_' + colour, 'band_' + colour)
+    clean(boxes)
+    return boxes
 
 
 def stack_model():
@@ -1685,6 +1705,15 @@ def snowman():
     return b
 
 
+def rod(p0, p1, thickness, mat):
+    dx, dy = p1[0] - p0[0], p1[1] - p0[1]
+    length = math.hypot(dx, dy) + thickness
+    mx, my, z = (p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2, p0[2]
+    angle = math.degrees(math.atan2(dy, dx)) - 90
+    h = thickness / 2
+    return Box((mx - h, my - length / 2, z - h), (mx + h, my + length / 2, z + h), mat, rotation=((mx, my, z), (0, 0, angle)))
+
+
 def reindeer():
     b = []
     fur = 'fell'
@@ -1711,13 +1740,11 @@ def reindeer():
                 Box((x - 1.4, 0, z - 1.4), (x + 1.4, 3, z + 1.4), 'kohle'),
             ]
     for side in (-1, 1):
-        base = (side * 2, 34, -16.5)
-        b += [
-            Box((side * 1.6 - 0.6, 34, -17), (side * 1.6 + 0.6, 42, -16), 'geweih', rotation=(base, (0, 0, -side * 20))),
-            Box((side * 4 - 0.5, 40, -17), (side * 4 + 0.5, 46, -16), 'geweih', rotation=(base, (0, 0, -side * 35))),
-            Box((side * 2.4 - 0.5, 38, -17), (side * 2.4 + 0.5, 43, -16), 'geweih', rotation=((side * 2.4, 38, -16.5), (0, 0, side * 40))),
-            Box((side * 6 - 0.5, 42, -17), (side * 6 + 0.5, 46.5, -16), 'geweih', rotation=((side * 6, 42, -16.5), (0, 0, side * 35))),
-        ]
+        joints = [(side * 2.2, 33.4), (side * 4.4, 39), (side * 5.4, 44), (side * 4.6, 48.6)]
+        for (x0, y0), (x1, y1) in zip(joints, joints[1:]):
+            b.append(rod((x0, y0, -16.5), (x1, y1, -16.5), 1.2, 'geweih'))
+        for (x0, y0), (x1, y1) in (((side * 4.4, 39), (side * 8, 42.4)), ((side * 5.4, 44), (side * 9, 46.6)), ((side * 3.3, 36.2), (side * 2.2, 40.4)), ((side * 5, 42), (side * 3.4, 45.6))):
+            b.append(rod((x0, y0, -16.5), (x1, y1, -16.5), 0.9, 'geweih'))
     colours = list(BULB_SLOTS)
     for k in range(9):
         z = -9 + k * 2.2
@@ -2247,7 +2274,105 @@ def column(height):
     return [(0, y, 0) for y in range(height)]
 
 
+def same_frame(box):
+    if not box.rotation:
+        return None
+    origin, angles = box.rotation
+    return (tuple(round(v, 3) for v in origin), tuple(round(v, 3) for v in angles))
+
+
+def visible_faces(box):
+    lo = [min(box.a[i], box.b[i]) for i in range(3)]
+    hi = [max(box.a[i], box.b[i]) for i in range(3)]
+    names = {(0, -1): 'west', (0, 1): 'east', (1, -1): 'down', (1, 1): 'up', (2, -1): 'north', (2, 1): 'south'}
+    for axis in range(3):
+        for sign in (-1, 1):
+            if names[(axis, sign)] in box.skip or (axis == 1 and sign < 0):
+                continue
+            plane = lo[axis] if sign < 0 else hi[axis]
+            others = [i for i in range(3) if i != axis]
+            yield axis, sign, plane, [(lo[i], hi[i]) for i in others]
+
+
+def overlap(r1, r2):
+    area = 1.0
+    for (a0, a1), (b0, b1) in zip(r1, r2):
+        d = min(a1, b1) - max(a0, b0)
+        if d <= 1e-4:
+            return 0.0
+        area *= d
+    return area
+
+
+def clean(boxes):
+    fixed = 0
+    for _ in range(30):
+        planes = {}
+        for index, box in enumerate(boxes):
+            for axis, sign, plane, rect in visible_faces(box):
+                planes.setdefault((same_frame(box), axis, sign, round(plane, 3)), []).append((index, rect))
+        moved = set()
+        for (frame, axis, sign, plane), faces in planes.items():
+            if len(faces) < 2:
+                continue
+            for i in range(len(faces)):
+                for j in range(i + 1, len(faces)):
+                    (ia, ra), (ib, rb) = faces[i], faces[j]
+                    if ia in moved or ib in moved or overlap(ra, rb) <= 0:
+                        continue
+                    area_a = (ra[0][1] - ra[0][0]) * (ra[1][1] - ra[1][0])
+                    area_b = (rb[0][1] - rb[0][0]) * (rb[1][1] - rb[1][0])
+                    target = ib if area_b <= area_a else ia
+                    box = boxes[target]
+                    a = list(box.a)
+                    b = list(box.b)
+                    if sign > 0:
+                        if a[axis] >= b[axis]:
+                            a[axis] += NUDGE
+                        else:
+                            b[axis] += NUDGE
+                    else:
+                        if a[axis] <= b[axis]:
+                            a[axis] -= NUDGE
+                        else:
+                            b[axis] -= NUDGE
+                    box.a, box.b = tuple(a), tuple(b)
+                    moved.add(target)
+                    fixed += 1
+        if not moved:
+            return fixed
+    return fixed
+
+
+def count_fights(boxes):
+    planes = {}
+    for index, box in enumerate(boxes):
+        for axis, sign, plane, rect in visible_faces(box):
+            planes.setdefault((same_frame(box), axis, sign, round(plane, 3)), []).append((index, rect))
+    total = 0
+    for faces in planes.values():
+        for i in range(len(faces)):
+            for j in range(i + 1, len(faces)):
+                if overlap(faces[i][1], faces[j][1]) > 0:
+                    total += 1
+    return total
+
+
+_PROPS = None
+
+
 def props():
+    global _PROPS
+    if _PROPS is None:
+        _PROPS = build_props()
+        for prop in _PROPS:
+            boxes = [b for part in prop.parts if part.boxes is not None for b in part.boxes]
+            prop.fixed = clean(boxes)
+            prop.fights = count_fights(boxes)
+    return _PROPS
+
+
+def build_props():
     result = []
     for size, spec in GIFT_SIZES.items():
         ox = spec['centre'][0] / 16
@@ -2391,6 +2516,8 @@ def main():
         write_json(ASSETS / f'models/item/props/deko/{name}.json', resolve(sheet, model))
         write_json(ASSETS / f'items/props/deko/{name}.json', item_definition(name))
     print('sheet', SHEET, sheet.height, len(sheet.requests), 'faces')
+    for prop in props():
+        print(f'{prop.art}: {prop.fixed} nudged, {prop.fights} left')
 
 
 if __name__ == '__main__':
