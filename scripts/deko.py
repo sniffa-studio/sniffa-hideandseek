@@ -3032,29 +3032,58 @@ def ice_rink():
     return b
 
 
-def rink_board():
-    b = [
-        Box((-24, 0, -1), (24, 8, 1), 'bande'),
-        Box((-24, 8, -1.2), (24, 9, 1.2), 'holz_hell'),
-        snow_cap(-24, -1.2, 24, 1.2, 9, 0.4),
-    ]
-    for x in (-12, 12):
-        b.append(Box((x - 0.8, 0, -1.5), (x + 0.8, 9.6, 1.5), 'holz_dunkel'))
-    return b
-
-
-def rink_corner():
-    b = [
+def board_post():
+    return [
         Box((-1.8, 0, -1.8), (1.8, 11, 1.8), 'holz_dunkel'),
         Box((-2.1, 11, -2.1), (2.1, 11.6, 2.1), 'schnee'),
-        Box((1.8, 0, -1), (8, 8, 1), 'bande'),
-        Box((1.8, 8, -1.2), (8, 9, 1.2), 'holz_hell'),
-        snow_cap(1.8, -1.2, 8, 1.2, 9, 0.4),
-        Box((-1, 0, 1.8), (1, 8, 8), 'bande'),
-        Box((-1.2, 8, 1.8), (1.2, 9, 8), 'holz_hell'),
-        snow_cap(-1.2, 1.8, 1.2, 8, 9, 0.4),
     ]
+
+
+def board_run(z0, z1):
+    return [
+        Box((-1, 0, z0), (1, 8, z1), 'bande'),
+        Box((-1.2, 8, z0), (1.2, 9, z1), 'holz_hell'),
+        snow_cap(-1.2, z0, 1.2, z1, 9, 0.4),
+    ]
+
+
+def fence_post():
+    return [
+        Box((-1.5, 0, -1.5), (1.5, 15, 1.5), 'holz_dunkel'),
+        Box((-1.8, 15, -1.8), (1.8, 15.6, 1.8), 'schnee'),
+    ]
+
+
+def fence_run(z0, z1):
+    b = [
+        Box((-0.6, 4, z0), (0.6, 6, z1), 'holz'),
+        Box((-0.6, 10, z0), (0.6, 12, z1), 'holz'),
+        snow_cap(-0.6, z0, 0.6, z1, 12, 0.3),
+    ]
+    span = z1 - z0
+    count = max(1, round(span / 4))
+    for k in range(count):
+        z = z0 + span * (k + 0.5) / count
+        b += [
+            Box((-0.3, 1, z - 0.9), (0.3, 13.5, z + 0.9), 'holz_hell'),
+            Box((-0.3, 13.5, z - 0.45), (0.3, 14.4, z + 0.45), 'holz_hell'),
+        ]
     return b
+
+
+LINKED = {
+    'bande': ('Eisbahn-Bande', board_post, board_run, 1.8),
+    'holzzaun': ('Holzzaun', fence_post, fence_run, 1.5),
+}
+
+
+def linked_models(art):
+    _, post, run, half = LINKED[art]
+    return {
+        f'{art}_pfosten': post(),
+        f'{art}_arm': run(-8, -half),
+        f'{art}_gerade': run(-8, 8),
+    }
 
 
 SKATERS = [
@@ -4324,9 +4353,14 @@ def build_props():
         result.append(prop)
     boxes = conveyor()
     result.append(Prop('fliessband', auto_parts('fliessband', boxes), footprint_of(boxes), title='Fließband'))
-    for art, title, maker in (('bande', 'Eisbahn-Bande', rink_board), ('bande_ecke', 'Bandenecke', rink_corner)):
-        boxes = maker()
-        result.append(Prop(art, auto_parts(art, boxes), footprint_of(boxes), title=title))
+    for art, (title, _, _, _) in LINKED.items():
+        prop = Prop(art, [], [(0, 0, 0)], title=title)
+        prop.extra = [f'function sniffa:intern/deko/verbund/setzen {{art:"{art}"}}']
+        prop.extra_raeumen = [f'function sniffa:intern/deko/verbund/raeumen {{art:"{art}"}}']
+        result.append(prop)
+    laeufer = Prop('eislaeufer', [], [], title='Eisläufer')
+    laeufer.extra = ['function sniffa:intern/deko/laeufer/setzen with entity @s data']
+    result.append(laeufer)
     crate = gift_crate()
     kiste = Prop('geschenkkiste', auto_parts('geschenkkiste', crate), footprint_of(crate), title='Geschenkkiste')
     kiste.extra = ['function sniffa:intern/deko/paket/legen']
@@ -4445,6 +4479,7 @@ def functions(prop):
     write(base / 'frei.mcfunction', '\n'.join(frei) + '\n')
     setzen += getattr(prop, 'extra', [])
     write(base / 'setzen.mcfunction', '\n'.join(setzen) + '\n')
+    raeumen += getattr(prop, 'extra_raeumen', [])
     write(base / 'raeumen.mcfunction', '\n'.join(raeumen) + '\n' if raeumen else 'return 1\n')
     modus = '_wand' if getattr(prop, 'wall', False) else '_decke' if getattr(prop, 'ceiling', False) else ''
     write(FUNCTIONS / f'{prop.art}.mcfunction', f'function sniffa:intern/deko/platzieren {{art:"{prop.art}",name:"{prop.title}",modus:"{modus}"}}\n')
@@ -4466,6 +4501,10 @@ def main():
         for colour in GIFT_COLOURS:
             name = f'geschenk_{size}_{colour}'
             models.append((name, model_json(sheet, gift_model(size, colour), shift, name)))
+    for art in LINKED:
+        for name, boxes in linked_models(art).items():
+            clean(boxes)
+            models.append((name, model_json(sheet, boxes, (-8, -8, -8), name)))
     for number in range(1, len(SKATERS) + 1):
         name = f'eislaeufer_{number}'
         models.append((name, model_json(sheet, skater(number), (-8, 8, -8), name)))
