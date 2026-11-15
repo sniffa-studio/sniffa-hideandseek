@@ -297,6 +297,33 @@ def stones(img, rnd):
             img.putpixel((x, y), shade(base, (0.68 if edge else 1) + rnd.uniform(-0.06, 0.06)))
 
 
+def speckled(base_hex, dot_hex):
+    def paint(img, rnd):
+        fill_noise(img, rnd, hexcolour(base_hex), 0.06)
+        for _ in range(60):
+            img.putpixel((rnd.randrange(TILE), rnd.randrange(TILE)), hexcolour(dot_hex))
+    return paint
+
+
+def cone_paper(img, rnd):
+    red = hexcolour('#c8202c')
+    white = hexcolour('#f4efe6')
+    for y in range(TILE):
+        for x in range(TILE):
+            colour = red if ((x + y // 2) // 3) % 2 == 0 else white
+            img.putpixel((x, y), shade(colour, 1 + rnd.uniform(-0.03, 0.03)))
+
+
+def knit(img, rnd):
+    red = hexcolour('#c42232')
+    white = hexcolour('#f1ece2')
+    for y in range(TILE):
+        for x in range(TILE):
+            colour = white if y % 8 in (3, 4) else red
+            amount = 0.85 if (x + (y % 2)) % 2 == 0 else 1.0
+            img.putpixel((x, y), shade(colour, amount + rnd.uniform(-0.03, 0.03)))
+
+
 def flame(img, rnd):
     for y in range(TILE):
         for x in range(TILE):
@@ -432,6 +459,32 @@ def build_atlas():
     atlas.add('kerze', flat(hexcolour('#f3ead6'), 0.03))
     atlas.add('kerze_rot', flat(hexcolour('#b3202b'), 0.04))
     atlas.add('flamme', flame)
+    atlas.add('lack_orange', grain(hexcolour('#c4581c')))
+    atlas.add('lack_gelb', grain(hexcolour('#d9a51e')))
+    atlas.add('lack_tuerkis', grain(hexcolour('#1d8a86')))
+    atlas.add('kupfer', metal(hexcolour('#b8683a')))
+    atlas.add('mandel', speckled('#8a4a22', '#c27a3c'))
+    atlas.add('tuete', cone_paper)
+    atlas.add('crepe', speckled('#e2b46a', '#c98e42'))
+    atlas.add('nougat', flat(hexcolour('#5a2e17'), 0.05))
+    atlas.add('kakao', flat(hexcolour('#5b3420'), 0.04))
+    atlas.add('becher_weiss', flat(hexcolour('#f1ede6'), 0.03))
+    atlas.add('topf', metal(hexcolour('#9aa3aa')))
+    atlas.add('marone', speckled('#5b2e1a', '#8a4d2c'))
+    atlas.add('topf_ton', planks(hexcolour('#a5512e'), 8))
+    atlas.add('schneeball', snow, seed='schneeball')
+    atlas.add('karotte', flat(hexcolour('#e57a1f'), 0.06))
+    atlas.add('kohle', flat(hexcolour('#1d1d20'), 0.08))
+    atlas.add('schal', knit)
+    atlas.add('stroh', grain(hexcolour('#c9a24a')))
+    atlas.add('fell', speckled('#7a4f2e', '#6a4226'))
+    atlas.add('fell_hell', speckled('#d8c3a0', '#c9b088'))
+    atlas.add('geweih', grain(hexcolour('#cdb68e')))
+    atlas.add('schild_mandeln', lettered(hexcolour('#2f1a0c'), hexcolour('#f2c14e'), 'MANDELN', 64, 14, size=2), density=64 / 46, span=2)
+    atlas.add('schild_crepes', lettered(hexcolour('#2f1a0c'), hexcolour('#f2c14e'), 'CREPES', 64, 14, size=2), density=64 / 46, span=2)
+    atlas.add('schild_kakaostand', lettered(hexcolour('#2f1a0c'), hexcolour('#f2c14e'), 'KAKAO', 64, 14, size=2), density=64 / 46, span=2)
+    atlas.add('schild_maronen', lettered(hexcolour('#2f1a0c'), hexcolour('#f2c14e'), 'MARONEN', 32, 5), density=32 / 13)
+    atlas.add('schild_post', lettered(hexcolour('#5a3820'), hexcolour('#f7e7b0'), 'POST', 32, 24, size=2), density=4)
     atlas.add('creme', flat(hexcolour('#efe3c8'), 0.04))
     atlas.add('stein', stones)
     atlas.add('fass', planks(hexcolour('#7a4e2c'), 4))
@@ -1038,7 +1091,7 @@ def gingerbread_figure(x, y, z, s=1.0):
     ]
 
 
-ROOF_COLOUR = {'rot': 'lack_rot', 'gruen': 'lack_gruen', 'braun': 'lack_braun', 'blau': 'lack_blau', 'lila': 'lack_lila'}
+ROOF_COLOUR = {'rot': 'lack_rot', 'gruen': 'lack_gruen', 'braun': 'lack_braun', 'blau': 'lack_blau', 'lila': 'lack_lila', 'orange': 'lack_orange', 'gelb': 'lack_gelb', 'tuerkis': 'lack_tuerkis'}
 
 COUNTER_Y = 17
 COUNTER_Z = (-24, -12)
@@ -1249,12 +1302,357 @@ def kugel_big():
     return b
 
 
+def cone_bag(x, y, z, s=1.0):
+    return [
+        Box((x - 1.4 * s, y + 2 * s, z - 1.4 * s), (x + 1.4 * s, y + 6 * s, z + 1.4 * s), 'tuete'),
+        Box((x - 0.9 * s, y, z - 0.9 * s), (x + 0.9 * s, y + 2 * s, z + 0.9 * s), 'tuete'),
+        Box((x - 1.2 * s, y + 6 * s, z - 1.2 * s), (x + 1.2 * s, y + 7 * s, z + 1.2 * s), 'mandel'),
+    ]
+
+
+def mandeln_big():
+    b = [
+        Box((-14, 17, -23), (6, 18, -13), 'kessel'),
+        Box((-12, 18, -22), (4, 23, -14), 'kupfer'),
+        Box((-11, 22, -21), (3, 23.2, -15), 'mandel'),
+        Box((-4.6, 23.2, -18.4), (-3.4, 30, -17.6), 'holz_hell', rotation=((-4, 23.2, -18), (0, 0, 25))),
+        Box((-13, 17, -22.5), (5, 17.6, -13.5), 'glut', emit=12),
+    ]
+    for x in (12, 16, 20, 24, 28, 32):
+        for z in (-21.5, -17):
+            b += cone_bag(x, COUNTER_Y, z, 0.9)
+    for x in (-34, -29, -24):
+        b += candy_jar(x, COUNTER_Y, -18, ('rot', 'gold', 'gruen')[(x // 5) % 3])
+    for x in range(-32, 33, 6):
+        b += cone_bag(x, SHELF[0], 33.5, 0.9)
+        b += cone_bag(x + 3, SHELF[1], 33.5, 0.9)
+    for x in (-30, -18, 18, 30):
+        b += soft(cone_bag(x, 30, -24.5, 0.8) + [Box((x - 0.15, 37, -24.6), (x + 0.15, 46, -24.3), 'messing')])
+    return b
+
+
+def crepe_plate(x, z):
+    return [
+        Box((x - 5, 17, z - 5), (x + 5, 20, z + 5), 'kessel'),
+        Box((x - 4.6, 20, z - 4.6), (x + 4.6, 20.4, z + 4.6), 'eisen'),
+        Box((x - 3.6, 20.4, z - 3.6), (x + 3.6, 20.7, z + 3.6), 'crepe'),
+        Box((x - 4.6, 17.6, z - 5.4), (x + 4.6, 18.4, z - 5), 'glut', emit=10),
+    ]
+
+
+def crepes_big():
+    b = []
+    b += crepe_plate(-26, -18)
+    b += crepe_plate(-12, -18)
+    b += [
+        Box((-3, 17, -21), (3, 22, -15), 'creme'),
+        Box((-2.6, 22, -20.6), (2.6, 22.4, -15.4), 'crepe'),
+        Box((-1, 22, -18.6), (4, 22.8, -17.4), 'holz_hell', rotation=((0, 22.4, -18), (0, 0, 15))),
+    ]
+    for x in (8, 12.5, 17):
+        b += [Box((x - 1.8, COUNTER_Y, -20), (x + 1.8, COUNTER_Y + 4.5, -16.4), 'nougat'), Box((x - 2, COUNTER_Y + 4.5, -20.2), (x + 2, COUNTER_Y + 5.4, -16.2), 'lack_rot')]
+    for k, x in enumerate((24, 29, 34)):
+        b += [Box((x - 2.4, COUNTER_Y, -21), (x + 2.4, COUNTER_Y + 0.6, -15), 'creme')]
+        for i in range(3):
+            b += [Box((x - 1.8, COUNTER_Y + 0.6 + i * 0.8, -20.4), (x + 1.8, COUNTER_Y + 1.4 + i * 0.8, -15.6), 'crepe', rotation=((x, COUNTER_Y + 1, -18), (0, 20 * i - 15, 0)))]
+    for x in range(-32, 33, 8):
+        b += [Box((x - 3, SHELF[0], 31), (x + 3, SHELF[0] + 0.8, 36), 'creme')]
+        for i in range(4):
+            b += [Box((x - 2.4, SHELF[0] + 0.8 + i, 31.6), (x + 2.4, SHELF[0] + 1.6 + i, 35.4), 'crepe')]
+        b += [Box((x - 1.8, SHELF[1], 32), (x + 1.8, SHELF[1] + 4.5, 35.6), 'nougat'), Box((x - 2, SHELF[1] + 4.5, 31.8), (x + 2, SHELF[1] + 5.4, 35.8), 'lack_rot')]
+    return b
+
+
+def cocoa_mug(x, y, z):
+    return [
+        Box((x, y, z), (x + 2.6, y + 3.2, z + 2.6), 'becher_weiss'),
+        Box((x + 2.6, y + 0.6, z + 0.8), (x + 3.4, y + 2.6, z + 1.8), 'becher_weiss'),
+        Box((x + 0.3, y + 2.6, z + 0.3), (x + 2.3, y + 3, z + 2.3), 'kakao'),
+        Box((x + 0.5, y + 3, z + 0.5), (x + 2.1, y + 4, z + 2.1), 'zuckerguss'),
+        Box((x + 0.9, y + 4, z + 0.9), (x + 1.7, y + 4.6, z + 1.7), 'zuckerguss'),
+    ]
+
+
+def kakao_big():
+    b = [
+        Box((-16, 17, -22), (-4, 25, -13), 'kessel'),
+        Box((-16.6, 25, -22.6), (-3.4, 26.2, -12.4), 'kessel'),
+        Box((-11, 26.2, -18.5), (-9, 27.8, -16.5), 'messing'),
+        Box((-17, 17, -22.8), (-3, 17.8, -12.2), 'glut', emit=12),
+        Box((2, 17, -22), (12, 25, -13), 'topf'),
+        Box((1.6, 25, -22.4), (12.4, 26, -12.6), 'topf'),
+        Box((6, 26, -18.5), (8, 27.4, -16.5), 'messing'),
+    ]
+    for x in (-35, -31, -27, -23, 16, 20, 24, 28, 32):
+        b += cocoa_mug(x, COUNTER_Y, -21)
+    for x in range(-33, 34, 6):
+        b += cocoa_mug(x - 1.3, SHELF[0], 32)
+        b += bottle(x, SHELF[1], 33.5)
+    for x in (-30, -18, 18, 30):
+        b += soft([
+            Box((x - 0.15, 36, -24.6), (x + 0.15, 46, -24.3), 'messing'),
+            Box((x - 1.6, 33, -24.9), (x + 1.6, 36.2, -24.2), 'stern', emit=10, rotation=((x, 34.6, -24.5), (0, 0, 45))),
+            Box((x - 0.7, 32.2, -24.9), (x + 0.7, 37, -24.2), 'stern', emit=10),
+        ])
+    return b
+
+
+def wheel(cx, cy, z, r, mat='holz_dunkel'):
+    b = []
+    for k in range(8):
+        b.append(Box((cx - r * 0.42, cy + r - 1, z - 0.8), (cx + r * 0.42, cy + r, z + 0.8), mat, rotation=((cx, cy, z), (0, 0, k * 45))))
+    for k in range(4):
+        b.append(Box((cx - 0.4, cy - r + 0.6, z - 0.5), (cx + 0.4, cy + r - 0.6, z + 0.5), mat, rotation=((cx, cy, z), (0, 0, k * 45))))
+    b.append(Box((cx - 1, cy - 1, z - 1.2), (cx + 1, cy + 1, z + 1.2), 'eisen'))
+    return b
+
+
+def chestnut_oven():
+    b = []
+    for z in (-7.5, 7.5):
+        b += wheel(-2, 6, z, 6)
+    b += [
+        Box((-14, 9, -6.5), (14, 11, 6.5), 'holz_dunkel'),
+        Box((-22, 9.5, -0.6), (-14, 10.5, 0.6), 'holz'),
+        Box((-22, 9.5, -5), (-21, 10.5, 5), 'holz'),
+        Box((-13, 11, -5.5), (8, 23, 5.5), 'kessel'),
+        Box((-13.4, 23, -5.9), (8.4, 24, 5.9), 'eisen'),
+        Box((-13.4, 11, -5.9), (8.4, 12, 5.9), 'messing'),
+        Box((-9, 13, -5.8), (-1, 19, -5.5), 'glut', emit=13),
+        Box((-9.5, 12.5, -6.2), (-0.5, 13, -5.4), 'eisen'),
+        Box((-9.5, 19, -6.2), (-0.5, 19.5, -5.4), 'eisen'),
+        Box((-6, 24, -3), (-1, 25.4, 3), 'kupfer'),
+        Box((-5.4, 25.4, -2.4), (-1.6, 26.4, 2.4), 'marone'),
+        Box((3, 24, -1.5), (6, 40, 1.5), 'eisen'),
+        Box((2.4, 40, -2.1), (6.6, 41.4, 2.1), 'eisen'),
+        Box((8, 11, -5), (14, 20, 5), 'holz'),
+        Box((8, 20, -5.4), (14.4, 21, 5.4), 'holz_hell'),
+        snow_cap(8, -5.4, 14.4, 5.4, 21, 0.6),
+        snow_cap(-13.4, -5.9, 2, 5.9, 24, 0.5),
+    ]
+    for x in (9.5, 12.5):
+        for z in (-3, 0.5, 3.5):
+            b += cone_bag(x, 21, z, 0.7)
+    b += soft([
+        Box((-12, 28, -0.6), (1, 33, 0.6), 'holz_dunkel', faces={'north': 'schild_maronen', 'south': 'schild_maronen'}, uv={'north': (0, 0), 'south': (0, 0)}),
+        Box((-11, 24, -0.3), (-10.4, 28, 0.3), 'eisen'),
+        Box((-1.4, 24, -0.3), (-0.8, 28, 0.3), 'eisen'),
+        Box((-12.2, 33, -0.8), (1.2, 33.6, 0.8), 'schnee', skip=('down',)),
+    ])
+    return b
+
+
+def light_arch():
+    b = []
+    for side in (-1, 1):
+        x = side * 29.5
+        b += [
+            Box((x - 2.5, 0, -2.5), (x + 2.5, 2, 2.5), 'eisen'),
+            Box((x - 1.5, 2, -1.5), (x + 1.5, 44, 1.5), 'eisen'),
+            Box((x - 2, 20, -2), (x + 2, 21, 2), 'messing'),
+            snow_cap(x - 2.6, -2.6, x + 2.6, 2.6, 2, 0.5),
+        ]
+        b.append(Box((x - 1.5, 0, -1.5), (x + 1.5, 44, 1.5), 'eisen'))
+        for k in range(8):
+            y = 4 + k * 5
+            b += soft([Box((x - 1.9, y, -1.9), (x + 1.9, y + 2, 1.9), 'tanne')])
+            if k % 2 == 0:
+                b += soft(flat_bow(x, y + 1, -1.9, 'band_rot', 0.7))
+    colours = list(BULB_SLOTS)
+    steps = 18
+    for k in range(steps + 1):
+        t = k / steps
+        angle = math.pi * t
+        x = -29.5 * math.cos(angle)
+        y = 44 + 14 * math.sin(angle)
+        tangent = math.degrees(math.atan2(14 * math.cos(angle), 29.5 * math.sin(angle) + 1e-6))
+        seg = 6.2
+        b += soft([Box((x - seg / 2, y - 1.6, -1.6), (x + seg / 2, y + 1.6, 1.6), 'tanne', rotation=((x, y, 0), (0, 0, tangent)))])
+        b += soft([Box((x - 0.7, y - 3.4, -0.7), (x + 0.7, y - 1.6, 0.7), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, colours[k % 6]))])
+        if k % 3 == 0:
+            b += soft([Box((x - 0.6, y + 1.6, -0.6), (x + 0.6, y + 2.8, 0.6), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, 'warm'))])
+    b += soft([
+        Box((-2, 58.4, -0.8), (2, 64, 0.8), 'stern', emit=15, shade=False, rotation=((0, 61.2, 0), (0, 0, 45))),
+        Box((-1, 57.6, -0.8), (1, 64.8, 0.8), 'stern', emit=15, shade=False),
+        Box((-3.6, 60.4, -0.8), (3.6, 62, 0.8), 'stern', emit=15, shade=False),
+    ])
+    return b
+
+
+def potted_tree():
+    b = [
+        Box((-6, 0, -6), (6, 8, 6), 'topf_ton'),
+        Box((-6.6, 7, -6.6), (6.6, 9, 6.6), 'topf_ton'),
+        Box((-5.6, 8, -5.6), (5.6, 8.6, 5.6), 'schnee'),
+        Box((-1.2, 8, -1.2), (1.2, 14, 1.2), 'holz_dunkel'),
+        Box((-6.8, 3.5, -6.8), (6.8, 5, 6.8), 'band_rot'),
+    ]
+    layers = ((12, 11, 7), (18, 9, 7), (24, 7, 6.5), (30, 5, 6), (35, 3, 5))
+    for y, r, h in layers:
+        b.append(Box((-r, y, -r), (r, y + h, r), 'tanne'))
+        b.append(Box((-r * 0.85, y, -r * 0.85), (r * 0.85, y + h, r * 0.85), 'tanne', rotation=((0, y, 0), (0, 45, 0))))
+        b.append(Box((-r + 0.6, y + h - 0.6, -r + 0.6), (r - 0.6, y + h - 0.1, r - 0.6), 'schnee', skip=('down',)))
+    colours = list(KUGEL_SLOTS)
+    bulbs_ = list(BULB_SLOTS)
+    k = 0
+    for y, r, h in layers[:-1]:
+        for j in range(6):
+            a = math.radians(j * 60 + y * 7)
+            x, z = (r + 0.4) * math.cos(a), (r + 0.4) * math.sin(a)
+            b += soft(bauble(x, y + 2.2, z, colours[k % len(colours)], 1.8))
+            b += soft([Box((x * 0.92 - 0.5, y + h - 1.8, z * 0.92 - 0.5), (x * 0.92 + 0.5, y + h - 0.6, z * 0.92 + 0.5), 'lampen', emit=15, shade=False,
+                           uv=patch(BULB_SLOTS, bulbs_[(k + 2) % 6]))])
+            k += 1
+    b += soft([
+        Box((-2, 41, -0.7), (2, 46, 0.7), 'stern', emit=15, shade=False, rotation=((0, 43.5, 0), (0, 0, 45))),
+        Box((-1, 40, -0.7), (1, 47, 0.7), 'stern', emit=15, shade=False),
+    ])
+    return b
+
+
+def ball(cx, cy, cz, r, mat='schneeball'):
+    return [
+        Box((cx - r, cy - r * 0.72, cz - r * 0.72), (cx + r, cy + r * 0.72, cz + r * 0.72), mat),
+        Box((cx - r * 0.72, cy - r, cz - r * 0.72), (cx + r * 0.72, cy + r, cz + r * 0.72), mat),
+        Box((cx - r * 0.72, cy - r * 0.72, cz - r), (cx + r * 0.72, cy + r * 0.72, cz + r), mat),
+        Box((cx - r * 0.86, cy - r * 0.86, cz - r * 0.86), (cx + r * 0.86, cy + r * 0.86, cz + r * 0.86), mat),
+    ]
+
+
+def snowman():
+    b = []
+    b += ball(0, 9, 0, 9.5)
+    b += ball(0, 23, 0, 7)
+    b += ball(0, 33.5, 0, 5.2)
+    b += [
+        Box((-5.6, 0, -5.6), (5.6, 1.2, 5.6), 'schneeball'),
+        Box((-0.6, 34, -9.6), (0.6, 35.2, -5), 'karotte'),
+        Box((-0.4, 34.2, -10.6), (0.4, 35, -9.6), 'karotte'),
+        Box((-2.4, 36, -5.2), (-1.2, 37.2, -4.6), 'kohle'),
+        Box((1.2, 36, -5.2), (2.4, 37.2, -4.6), 'kohle'),
+    ]
+    for k, x in enumerate((-2.8, -1.4, 0, 1.4, 2.8)):
+        y = 31.4 - 0.5 * (2 - abs(k - 2))
+        b.append(Box((x - 0.4, y - 0.4, -5.1), (x + 0.4, y + 0.4, -4.5)
+                     , 'kohle'))
+    for y in (25, 21.5, 18):
+        b.append(Box((-0.7, y - 0.7, -7.6), (0.7, y + 0.7, -6.8), 'kohle'))
+    b += [
+        Box((-5.6, 27.6, -5.6), (5.6, 30, 5.6), 'schal'),
+        Box((-4.4, 18, -6.6), (-2, 28.6, -5.4), 'schal', rotation=((-3.2, 28.6, -6), (8, 0, -6))),
+        Box((-6, 37.6, -6), (6, 38.6, 6), 'kessel'),
+        Box((-4, 38.6, -4), (4, 46, 4), 'kessel'),
+        Box((-4.1, 39.4, -4.1), (4.1, 40.8, 4.1), 'band_rot'),
+        Box((1.6, 40.8, -4.3), (3.2, 42.4, -4), 'tanne_blatt'),
+        Box((2.2, 41.2, -4.4), (2.8, 41.8, -4.2), 'beere'),
+    ]
+    for side in (-1, 1):
+        b.append(Box((side * 6, 24, -0.5), (side * 18, 25, 0.5), 'holz', rotation=((side * 6, 24.5, 0), (0, 0, side * 28))))
+        b.append(Box((side * 14, 28, -0.4), (side * 17.5, 28.8, 0.4), 'holz', rotation=((side * 14, 28.4, 0), (0, 0, side * 70))))
+    b += [
+        Box((9.5, 0, 3), (10.5, 30, 4), 'holz_hell', rotation=((10, 0, 3.5), (0, 0, 10))),
+        Box((7.4, -0.5, 1.6), (12.6, 6, 5.4), 'stroh', rotation=((10, 3, 3.5), (0, 0, 10))),
+        Box((7.2, 5, 1.4), (12.8, 6.4, 5.6), 'band_rot', rotation=((10, 3, 3.5), (0, 0, 10))),
+    ]
+    return b
+
+
+def reindeer():
+    b = []
+    fur = 'fell'
+    light = 'fell_hell'
+    b += [
+        Box((-4.5, 14, -11), (4.5, 23, 11), fur),
+        Box((-4, 13.4, -9), (4, 14, 9), light),
+        Box((-1.5, 21, 10), (1.5, 24, 13), light),
+        Box((-3, 19, -16), (3, 30, -10), fur, rotation=((0, 22, -12), (-30, 0, 0))),
+        Box((-3.6, 27, -21), (3.6, 34, -14), fur),
+        Box((-2.6, 27.4, -25), (2.6, 31.6, -20.8), light),
+        Box((-1.2, 29.4, -26), (1.2, 31.4, -24.8), 'kohle'),
+        Box((-3.7, 31, -20), (-2.8, 32.2, -18.6), 'kohle'),
+        Box((2.8, 31, -20), (3.7, 32.2, -18.6), 'kohle'),
+        Box((-6.4, 32, -16.6), (-3.6, 33.6, -15.6), fur, rotation=((-3.6, 32.8, -16), (0, 0, -25))),
+        Box((3.6, 32, -16.6), (6.4, 33.6, -15.6), fur, rotation=((3.6, 32.8, -16), (0, 0, 25))),
+        Box((-4.6, 25, -14.6), (4.6, 27, -11.6), 'band_rot', rotation=((0, 22, -12), (-30, 0, 0))),
+        Box((-1.2, 22.4, -16.4), (1.2, 24.8, -14.2), 'messing'),
+    ]
+    for x in (-3, 3):
+        for z in (-8, 8):
+            b += [
+                Box((x - 1.3, 3, z - 1.3), (x + 1.3, 14.6, z + 1.3), fur),
+                Box((x - 1.4, 0, z - 1.4), (x + 1.4, 3, z + 1.4), 'kohle'),
+            ]
+    for side in (-1, 1):
+        base = (side * 2, 34, -16.5)
+        b += [
+            Box((side * 1.6 - 0.6, 34, -17), (side * 1.6 + 0.6, 42, -16), 'geweih', rotation=(base, (0, 0, -side * 20))),
+            Box((side * 4 - 0.5, 40, -17), (side * 4 + 0.5, 46, -16), 'geweih', rotation=(base, (0, 0, -side * 35))),
+            Box((side * 2.4 - 0.5, 38, -17), (side * 2.4 + 0.5, 43, -16), 'geweih', rotation=((side * 2.4, 38, -16.5), (0, 0, side * 40))),
+            Box((side * 6 - 0.5, 42, -17), (side * 6 + 0.5, 46.5, -16), 'geweih', rotation=((side * 6, 42, -16.5), (0, 0, side * 35))),
+        ]
+    colours = list(BULB_SLOTS)
+    for k in range(9):
+        z = -9 + k * 2.2
+        b += soft([Box((-0.6, 23, z - 0.6), (0.6, 24.2, z + 0.6), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, colours[k % 6]))])
+    b += [Box((-4.8, 17, -6), (4.8, 23.3, 2), 'samt'), Box((-5, 16, -6.2), (5, 17, 2.2), 'messing')]
+    return b
+
+
+def bench():
+    b = []
+    for x in (-5, 21):
+        b += [
+            Box((x - 1, 0, -6), (x + 1, 8, -4), 'eisen'),
+            Box((x - 1, 0, 4), (x + 1, 18, 6), 'eisen'),
+            Box((x - 1, 7, -6), (x + 1, 8.2, 6), 'eisen'),
+            Box((x - 1, 10, -6.5), (x + 1, 11, -2), 'eisen'),
+            Box((x - 1, 9, -6.5), (x + 1, 11, -5.5), 'eisen'),
+        ]
+    for k in range(4):
+        z = -5 + k * 2.6
+        b.append(Box((-7, 8.2, z), (23, 9.4, z + 2.2), 'holz'))
+    for k in range(3):
+        y = 11 + k * 2.4
+        b.append(Box((-7, y, 4.2), (23, y + 1.8, 5.4), 'holz'))
+    b += [
+        snow_cap(-6.5, -5.2, 22.5, 1, 9.4, 0.8),
+        snow_cap(-7, 4.1, 23, 5.5, 18.2, 0.5),
+        Box((-6, 8.2, -7), (-2.8, 8.9, -2), 'schnee'),
+    ]
+    b += cocoa_mug(14, 10.2, -3)
+    return b
+
+
+def mailbox():
+    b = [
+        Box((-1.5, 0, -1.5), (1.5, 14, 1.5), 'eisen'),
+        Box((-2.6, 0, -2.6), (2.6, 1.2, 2.6), 'eisen'),
+        Box((-6, 14, -5), (6, 28, 5), 'lack_rot'),
+        Box((-6.4, 27, -5.4), (6.4, 29, 5.4), 'lack_rot'),
+        Box((-5, 29, -4.4), (5, 30.4, 4.4), 'lack_rot'),
+        Box((-4, 25, -5.3), (4, 25.7, -5), 'kohle'),
+        Box((-4.4, 24.6, -5.5), (4.4, 25, -5)
+            , 'messing'),
+        Box((-4.4, 25.7, -5.5), (4.4, 26.1, -5), 'messing'),
+        Box((-4, 16, -5.6), (4, 22, -5), 'holz_dunkel', faces={'north': 'schild_post'}, uv={'north': (0, 0)}),
+        Box((-6.2, 14, -5.3), (6.2, 14.8, 5.3), 'messing'),
+        snow_cap(-5, -4.4, 5, 4.4, 30.4, 0.8),
+        Box((-1.4, 30, -4.6), (1.4, 33.4, -4.2), 'zuckerguss', rotation=((0, 30, -4.4), (0, 0, 12))),
+        Box((-1.2, 31, -4.8), (1, 31.4, -4.6), 'band_rot', rotation=((0, 30, -4.4), (0, 0, 12))),
+    ]
+    b += soft(flat_bow(0, 23, -5.2, 'band_gruen', 0.9))
+    return b
+
+
 STALLS = {
     'marktstand': ('Glühweinstand', 'rot', 'schild_gluehwein', gluehwein_big, []),
     'stand_lebkuchen': ('Lebkuchenstand', 'gruen', 'schild_lebkuchen', lebkuchen_big, []),
     'stand_wurst': ('Bratwurststand', 'braun', 'schild_wurst', wurst_big, [('rauch', (-1, 1.25, -1.1), 1.4)]),
     'stand_kerzen': ('Kerzenstand', 'blau', 'schild_kerzen', kerzen_big, []),
     'stand_kugeln': ('Kugelstand', 'lila', 'schild_kugeln', kugel_big, []),
+    'stand_mandeln': ('Mandelstand', 'orange', 'schild_mandeln', mandeln_big, []),
+    'stand_crepes': ('Crêpesstand', 'gelb', 'schild_crepes', crepes_big, []),
+    'stand_kakao': ('Kakaostand', 'tuerkis', 'schild_kakaostand', kakao_big, []),
 }
 
 
@@ -1467,6 +1865,13 @@ def props():
         result.append(Prop(art, parts, footprint_of(boxes), title=title))
     gate_boxes = gate_big()
     result.append(Prop('eingangstor', auto_parts('eingangstor', gate_boxes), footprint_of(gate_boxes), title='Eingangstor'))
+    for art, title, maker in (('maronenofen', 'Maronenofen', chestnut_oven), ('lichterbogen', 'Lichterbogen', light_arch), ('tannenbaum', 'Tannenbaum', potted_tree),
+                              ('schneemann', 'Schneemann', snowman), ('rentier', 'Rentier', reindeer), ('bank', 'Bank', bench), ('briefkasten', 'Wunschzettel-Briefkasten', mailbox)):
+        boxes = maker()
+        parts = auto_parts(art, boxes)
+        if art == 'maronenofen':
+            parts.append(Part('rauch', None, (0.28, 2.6, 0), components='"minecraft:custom_model_data":{floats:[0.8f]}'))
+        result.append(Prop(art, parts, footprint_of(boxes), title=title))
     result.append(Prop('stehtisch', [Part('stehtisch', table(), (0, None, 0))], column(2), title='Stehtisch'))
     base = pyramid_big_base()
     spin = pyramid_big_spin()
