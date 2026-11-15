@@ -3121,6 +3121,9 @@ def lamp_dot(x, y, z, colour, size=1.0):
     return Box((x - h, y - h, z - 0.5), (x + h, y + h, z), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, colour))
 
 
+BAND_TOP = 8.4
+
+
 def conveyor():
     b = []
     for side in (-1, 1):
@@ -3133,6 +3136,43 @@ def conveyor():
         b += soft([Box((x - 0.8, 6.6, -5.5), (x + 0.8, 7.6, 5.5), 'messing')])
     b += [Box((-24, 3, -5.5), (24, 3.6, 5.5), 'eisen')]
     return b
+
+
+PAKETE = [
+    (6, 4.6, 'rot', True), (5.5, 4.2, 'gruen', False), (6, 4.0, 'blau', True),
+    (5, 4.6, 'gold', True), (6, 4.4, 'lila', False), (5.5, 4.8, 'weiss', True),
+]
+
+
+def paket(number):
+    w, h, colour, bow = PAKETE[number - 1]
+    boxes = gift(0, 0, w, h, w, 0, 'papier_' + colour, 'band_' + colour, bow=bow)
+    clean(boxes)
+    return boxes
+
+
+def gift_crate():
+    wall = 'holz'
+    b = [
+        Box((-7.5, 0, -7.5), (7.5, 1, 23.5), 'holz_dunkel'),
+        Box((-6.5, 1, -6.5), (6.5, CRATE_FLOOR, 22.5), 'stroh'),
+        Box((-7.5, 1, -7.5), (-6.5, 12, 23.5), wall),
+        Box((6.5, 1, -7.5), (7.5, 12, 23.5), wall),
+        Box((-6.5, 1, -7.5), (6.5, 6, -6.5), wall),
+        Box((-6.5, 1, 22.5), (6.5, 12, 23.5), wall),
+        Box((-7.9, 12, 8), (7.9, 13, 23.9), 'holz_dunkel'),
+        Box((-6.5, 11.2, 8), (6.5, 12, 9), 'holz_dunkel'),
+    ]
+    for x in (-7.5, 6.5):
+        for z in (-7.5, 22.5):
+            b.append(Box((x - 0.4, 0, z - 0.4), (x + 1.4, 12.4, z + 1.4), 'holz_dunkel'))
+    for x0, x1 in ((-7.9, -7.5), (7.5, 7.9)):
+        for y in (3, 8):
+            b.append(Box((x0, y, -7.1), (x1, y + 1, 23.1), 'eisen'))
+    return b
+
+
+CRATE_FLOOR = 2.5
 
 
 def conveyor_load():
@@ -3437,7 +3477,7 @@ def mega_wrapper():
         for z in (-28.6, 26.6):
             b.append(Box((x, 4, z), (x + 2, 76, z + 2), 'eisen'))
     b += rivets(-42, 18, 58, -28)
-    b += rivets(-42, 18, 18, -28)
+    b += [r for r in rivets(-42, 18, 18, -28) if abs(r.a[0] + 0.4) > 9]
     b += [Box((-35, 24.6, -26), (11, 26, -21), 'band_schwarz')]
     for k, x in enumerate((-30, -20, -6, 4)):
         b += gift(x, -23.5, 5, 5, 4, 26, ('papier_rot', 'papier_gold', 'papier_blau', 'papier_gruen')[k], ('band_rot', 'band_gold', 'band_blau', 'band_gruen')[k], turn=k * 12)
@@ -3476,12 +3516,48 @@ def mega_wrapper():
     b += big_gauge(-38, 46, -28)
     colours = ['rot', 'gelb', 'gruen', 'blau', 'warm', 'rot', 'gelb', 'gruen']
     for k, x in enumerate(range(-40, 18, 7)):
-        b += soft([lamp_dot(x, 10, -28, colours[k % 8], 1.8)])
+        if abs(x) > 9:
+            b += soft([lamp_dot(x, 10, -28, colours[k % 8], 1.8)])
     b += [Box((24, 4, -38), (48, 10, -32), 'kessel'), Box((23.6, 9.6, -38.4), (48.4, 11, -31.6), 'messing')]
     for k in range(6):
         b += soft([lamp_dot(27 + k * 3.8, 11.5, -33, colours[k], 1.4)])
     b.append(Box((27 + 5 * 3.8 - 0.6, 11, -36), (27 + 5 * 3.8 + 0.6, 16, -35), 'eisen', rotation=((27 + 5 * 3.8, 11, -35.5), (-20, 0, 0))))
+    b = carve(b, (-7, BAND_TOP, -30), (7, 17, -4))
+    b += outlet()
     return b
+
+
+def outlet():
+    return [
+        Box((-7, 4, -40), (7, 7.6, -28), 'eisen'),
+        Box((-6, 7.6, -40), (6, BAND_TOP, -28), 'band_schwarz'),
+        Box((-7.4, 7.6, -40), (-6, 9.4, -28), 'lack_gelb'),
+        Box((6, 7.6, -40), (7.4, 9.4, -28), 'lack_gelb'),
+        Box((-7, BAND_TOP, -4.6), (7, 17, -4), 'kohle'),
+        Box((-8.4, BAND_TOP, -29.2), (-7, 18.4, -28), 'messing'),
+        Box((7, BAND_TOP, -29.2), (8.4, 18.4, -28), 'messing'),
+        Box((-7, 17, -29.2), (7, 18.4, -28), 'messing'),
+    ]
+
+
+def carve(boxes, low, high):
+    out = []
+    for box in boxes:
+        lo = [min(box.a[i], box.b[i]) for i in range(3)]
+        hi = [max(box.a[i], box.b[i]) for i in range(3)]
+        if all(hi[i] > low[i] + 1e-6 and lo[i] < high[i] - 1e-6 for i in range(3)):
+            if box.rotation:
+                raise ValueError('carve through rotated box')
+            for axis in range(3):
+                for keep_lo, keep_hi in ((lo[axis], low[axis]), (high[axis], hi[axis])):
+                    if keep_hi - keep_lo > 1e-6:
+                        a, b = list(lo), list(hi)
+                        a[axis], b[axis] = keep_lo, keep_hi
+                        out.append(clone_box(box, a, b))
+                lo[axis], hi[axis] = max(lo[axis], low[axis]), min(hi[axis], high[axis])
+        else:
+            out.append(box)
+    return out
 
 
 def mega_wrapper_gear():
@@ -4170,7 +4246,11 @@ def build_props():
         prop.wall = True
         result.append(prop)
     boxes = conveyor()
-    result.append(Prop('fliessband', auto_parts('fliessband', boxes) + [Part('fliessband_last', conveyor_load(), (0, 0, 0), tags=('deko_band',))], footprint_of(boxes), title='Fließband'))
+    result.append(Prop('fliessband', auto_parts('fliessband', boxes), footprint_of(boxes), title='Fließband'))
+    crate = gift_crate()
+    kiste = Prop('geschenkkiste', auto_parts('geschenkkiste', crate), footprint_of(crate), title='Geschenkkiste')
+    kiste.extra = ['function sniffa:intern/deko/paket/legen']
+    result.append(kiste)
     boxes = toy_press()
     result.append(Prop('spielzeugpresse', auto_parts('spielzeugpresse', boxes) + [Part('spielzeugpresse_stempel', toy_press_stamp(), (0, 1, 0), tags=('deko_hub_klein',))], footprint_of(boxes), title='Spielzeugpresse'))
     for title, art, maker in (('Deckenrohr', 'deckenrohr', ceiling_pipes), ('Deckenlichter', 'deckenlichter', ceiling_lights)):
@@ -4283,6 +4363,7 @@ def functions(prop):
         setzen.insert(0, summon(prop, part))
     base = FUNCTIONS / 'intern/deko' / prop.art
     write(base / 'frei.mcfunction', '\n'.join(frei) + '\n')
+    setzen += getattr(prop, 'extra', [])
     write(base / 'setzen.mcfunction', '\n'.join(setzen) + '\n')
     write(base / 'raeumen.mcfunction', '\n'.join(raeumen) + '\n' if raeumen else 'return 1\n')
     modus = '_wand' if getattr(prop, 'wall', False) else '_decke' if getattr(prop, 'ceiling', False) else ''
@@ -4305,6 +4386,9 @@ def main():
         for colour in GIFT_COLOURS:
             name = f'geschenk_{size}_{colour}'
             models.append((name, model_json(sheet, gift_model(size, colour), shift, name)))
+    for number in range(1, len(PAKETE) + 1):
+        name = f'paket_{number}'
+        models.append((name, model_json(sheet, paket(number), (-8, -8, -8), name)))
     previews = []
     for prop in props():
         boxes = [b for part in prop.parts if part.boxes is not None for b in part.boxes]
