@@ -8,3 +8,5 @@ execute if score #takt sniffa_deko matches 10 as @e[type=minecraft:item_display,
 execute if score #takt sniffa_deko matches 20 as @e[type=minecraft:item_display,tag=deko_blitz] run function sniffa:intern/deko/blitzen
 execute if score #takt sniffa_deko matches 20 run function sniffa:intern/deko/hub
 execute if score #takt sniffa_deko matches 30 as @e[type=minecraft:item_display,tag=deko_blitz] run function sniffa:intern/deko/blitzen
+execute if score #takt sniffa_deko matches 26 if score #hub sniffa_deko matches 1 run function sniffa:intern/deko/funken
+execute if score #takt sniffa_deko matches 0 as @e[type=minecraft:marker,tag=sniffa_deko,nbt={data:{art:"dampfkessel"}}] at @s rotated as @s run particle minecraft:cloud ^-0.625 ^4.1 ^ 0.06 0.05 0.06 0.02 6
