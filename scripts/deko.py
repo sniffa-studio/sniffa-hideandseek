@@ -17,7 +17,7 @@ TEXTURE = 'hideandseek:item/props/deko'
 JITTER = 0.0
 SHEET = 1024
 MAX_FACE = 64
-NO_EDGES = {'schneeball', 'glas', 'lampen', 'stern', 'flamme', 'glut', 'schnee_rand', 'bonbons', 'kugeln', 'tanne', 'beere'}
+NO_EDGES = {'sack', 'schneeball', 'glas', 'lampen', 'stern', 'flamme', 'glut', 'schnee_rand', 'bonbons', 'kugeln', 'tanne', 'beere'}
 RIVETS = {'eisen', 'kessel'}
 
 
@@ -336,7 +336,7 @@ def flame(img, rnd):
     for y in range(TILE):
         for x in range(TILE):
             t = y / TILE
-            img.putpixel((x, y), mix(hexcolour('#fff3c0'), hexcolour('#ff9a2a'), t))
+            img.putpixel((x, y), mix(hexcolour('#ffd75a'), hexcolour('#ff6a1a'), t))
 
 
 def bulbs(img, rnd):
@@ -493,6 +493,7 @@ def build_atlas():
     atlas.add('schild_kakaostand', lettered(hexcolour('#2f1a0c'), hexcolour('#f2c14e'), 'KAKAO', 64, 14, size=2), density=64 / 46, span=2)
     atlas.add('schild_maronen', lettered(hexcolour('#2f1a0c'), hexcolour('#f2c14e'), 'MARONEN', 32, 5), density=32 / 13)
     atlas.add('schild_post', lettered(hexcolour('#5a3820'), hexcolour('#f7e7b0'), 'POST', 32, 24, size=2), density=4)
+    atlas.add('sack_flick', flat(hexcolour('#8c6a43'), 0.04))
     atlas.add('creme', flat(hexcolour('#efe3c8'), 0.04))
     atlas.add('stein', stones)
     atlas.add('fass', planks(hexcolour('#7a4e2c'), 4))
@@ -1251,6 +1252,17 @@ def stall_big(colour, sign):
         Box((-41.5, ridge_y - 1, ridge_z - 2), (41.5, ridge_y + 2, ridge_z + 2), 'holz_dunkel'),
         Box((-41.5, ridge_y + 2, ridge_z - 2), (41.5, ridge_y + 2.6, ridge_z + 2), 'schnee', skip=('down',)),
     ]
+    edge_colours = ['warm', 'rot', 'warm', 'gelb', 'warm', 'gruen']
+    for k, x in enumerate(range(-39, 40, 4)):
+        b += soft([Box((x - 0.6, 47.2, -31.8), (x + 0.6, 48.6, -30.8), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, edge_colours[k % 6]))])
+    for side in (-1, 1):
+        x = side * 42.1
+        for z0, z1 in ((front_z, ridge_z), (back_z, ridge_z)):
+            for k in range(1, 9):
+                t = k / 9
+                z = z0 + (z1 - z0) * t
+                y = eave_y + 2.4 + (ridge_y - eave_y) * t
+                b += soft([Box((x - 0.6, y, z - 0.6), (x + 0.6, y + 1.4, z + 0.6), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, edge_colours[(k + (side > 0)) % 6]))])
     b += soft([
         Box((-1.6, 75.4, ridge_z - 0.8), (1.6, 80.4, ridge_z + 0.8), 'stern', emit=15, shade=False, rotation=((0, 77.9, ridge_z), (0, 0, 45))),
         Box((-0.8, 74.6, ridge_z - 0.8), (0.8, 81.4, ridge_z + 0.8), 'stern', emit=15, shade=False),
@@ -1571,7 +1583,7 @@ def light_arch():
         y = 44 + 14 * math.sin(angle)
         tangent = math.degrees(math.atan2(14 * math.cos(angle), 29.5 * math.sin(angle) + 1e-6))
         seg = 6.2
-        b += soft([Box((x - seg / 2, y - 1.6, -1.6), (x + seg / 2, y + 1.6, 1.6), 'tanne', rotation=((x, y, 0), (0, 0, tangent)))])
+        b += soft([Box((x - seg / 2, y - 2.2, -2.2), (x + seg / 2, y + 2.2, 2.2), 'tanne', rotation=((x, y, 0), (0, 0, tangent)))])
         b += soft([Box((x - 0.7, y - 3.4, -0.7), (x + 0.7, y - 1.6, 0.7), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, colours[k % 6]))])
         if k % 3 == 0:
             b += soft([Box((x - 0.6, y + 1.6, -0.6), (x + 0.6, y + 2.8, 0.6), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, 'warm'))])
@@ -1745,6 +1757,264 @@ def mailbox():
         Box((-1.2, 31, -4.8), (1, 31.4, -4.6), 'band_rot', rotation=((0, 30, -4.4), (0, 0, 12))),
     ]
     b += soft(flat_bow(0, 23, -5.2, 'band_gruen', 0.9))
+    return b
+
+
+def nutcracker_big():
+    s = 4.2
+    b = [
+        Box((-7, 0, -7), (7, 3, 7), 'holz_dunkel'),
+        Box((-7.3, 2.4, -7.3), (7.3, 3.2, 7.3), 'messing'),
+        snow_cap(-7, -7, 7, -3, 3, 0.5),
+    ]
+    b += nutcracker(0, 3, 0, s)
+    b += [
+        Box((-1.2 * s, 3 + 9.2 * s, -1.4 * s), (1.2 * s, 3 + 9.5 * s, -1.2 * s), 'zuckerguss'),
+        Box((-0.9 * s, 3 + 8.2 * s, -1.25 * s), (0.9 * s, 3 + 8.7 * s, -1.15 * s), 'kohle'),
+        Box((-0.5 * s, 3 + 8.9 * s, -1.25 * s), (-0.2 * s, 3 + 9.2 * s, -1.15 * s), 'kohle'),
+        Box((0.2 * s, 3 + 8.9 * s, -1.25 * s), (0.5 * s, 3 + 9.2 * s, -1.15 * s), 'kohle'),
+        Box((-0.25 * s, 3 + 13 * s, -0.25 * s), (0.25 * s, 3 + 13.8 * s, 0.25 * s), 'messing'),
+        Box((2.4 * s - 0.6, 3 + 3 * s, -0.6), (2.4 * s + 0.6, 3 + 9 * s, 0.6), 'messing'),
+        Box((2.4 * s - 1.2, 3 + 9 * s, -1.2), (2.4 * s + 1.2, 3 + 9.8 * s, 1.2), 'messing'),
+    ]
+    for y in (5.2, 6.2):
+        b.append(Box((-0.3, 3 + y * s, -1.15 * s - 0.2), (0.3, 3 + y * s + 0.6, -1.1 * s), 'messing'))
+    return b
+
+
+def schwibbogen():
+    b = [Box((-26, 0, -4), (26, 3, 4), 'holz_dunkel'), Box((-26.3, 2.4, -4.3), (26.3, 3.2, 4.3), 'messing')]
+    b += arc((0, 3, 0), 22, 180, 0, 16, 2.4, 3, 'holz_dunkel', 1.1)
+    b += arc((0, 3, 0), 18.5, 180, 0, 14, 1.2, 2.2, 'holz', 1.1)
+    for k in range(7):
+        t = (k + 1) / 8
+        a = math.pi * t
+        x = -22 * math.cos(a)
+        y = 3 + 22 * math.sin(a)
+        b += soft(candle(x, y + 1.2, 0, 3.5, 'kerze', 1.4))
+        b += [Box((x - 1.2, y + 0.6, -1.2), (x + 1.2, y + 1.2, 1.2), 'messing')]
+    for x, h, mat in ((-14, 9, 'lack_rot'), (-8, 7, 'lack_blau'), (8, 7, 'lack_gruen'), (14, 9, 'lack_rot')):
+        b += figure_big(x, 3, 0, mat, h / 7.6)
+    for x in (-3, 3):
+        b += [
+            Box((x - 2.4, 3, -2.4), (x + 2.4, 6, 2.4), 'tanne_blatt'),
+            Box((x - 1.6, 6, -1.6), (x + 1.6, 9, 1.6), 'tanne_blatt'),
+            Box((x - 0.8, 9, -0.8), (x + 0.8, 11.5, 0.8), 'tanne_blatt'),
+        ]
+    b += [Box((-0.8, 12, -1), (0.8, 18, 1), 'holz_hell'), Box((-3, 15, -1), (3, 16.5, 1), 'holz_hell')]
+    return b
+
+
+def angel_statue():
+    b = [
+        Box((-7, 0, -7), (7, 4, 7), 'stein'),
+        Box((-6, 4, -6), (6, 12, 6), 'stein'),
+        Box((-7, 12, -7), (7, 14, 7), 'stein'),
+        snow_cap(-7, -7, 7, 7, 14, 0.6),
+        Box((-6.1, 7, -6.1), (6.1, 9, 6.1), 'messing'),
+    ]
+    robe = 'zuckerguss'
+    b += [
+        Box((-4.2, 14.6, -3.4), (4.2, 26, 3.4), robe),
+        Box((-3.4, 26, -2.8), (3.4, 33, 2.8), robe),
+        Box((-4.6, 14.6, -3.8), (4.6, 16, 3.8), 'messing'),
+        Box((-2.2, 33, -2.2), (2.2, 37.4, 2.2), 'holz_hell'),
+        Box((-2.4, 36, -2.4), (2.4, 38.2, 2.4), 'stroh'),
+        Box((-3, 39.2, -0.3), (3, 39.8, 0.3), 'stern', emit=12),
+        Box((-0.3, 39.2, -3), (0.3, 39.8, 3), 'stern', emit=12),
+        Box((-3.4, 38.8, -3.4), (3.4, 39.2, 3.4), 'stern', emit=12),
+        Box((-1.2, 29.4, -6.6), (1.2, 30.6, -3), 'messing', rotation=((0, 30, -3), (-20, 0, 0))),
+        Box((-2, 28.6, -8.4), (2, 31.4, -6.6), 'messing', rotation=((0, 30, -3), (-20, 0, 0))),
+        Box((-3.4, 28.6, -4.6), (-1.6, 31, -2.8), 'holz_hell'),
+        Box((1.6, 28.6, -4.6), (3.4, 31, -2.8), 'holz_hell'),
+    ]
+    for side in (-1, 1):
+        for k, (length, height, tilt) in enumerate(((12, 14, 25), (10, 11, 10), (7, 8, -5))):
+            b.append(Box((side * 1.5, 22 + k * 2, 2.8), (side * (1.5 + length), 22 + k * 2 + height, 3.8), robe,
+                         rotation=((side * 1.5, 26, 3.3), (0, side * -25, side * -tilt))))
+    return b
+
+
+def gingerbread_house():
+    b = [
+        Box((-15, 0, -13), (15, 1, 13), 'zuckerguss'),
+        Box((-13, 1, -11), (13, 18, 11), 'lebkuchen'),
+    ]
+    rise, run = 12.0, 13.0
+    angle = math.degrees(math.atan2(rise, run))
+    length = math.hypot(rise, run) + 1.5
+    for side in (-1, 1):
+        z0 = -13.5 if side < 0 else 13.5
+        rot = ((0, 17, z0), (-angle if side < 0 else angle, 0, 0))
+        if side < 0:
+            b.append(Box((-15, 17, z0), (15, 19, z0 + length), 'lebkuchen', rotation=rot))
+            b.append(Box((-15.2, 19, z0), (15.2, 20.4, z0 + length), 'zuckerguss', rotation=rot, skip=('down',)))
+        else:
+            b.append(Box((-15, 17, z0 - length), (15, 19, z0), 'lebkuchen', rotation=rot))
+            b.append(Box((-15.2, 19, z0 - length), (15.2, 20.4, z0), 'zuckerguss', rotation=rot, skip=('down',)))
+    for k in range(6):
+        y = 18 + k * 2
+        inset = (k * 2 + 1) / rise * run
+        for x0, x1 in ((-13, -12), (12, 13)):
+            b.append(Box((x0, y, -11 + inset), (x1, y + 2, 11 - inset), 'lebkuchen'))
+    b += [
+        Box((-3.5, 1, -11.6), (3.5, 11, -11), 'kakao'),
+        Box((-4.2, 10.4, -11.8), (4.2, 11.6, -11), 'zuckerguss'),
+        Box((-0.6, 5.4, -12), (0.6, 6.6, -11.6), 'messing'),
+        Box((-11, 8, -11.6), (-6, 13, -11), 'glas', emit=12, shade=False),
+        Box((6, 8, -11.6), (11, 13, -11), 'glas', emit=12, shade=False),
+        Box((-11.4, 7.4, -11.8), (-5.6, 8, -11), 'zuckerguss'),
+        Box((5.6, 7.4, -11.8), (11.4, 8, -11), 'zuckerguss'),
+        Box((-13.4, 1, -11.4), (13.4, 2, 11.4), 'zuckerguss'),
+        Box((6, 24, 0), (9, 32, 3), 'lebkuchen'),
+        Box((5.6, 32, -0.4), (9.4, 33, 3.4), 'zuckerguss'),
+    ]
+    for x in range(-12, 13, 4):
+        b += [dot(x, 15, -11, ('beere', 'band_gruen', 'senf')[(x // 4) % 3], 1.4, 0.6)]
+    for x in (-15.5, 15.5):
+        for y in (3, 7, 11, 15):
+            b.append(Box((x - 0.4, y, -11.5), (x + 0.4, y + 2.4, -10.7), 'zucker'))
+    for z in (-15, 15):
+        for x in (-12, -6, 0, 6, 12):
+            b += [Box((x - 0.9, 1, z - 0.9), (x + 0.9, 3.4, z + 0.9), 'zucker')]
+    return b
+
+
+def poinsettia():
+    b = [
+        Box((-4.5, 0, -4.5), (4.5, 7, 4.5), 'topf_ton'),
+        Box((-5, 6, -5), (5, 8, 5), 'topf_ton'),
+        Box((-5.2, 2.5, -5.2), (5.2, 3.6, 5.2), 'messing'),
+        Box((-4, 7, -4), (4, 8, 4), 'nougat'),
+        Box((-0.6, 8, -0.6), (0.6, 13, 0.6), 'tanne_blatt'),
+    ]
+    for ring, (y, length, tilt) in enumerate(((11, 7.5, 20), (13, 6.5, 32), (14.6, 4.6, 45))):
+        for k in range(6):
+            yaw = k * 60 + ring * 30
+            mat = 'tanne_blatt' if ring == 0 and k % 2 == 0 else 'lack_rot'
+            b.append(Box((-1.4, y, 0), (1.4, y + 0.6, length), mat, rotation=((0, y, 0), (-tilt, yaw, 0))))
+    b += [Box((-1, 14.8, -1), (1, 15.8, 1), 'senf')]
+    return b
+
+
+def gift_sack():
+    b = []
+    b += ball(0, 8, 0, 9, 'sack')
+    b += ball(0, 15, 0, 7.4, 'sack')
+    b += [
+        Box((-4.4, 19, -4), (4.4, 22.4, 4), 'sack'),
+        Box((-3, 22.4, -2.6), (3, 24, 2.6), 'sack'),
+        Box((-4.8, 20.4, -4.4), (4.8, 21.8, 4.4), 'band_gold'),
+        Box((-0.6, 18.4, -4.8), (0.6, 21.8, -4.4), 'band_gold', rotation=((0, 20.4, -4.4), (0, 0, 25))),
+        Box((-0.6, 18.4, -4.8), (0.6, 21.8, -4.4), 'band_gold', rotation=((0, 20.4, -4.4), (0, 0, -25))),
+        Box((-5.6, 0, -5.6), (5.6, 1, 5.6), 'sack'),
+    ]
+    for x, y, z in ((-2, 5, -8.6), (3, 11, -7.6), (-5, 13, -6), (5, 4, -8.2)):
+        b += [Box((x - 1, y - 1, z - 0.3), (x + 1, y + 1, z), 'sack_flick')]
+    b += gift(0.5, -0.5, 6, 6, 5, 23.6, 'papier_rot', 'band_rot', turn=15)
+    b += gift(-3, 0, 5, 5, 5, 22.4, 'papier_blau', 'band_blau', turn=-25, bow=False)
+    b += gift(3.6, 1, 4.6, 5, 4.6, 22.6, 'papier_gruen', 'band_gruen', turn=35, bow=False)
+    b += gift(12.5, -4, 7, 6, 7, 0, 'papier_gold', 'band_gold', turn=20)
+    b += gift(-12, 5, 6, 5, 6, 0, 'papier_lila', 'band_lila', turn=-15)
+    return b
+
+
+def advent_wreath():
+    b = [
+        Box((-12, 0, -12), (12, 6, 12), 'holz_dunkel'),
+        Box((-12.4, 5.4, -12.4), (12.4, 6.6, 12.4), 'messing'),
+        snow_cap(-12, -12, 12, -8, 6, 0.5),
+    ]
+    for k in range(12):
+        yaw = k * 30
+        b.append(Box((-2.4, 6.6, 6.6), (2.4, 10.4, 11), 'tanne', rotation=((0, 6.6, 0), (0, yaw, 0))))
+    for k in range(4):
+        a = math.radians(45 + k * 90)
+        x, z = 8.8 * math.cos(a), 8.8 * math.sin(a)
+        b += soft(candle(x, 9, z, 7 + (3 - k) * 0, 'kerze_rot', 2.4))
+        b += [Box((x - 1.6, 8.6, z - 1.6), (x + 1.6, 9.4, z + 1.6), 'messing')]
+    for k in range(8):
+        a = math.radians(k * 45 + 22)
+        x, z = 11 * math.cos(a), 11 * math.sin(a)
+        b += soft(bauble(x, 9, z, list(KUGEL_SLOTS)[k % 6], 1.8))
+    for k in range(4):
+        b += [Box((-0.4, 7, -11.4), (0.4, 9.6, -10.6), 'band_rot', rotation=((0, 6.6, 0), (0, 45 + k * 90, 0)))]
+    return b
+
+
+def penguin():
+    b = [
+        Box((-5, 1, -4.5), (5, 15, 4.5), 'kohle'),
+        Box((-3.8, 2, -4.9), (3.8, 13, -4.4), 'zuckerguss'),
+        Box((-4, 15, -4), (4, 22, 4), 'kohle'),
+        Box((-2.8, 15.4, -4.4), (2.8, 20, -3.9), 'zuckerguss'),
+        Box((-2, 19.4, -4.6), (-0.8, 20.6, -4.2), 'kohle'),
+        Box((0.8, 19.4, -4.6), (2, 20.6, -4.2), 'kohle'),
+        Box((-1, 17.4, -6.4), (1, 18.6, -4.2), 'karotte'),
+        Box((-3.5, 0, -6), (-0.5, 1, -1), 'karotte'),
+        Box((0.5, 0, -6), (3.5, 1, -1), 'karotte'),
+        Box((-6, 6, -2), (-5, 14, 2), 'kohle', rotation=((-5, 14, 0), (0, 0, -12))),
+        Box((5, 6, -2), (6, 14, 2), 'kohle', rotation=((5, 14, 0), (0, 0, 12))),
+        Box((-4.6, 14, -4.6), (4.6, 16, 4.6), 'schal'),
+        Box((1.6, 8, -5.2), (4, 14.2, -4.4), 'schal'),
+        Box((-4.2, 22, -4.2), (4.2, 23.4, 4.2), 'schal'),
+        Box((-3, 23.4, -3), (3, 26, 3), 'schal'),
+        Box((-1.4, 26, -1.4), (1.4, 28.4, 1.4), 'zuckerguss'),
+    ]
+    return b
+
+
+def woodpile():
+    b = [Box((-14, 0, -5), (14, 1, 5), 'holz_dunkel')]
+    for row in range(5):
+        y = 1 + row * 4.4
+        count = 6 - row // 2
+        start = -12 + (row % 2) * 2.2
+        for k in range(count):
+            x = start + k * 4.6
+            if x > 12:
+                continue
+            b += [
+                Box((x - 2, y, -5), (x + 2, y + 4, 5), 'holz'),
+                Box((x - 1.4, y + 0.6, -5.2), (x + 1.4, y + 3.4, -5), 'holz_hell'),
+                Box((x - 0.5, y + 1.5, -5.25), (x + 0.5, y + 2.5, -5.2), 'holz'),
+            ]
+    b += [
+        snow_cap(-14, -5, 14, 5, 23, 0.8),
+        Box((-14, 23, -5), (14, 24, 5), 'holz_dunkel'),
+        Box((15, 0, -3), (21, 8, 3), 'holz_dunkel'),
+        Box((14.8, 8, -3.2), (21.2, 8.8, 3.2), 'holz_hell'),
+        Box((17.6, 8.8, -0.4), (18.4, 22, 0.4), 'holz_hell', rotation=((18, 8.8, 0), (0, 0, -15))),
+        Box((15.6, 8, -0.6), (19, 11, 0.6), 'eisen', rotation=((18, 8.8, 0), (0, 0, -15))),
+    ]
+    return b
+
+
+def fire_basket():
+    b = [
+        Box((-1, 0, -8), (1, 10, -6), 'eisen'),
+        Box((-1, 0, 6), (1, 10, 8), 'eisen'),
+        Box((-8, 0, -1), (-6, 10, 1), 'eisen'),
+        Box((6, 0, -1), (8, 10, 1), 'eisen'),
+        Box((-8, 10, -8), (8, 11, 8), 'eisen'),
+    ]
+    for y in (11, 15, 19):
+        for side in (-1, 1):
+            b.append(Box((-8, y, side * 8 - 0.5), (8, y + 1, side * 8 + 0.5), 'eisen'))
+            b.append(Box((side * 8 - 0.5, y, -8), (side * 8 + 0.5, y + 1, 8), 'eisen'))
+    for x in (-7.5, -2.5, 2.5, 7.5):
+        for side in (-1, 1):
+            b.append(Box((x - 0.5, 11, side * 8 - 0.5), (x + 0.5, 21, side * 8 + 0.5), 'eisen'))
+            b.append(Box((side * 8 - 0.5, 11, x - 0.5), (side * 8 + 0.5, 21, x + 0.5), 'eisen'))
+    b += [
+        Box((-7, 11, -7), (7, 15, 7), 'glut', emit=15, shade=False),
+        Box((-5, 15, -2), (5, 17, 2), 'holz_dunkel', rotation=((0, 16, 0), (0, 30, 0))),
+        Box((-5, 16.4, -2), (5, 18.4, 2), 'holz_dunkel', rotation=((0, 17.4, 0), (0, -40, 0))),
+        Box((-3, 15, -3), (3, 21, 3), 'flamme', emit=15, shade=False),
+        Box((-1.8, 21, -1.8), (1.8, 24, 1.8), 'flamme', emit=15, shade=False),
+        Box((-4.5, 15, -0.8), (-2, 19, 0.8), 'flamme', emit=15, shade=False),
+        Box((2, 15, -0.8), (4.5, 19.5, 0.8), 'flamme', emit=15, shade=False),
+    ]
     return b
 
 
@@ -1970,11 +2240,16 @@ def props():
     gate_boxes = gate_big()
     result.append(Prop('eingangstor', auto_parts('eingangstor', gate_boxes), footprint_of(gate_boxes), title='Eingangstor'))
     for art, title, maker in (('maronenofen', 'Maronenofen', chestnut_oven), ('lichterbogen', 'Lichterbogen', light_arch), ('tannenbaum', 'Tannenbaum', potted_tree),
-                              ('schneemann', 'Schneemann', snowman), ('rentier', 'Rentier', reindeer), ('bank', 'Bank', bench), ('briefkasten', 'Wunschzettel-Briefkasten', mailbox)):
+                              ('schneemann', 'Schneemann', snowman), ('rentier', 'Rentier', reindeer), ('bank', 'Bank', bench), ('briefkasten', 'Wunschzettel-Briefkasten', mailbox),
+                              ('nussknacker', 'Nussknacker', nutcracker_big), ('schwibbogen', 'Schwibbogen', schwibbogen), ('engel', 'Engel', angel_statue),
+                              ('lebkuchenhaus', 'Lebkuchenhaus', gingerbread_house), ('weihnachtsstern', 'Weihnachtsstern', poinsettia), ('geschenksack', 'Geschenksack', gift_sack),
+                              ('adventskranz', 'Adventskranz', advent_wreath), ('pinguin', 'Pinguin', penguin), ('holzstapel', 'Holzstapel', woodpile), ('feuerkorb', 'Feuerkorb', fire_basket)):
         boxes = maker()
         parts = auto_parts(art, boxes)
         if art == 'maronenofen':
             parts.append(Part('rauch', None, (0.28, 2.6, 0), components='"minecraft:custom_model_data":{floats:[0.8f]}'))
+        if art == 'feuerkorb':
+            parts.append(Part('rauch', None, (0, 1.4, 0), components='"minecraft:custom_model_data":{floats:[0.6f]}'))
         result.append(Prop(art, parts, footprint_of(boxes), title=title))
     result.append(Prop('stehtisch', [Part('stehtisch', table(), (0, None, 0))], column(2), title='Stehtisch'))
     base = pyramid_big_base()
