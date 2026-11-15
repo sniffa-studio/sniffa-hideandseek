@@ -22,7 +22,9 @@ import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.core.SectionPos
+import net.minecraft.core.component.DataComponents
 import net.minecraft.tags.BlockTags
+import net.minecraft.world.entity.Display
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.state.properties.BlockStateProperties
@@ -42,6 +44,8 @@ object LampGlow {
     private const val POOL_LIFT = 0.03f
     private const val FADE_FROM = 48f
     private const val FADE_TO = 64f
+    private val STREET_LAMP = Hideandseek.id("props/deko/laterne_kopf")
+    private const val STREET_LAMP_LIFT = 0.8f
 
     enum class Kind(val colour: Vector3f, val halo: Float, val pool: Float, val gain: Float) {
         LANTERN(Vector3f(1f, 0.62f, 0.28f), 1.5f, 3.2f, 1f),
@@ -148,7 +152,20 @@ object LampGlow {
                 }
             }
         }
+        streetLamps(level, origin, pos, lamps)
         return lamps
+    }
+
+    private fun streetLamps(level: ClientLevel, origin: BlockPos, pos: BlockPos.MutableBlockPos, lamps: MutableList<Lamp>) {
+        for (entity in level.entitiesForRendering()) {
+            if (entity !is Display.ItemDisplay) continue
+            val stack = entity.itemRenderState()?.itemStack() ?: continue
+            if (stack.get(DataComponents.ITEM_MODEL) != STREET_LAMP) continue
+            val at = entity.position()
+            val bx = BlockPos.containing(at.x, at.y + STREET_LAMP_LIFT, at.z)
+            val floor = floorUnder(level, pos, bx.x, bx.y, bx.z)
+            lamps += Lamp((at.x - origin.x).toFloat(), (at.y - origin.y).toFloat() + STREET_LAMP_LIFT, (at.z - origin.z).toFloat(), Kind.LANTERN, floor?.let { it - origin.y }, phaseOf(bx.x, bx.y, bx.z))
+        }
     }
 
     private fun floorUnder(level: ClientLevel, pos: BlockPos.MutableBlockPos, x: Int, y: Int, z: Int): Float? {
@@ -160,7 +177,7 @@ object LampGlow {
                 if (!own.isEmpty && own.max(Direction.Axis.Y) < 0.5) return (y + own.max(Direction.Axis.Y)).toFloat()
                 continue
             }
-            if (state.isAir) continue
+            if (state.isAir || state.`is`(Blocks.BARRIER)) continue
             val shape = state.getCollisionShape(level, pos)
             if (shape.isEmpty) continue
             return (y - dy + shape.max(Direction.Axis.Y)).toFloat()
