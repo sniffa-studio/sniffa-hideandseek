@@ -19,7 +19,7 @@ SHEET = 1024
 MAX_FACE = 64
 PAD = 2
 NUDGE = 0.04
-NO_EDGES = {'warnstreifen', 'riffel', 'bildschirm', 'band_schwarz', 'glaskugel', 'netz', 'stern_weiss', 'stern_rot', 'eis_flaeche', 'flamme_tief', 'flamme_kern', 'eiszapfen', 'feder', 'feder_hell', 'sack', 'schneeball', 'glas', 'lampen', 'stern', 'flamme', 'glut', 'schnee_rand', 'bonbons', 'kugeln', 'tanne', 'beere'}
+NO_EDGES = {'warnlicht', 'warnstreifen', 'riffel', 'bildschirm', 'band_schwarz', 'glaskugel', 'netz', 'stern_weiss', 'stern_rot', 'eis_flaeche', 'flamme_tief', 'flamme_kern', 'eiszapfen', 'feder', 'feder_hell', 'sack', 'schneeball', 'glas', 'lampen', 'stern', 'flamme', 'glut', 'schnee_rand', 'bonbons', 'kugeln', 'tanne', 'beere'}
 RIVETS = {'eisen', 'kessel'}
 
 
@@ -630,6 +630,7 @@ def build_atlas():
     atlas.add('schild_puffer', lettered(hexcolour('#2f1a0c'), hexcolour('#f2c14e'), 'PUFFER', 64, 14, size=2), density=64 / 46, span=2)
     atlas.add('schild_werkstatt', lettered(hexcolour('#2f1a0c'), hexcolour('#f2c14e'), 'WICHTEL', 64, 14, size=2), density=64 / 46, span=2)
     atlas.add('band_schwarz', belt)
+    atlas.add('warnlicht', flat(hexcolour('#ff9a1f'), 0.02))
     atlas.add('riffel', tread_plate)
     atlas.add('warnstreifen', hazard_stripes)
     atlas.add('schild_fabrik', lettered(hexcolour('#2f1a0c'), hexcolour('#f2c14e'), 'GESCHENKE', 64, 14, size=2, gap=0), density=64 / 40, span=2)
@@ -3124,9 +3125,14 @@ def conveyor():
     for x in range(-22, 23, 4):
         b += soft([Box((x - 0.8, 6.6, -5.5), (x + 0.8, 7.6, 5.5), 'messing')])
     b += [Box((-24, 3, -5.5), (24, 3.6, 5.5), 'eisen')]
-    b += gift(-15, 0, 7, 6, 7, 8.4, 'papier_rot', 'band_rot', turn=10)
-    b += gift(-1, 0, 6, 7, 6, 8.4, 'papier_gruen', 'band_gruen', turn=-8)
-    b += gift(13, 0, 8, 5, 7, 8.4, 'papier_blau', 'band_blau', turn=4)
+    return b
+
+
+def conveyor_load():
+    b = []
+    b += gift(-20, 0, 7, 6, 7, 8.4, 'papier_rot', 'band_rot', turn=10)
+    b += gift(-4, 0, 6, 7, 6, 8.4, 'papier_gruen', 'band_gruen', turn=-8)
+    b += gift(12, 0, 7, 5, 7, 8.4, 'papier_blau', 'band_blau', turn=4)
     return b
 
 
@@ -3199,9 +3205,7 @@ def toy_press():
         Box((6, 3, 4), (12, 40, 10), 'eisen'),
         Box((-14, 38, 2), (14, 44, 12), 'lack_blau'),
         Box((-14.4, 43.6, 1.6), (14.4, 45, 12.4), 'messing'),
-        Box((-2, 22, -2), (2, 38, 6), 'messing'),
-        Box((-8, 18, -6), (8, 22, 8), 'eisen'),
-        Box((-8.4, 17.4, -6.4), (8.4, 18, 8.4), 'kohle'),
+        Box((-3, 30, -3), (3, 38, 7), 'eisen'),
         Box((-10, 3, -10), (10, 6, 8), 'eisen'),
         Box((-9, 6, -9), (9, 6.6, 7), 'band_schwarz'),
     ]
@@ -3212,6 +3216,14 @@ def toy_press():
         b.append(Box((11.6, 18, 5.4), (16, 20, 8.6), 'messing', rotation=((12, 19, 7), (0, 0, k * 45))))
     b.append(Box((11.4, 16, 5), (14.6, 22, 9), 'eisen'))
     return b
+
+
+def toy_press_stamp():
+    return [
+        Box((-2, 22, -2), (2, 34, 6), 'messing'),
+        Box((-8, 18, -6), (8, 22, 8), 'eisen'),
+        Box((-8.4, 17.4, -6.4), (8.4, 18, 8.4), 'kohle'),
+    ]
 
 
 def control_desk():
@@ -3541,6 +3553,7 @@ def boiler():
     for k, x in enumerate((-6, 0, 6)):
         b += soft([lamp_dot(x + 26, 7.5, -32, ('rot', 'gelb', 'gruen')[k], 2)])
     b += [Box((14, 4, -32), (38, 22, -24), 'kessel'), Box((13.6, 21.6, -32.4), (38.4, 23, -23.6), 'messing')]
+    b += placed(steam_valve(), 10, 55.6, 0)
     return b
 
 
@@ -3558,9 +3571,8 @@ def giant_press():
         Box((-40, 96, -8), (40, 108, 20), 'lack_blau'),
         Box((-40.4, 95, -8.4), (40.4, 97, 20.4), 'messing'),
         Box((-40.4, 107, -8.4), (40.4, 109, 20.4), 'messing'),
-        Box((-6, 52, -2), (6, 96, 10), 'messing'),
-        Box((-18, 40, -8), (18, 52, 14), 'eisen'),
-        Box((-18.4, 39, -8.4), (18.4, 40, 14.4), 'kohle'),
+        Box((-8, 58, -4), (8, 96, 12), 'eisen'),
+        Box((-8.4, 70, -4.4), (8.4, 72, 12.4), 'messing'),
         Box((-22, 6, -12), (22, 14, 14), 'eisen'),
         Box((-20, 14, -10), (20, 15, 12), 'band_schwarz'),
     ]
@@ -3576,6 +3588,49 @@ def giant_press():
     for k, x in enumerate((-30, 30)):
         b += [Box((x - 4, 6, -30), (x + 4, 12, -22), 'kessel')]
         b += gift(x, -26, 6, 6, 6, 12, ('papier_gruen', 'papier_rot')[k], ('band_gruen', 'band_rot')[k], turn=15)
+    return b
+
+
+def giant_press_stamp():
+    return [
+        Box((-6, 52, -2), (6, 70, 10), 'messing'),
+        Box((-18, 40, -8), (18, 52, 14), 'eisen'),
+        Box((-18.4, 39, -8.4), (18.4, 40, 14.4), 'kohle'),
+        Box((-18.4, 46, -8.4), (18.4, 47, 14.4), 'warnstreifen'),
+    ]
+
+
+def beacon():
+    b = [
+        Box((-2.4, 0, -2.4), (2.4, 1.2, 2.4), 'kessel'),
+        Box((-1.8, 1.2, -1.8), (1.8, 5, 1.8), 'kohle', faces={'east': 'warnlicht', 'west': 'warnlicht'}, emit=15, shade=False),
+        Box((-2, 5, -2), (2, 5.8, 2), 'kessel'),
+    ]
+    return b
+
+
+def steam_valve():
+    return [Box((-1.4, 0, -1.4), (1.4, 3, 1.4), 'messing'), Box((-2.2, 3, -2.2), (2.2, 3.8, 2.2), 'eisen'), *valve_wheel(0, 4.8, 0, 2.2)]
+
+
+def ceiling_pipes():
+    return [
+        Box((-24, 9.6, -5.2), (24, 13.6, -1.2), 'kupfer'),
+        Box((-24, 10.4, 1.8), (24, 13.4, 4.8), 'eisen'),
+        Box((-1.2, 9.2, -5.6), (1.2, 14, -0.8), 'messing'),
+        Box((-1.2, 10, 1.4), (1.2, 13.8, 5.2), 'messing'),
+        Box((-17, 13.4, -6), (-15, 16, 6), 'kessel'),
+        Box((15, 13.4, -6), (17, 16, 6), 'kessel'),
+        Box((-17, 9, -6), (-15, 9.6, -0.4), 'kessel'),
+        Box((15, 9, -6), (17, 9.6, -0.4), 'kessel'),
+    ]
+
+
+def ceiling_lights():
+    colours = list(BULB_SLOTS)
+    pts = [(x, 14.4 - 3.2 * math.sin(math.pi * (x + 23.4) / 46.8)) for x in frange(-23.4, 23.4, 3.9)]
+    b = [Box((-24, 14, -0.8), (-22.8, 16, 0.8), 'kessel'), Box((22.8, 14, -0.8), (24, 16, 0.8), 'kessel')]
+    b += light_string(pts, 0, colours, 1.2)
     return b
 
 
@@ -3934,22 +3989,41 @@ def build_props():
         prop = Prop(art, [Part(art, maker(), (0, 0, 0))], [], title=title)
         prop.wall = True
         result.append(prop)
-    for art, title, maker in (('fliessband', 'Fließband', conveyor), ('verpackungsmaschine', 'Verpackungsmaschine', wrapping_machine),
-                              ('zuckerstangenmaschine', 'Zuckerstangenmaschine', candy_machine), ('spielzeugpresse', 'Spielzeugpresse', toy_press),
+    boxes = conveyor()
+    result.append(Prop('fliessband', auto_parts('fliessband', boxes) + [Part('fliessband_last', conveyor_load(), (0, 0, 0), tags=('deko_band',))], footprint_of(boxes), title='Fließband'))
+    boxes = toy_press()
+    result.append(Prop('spielzeugpresse', auto_parts('spielzeugpresse', boxes) + [Part('spielzeugpresse_stempel', toy_press_stamp(), (0, 1, 0), tags=('deko_hub_klein',))], footprint_of(boxes), title='Spielzeugpresse'))
+    for title, art, maker in (('Deckenrohr', 'deckenrohr', ceiling_pipes), ('Deckenlichter', 'deckenlichter', ceiling_lights)):
+        prop = Prop(art, [Part(art, maker(), (0, 0, 0))], [], title=title)
+        prop.ceiling = True
+        result.append(prop)
+    for art, title, maker in (('verpackungsmaschine', 'Verpackungsmaschine', wrapping_machine),
+                              ('zuckerstangenmaschine', 'Zuckerstangenmaschine', candy_machine),
                               ('kontrollpult', 'Kontrollpult', control_desk), ('spielzeugregal', 'Spielzeugregal', toy_shelf), ('kistenstapel', 'Kistenstapel', crate_stack)):
         boxes = maker()
         result.append(Prop(art, auto_parts(art, boxes), footprint_of(boxes), title=title))
     def giant(art, title, body, extras):
         boxes = body()
         parts = auto_parts(art, boxes)
-        for name, maker, offset, tag in extras:
-            parts.append(Part(name, placed(maker(), offset[0] * 16, offset[1] * 16, offset[2] * 16), offset, tags=(tag,)))
+        for extra in extras:
+            name, maker, offset, tag = extra[:4]
+            if maker is None:
+                parts.append(Part(name, None, offset, components=tag))
+            elif len(extra) > 4:
+                parts.append(Part(name, maker(), offset, tags=(tag,)))
+            else:
+                parts.append(Part(name, placed(maker(), offset[0] * 16, offset[1] * 16, offset[2] * 16), offset, tags=(tag,)))
         result.append(Prop(art, parts, footprint_of(boxes), title=title))
 
-    giant('riesen_verpackung', 'Riesen-Verpackungsmaschine', mega_wrapper, [('riesen_verpackung_rad', mega_wrapper_gear, (0.625, 3.9375, -1.906), 'deko_dreh_z')])
-    giant('riesen_zuckerwerk', 'Zuckerstangenwerk', candy_works, [('ruehrwerk_l', candy_stirrer, (-1.25, 5.25, 0.875), 'deko_dreh'), ('ruehrwerk_r', candy_stirrer, (1.25, 5.25, 0.875), 'deko_dreh')])
-    giant('dampfkessel', 'Dampfkessel', boiler, [('dampfkessel_rad', boiler_gear, (1.625, 2.25, -1.625), 'deko_dreh_z')])
-    giant('riesen_presse', 'Riesenpresse', giant_press, [('riesen_presse_rad', press_wheel, (1.875, 3.75, -0.40625), 'deko_dreh_z')])
+    giant('riesen_verpackung', 'Riesen-Verpackungsmaschine', mega_wrapper, [('riesen_verpackung_rad', mega_wrapper_gear, (0.625, 3.9375, -1.906), 'deko_dreh_z'),
+                                                                            ('riesen_verpackung_licht', beacon, (1.125, 4.75, -1.5), 'deko_blitz')])
+    giant('riesen_zuckerwerk', 'Zuckerstangenwerk', candy_works, [('ruehrwerk_l', candy_stirrer, (-1.25, 5.25, 0.875), 'deko_dreh'), ('ruehrwerk_r', candy_stirrer, (1.25, 5.25, 0.875), 'deko_dreh'),
+                                                                     ('riesen_zuckerwerk_licht', beacon, (1.875, 2.5625, 2.1875), 'deko_blitz')])
+    giant('dampfkessel', 'Dampfkessel', boiler, [('dampfkessel_rad', boiler_gear, (1.625, 2.25, -1.625), 'deko_dreh_z'),
+                                                 ('dampfkessel_licht', beacon, (2.125, 1.4375, -1.75), 'deko_blitz'),
+                                                 ('rauch', None, (0.625, 4.0, 0), '"minecraft:custom_model_data":{floats:[0.5f]}')])
+    giant('riesen_presse', 'Riesenpresse', giant_press, [('riesen_presse_rad', press_wheel, (1.875, 3.75, -0.40625), 'deko_dreh_z'),
+                                                         ('riesen_presse_stempel', giant_press_stamp, (0, 3, 0.2), 'deko_hub', True)])
     gear = Prop('zahnrad', [Part('zahnrad_halter', wall_gear_mount(), (0, 0, 0)), Part('zahnrad_rad', wall_gear(), (0, 0.5, 0), tags=('deko_dreh_z',))], [], title='Zahnrad')
     gear.wall = True
     result.append(gear)
