@@ -1,4 +1,4 @@
-$summon minecraft:item_display ^-0.225 ^0.75 ^0.0078 {Tags:["sniffa_prop","sniffa_deko_teil","deko_teil_neu"],Rotation:[$(yaw)f,0f],item:{id:"minecraft:stick",count:1,components:{"minecraft:item_model":"hideandseek:props/deko/holzstapel_1"}}}
+$summon minecraft:item_display ^-0.1938 ^0.8187 ^ {Tags:["sniffa_prop","sniffa_deko_teil","deko_teil_neu"],Rotation:[$(yaw)f,0f],item:{id:"minecraft:stick",count:1,components:{"minecraft:item_model":"hideandseek:props/deko/holzstapel_1"}}}
 execute if block ^1 ^ ^ #minecraft:air run setblock ^1 ^ ^ minecraft:barrier strict
 execute if block ^1 ^1 ^ #minecraft:air run setblock ^1 ^1 ^ minecraft:barrier strict
 execute if block ^ ^ ^ #minecraft:air run setblock ^ ^ ^ minecraft:barrier strict
