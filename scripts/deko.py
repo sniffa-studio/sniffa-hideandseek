@@ -4485,6 +4485,63 @@ def functions(prop):
     write(FUNCTIONS / f'{prop.art}.mcfunction', f'function sniffa:intern/deko/platzieren {{art:"{prop.art}",name:"{prop.title}",modus:"{modus}"}}\n')
 
 
+CATEGORY_ORDER = ['Stände', 'Markt', 'Licht', 'Bauteile', 'Geschenke', 'Fabrik', 'Wand/Decke']
+FACTORY = {'fliessband', 'verpackungsmaschine', 'zuckerstangenmaschine', 'spielzeugpresse', 'kontrollpult', 'spielzeugregal', 'kistenstapel',
+           'riesen_verpackung', 'riesen_zuckerwerk', 'dampfkessel', 'riesen_presse', 'geschenkkiste'}
+LIGHTS = {'laterne', 'doppellaterne', 'lichterbogen', 'feuerkorb', 'schwibbogen', 'pyramide'}
+PARTS = {'bande', 'holzzaun', 'zaun', 'bank', 'sitzgruppe', 'stehtisch', 'wegweiser', 'eislaeufer', 'holzstapel', 'schneehaufen'}
+ICON_FALLBACK = {'bande': 'bande_gerade', 'holzzaun': 'holzzaun_gerade', 'eislaeufer': 'eislaeufer_1'}
+
+
+def category_of(prop):
+    if getattr(prop, 'wall', False) or getattr(prop, 'ceiling', False):
+        return 'Wand/Decke'
+    if prop.art.startswith('stand_') or prop.art == 'marktstand':
+        return 'Stände'
+    if prop.art in FACTORY:
+        return 'Fabrik'
+    if prop.art in LIGHTS:
+        return 'Licht'
+    if prop.art in PARTS:
+        return 'Bauteile'
+    if prop.art.startswith('geschenk'):
+        return 'Geschenke'
+    return 'Markt'
+
+
+def icon_model(model):
+    elements = model['elements']
+    low = [min(e['from'][i] for e in elements) for i in range(3)]
+    high = [max(e['to'][i] for e in elements) for i in range(3)]
+    size = max(high[i] - low[i] for i in range(3)) or 1
+    scale = 16 / size
+    offset = [8 - (low[0] + high[0]) / 2 * scale, (16 - (high[1] - low[1]) * scale) / 2 - low[1] * scale, 8 - (low[2] + high[2]) / 2 * scale]
+    out = []
+    for element in elements:
+        copy = dict(element)
+        copy['from'] = [round(element['from'][i] * scale + offset[i], 4) for i in range(3)]
+        copy['to'] = [round(element['to'][i] * scale + offset[i], 4) for i in range(3)]
+        if 'rotation' in element:
+            rotation = dict(element['rotation'])
+            rotation['origin'] = [round(element['rotation']['origin'][i] * scale + offset[i], 4) for i in range(3)]
+            copy['rotation'] = rotation
+        out.append(copy)
+    return {
+        'textures': {'0': TEXTURE, 'particle': TEXTURE},
+        'elements': out,
+        'display': {'gui': {'rotation': [25, 210, 0], 'translation': [0, 0, 0], 'scale': [0.8, 0.8, 0.8]}},
+    }
+
+
+def catalogue(icons):
+    entries = []
+    for prop in props():
+        icon = f'hideandseek:props/deko/icon/{prop.art}' if prop.art in icons else f'hideandseek:props/deko/{ICON_FALLBACK.get(prop.art, prop.art)}'
+        entries.append({'art': prop.art, 'title': prop.title, 'category': category_of(prop), 'icon': icon})
+    entries.sort(key=lambda e: (CATEGORY_ORDER.index(e['category']), e['title']))
+    return {'categories': CATEGORY_ORDER, 'props': entries}
+
+
 def main():
     atlas = build_atlas()
     sheet = FaceSheet(atlas)
@@ -4519,8 +4576,10 @@ def main():
     sheet.pack()
     preview_dir = ROOT / 'build/deko-preview'
     preview_dir.mkdir(parents=True, exist_ok=True)
+    icons = {}
     for art, model in previews:
         model = resolve(sheet, model)
+        icons[art] = icon_model(model)
         model['textures'] = {'0': '../../src/main/resources/assets/hideandseek/textures/item/props/deko', 'particle': '../../src/main/resources/assets/hideandseek/textures/item/props/deko'}
         (preview_dir / f'{art}.json').write_text(json.dumps(model))
     texture = ASSETS / 'textures/item/props/deko.png'
@@ -4529,6 +4588,10 @@ def main():
     for name, model in models:
         write_json(ASSETS / f'models/item/props/deko/{name}.json', resolve(sheet, model))
         write_json(ASSETS / f'items/props/deko/{name}.json', item_definition(name))
+    for art, model in icons.items():
+        write_json(ASSETS / f'models/item/props/deko/icon/{art}.json', model)
+        write_json(ASSETS / f'items/props/deko/icon/{art}.json', item_definition(f'icon/{art}'))
+    write_json(ASSETS / 'deko_katalog.json', catalogue(icons))
     print('sheet', SHEET, sheet.height, len(sheet.requests), 'faces')
     for prop in props():
         print(f'{prop.art}: {prop.fixed} nudged, {prop.fights} left')
