@@ -4493,6 +4493,137 @@ PARTS = {'bande', 'holzzaun', 'zaun', 'bank', 'sitzgruppe', 'stehtisch', 'wegwei
 ICON_FALLBACK = {'bande': 'bande_gerade', 'holzzaun': 'holzzaun_gerade', 'eislaeufer': 'eislaeufer_1'}
 
 
+DESCRIPTIONS = {
+    'stand_bratapfel': 'Holzbude mit dampfenden Bratäpfeln und Vanillesoße',
+    'stand_wurst': 'Grillbude mit Bratwürsten, Senf und Rauch',
+    'stand_brezeln': 'Bude mit Brezeln an Stangen und im Korb',
+    'stand_crepes': 'Crêpes mit Nougat, Erdbeeren und Banane',
+    'marktstand': 'Glühwein in Bechern, Topf mit Kelle, Lichter an der Traufe',
+    'stand_honig': 'Honiggläser, Waben und Bienenwachskerzen',
+    'stand_kakao': 'Heißer Kakao mit Sahne in bunten Bechern',
+    'stand_puffer': 'Kartoffelpuffer mit Apfelmus aus der Pfanne',
+    'stand_kerzen': 'Kerzen in allen Farben und Größen',
+    'stand_kugeln': 'Christbaumkugeln, Sterne und Glaskugeln',
+    'stand_lebkuchen': 'Lebkuchenherzen mit Zuckerguss',
+    'stand_mandeln': 'Gebrannte Mandeln in Tüten',
+    'stand_raclette': 'Schmelzender Raclettekäse mit Kartoffeln',
+    'stand_schoko': 'Schokofrüchte am Spieß',
+    'stand_spielzeug': 'Holzspielzeug, Teddys und Schaukelpferde',
+    'stand_sterne': 'Strohsterne und Herrnhuter Sterne',
+    'stand_strick': 'Mützen, Schals und Socken',
+    'stand_post': 'Briefstapel und Pakete der Wichtelpost',
+    'stand_werkstatt': 'Werkbank mit halb fertigem Spielzeug',
+    'adventskranz': 'Tannenkranz mit vier Kerzen',
+    'brunnen': 'Zugefrorener Brunnen mit Eiszapfen',
+    'christbaumverkauf': 'Tannen zum Mitnehmen mit Preisschild',
+    'eingangstor': 'Großes Markttor mit Schild und Lichtern',
+    'eisbahn': 'Kleine Eisfläche mit Bande und Laternen',
+    'engel': 'Engelsfigur mit Flügeln und Heiligenschein',
+    'karussell': 'Kinderkarussell, das sich dreht',
+    'lebkuchenhaus': 'Lebkuchenhaus mit Zuckerguss und Bonbons',
+    'maronenofen': 'Ofen für heiße Maronen mit Rauch',
+    'nussknacker': 'Großer Nussknacker in roter Uniform',
+    'pinguin': 'Pinguin mit Schal und Mütze',
+    'rentier': 'Rentier mit Geweih',
+    'schlitten': 'Holzschlitten mit Geschenken',
+    'schneekugel': 'Riesige Schneekugel mit Dorf darin',
+    'schneemann': 'Schneemann mit Karottennase und Hut',
+    'sterntor': 'Bogen mit Sternen und „Frohe Weihnachten“',
+    'tannenbaum': 'Geschmückte Tanne im Kübel',
+    'vogelhaus': 'Vogelhaus mit Schneedach',
+    'krippe': 'Stall mit Krippe und Stroh',
+    'weihnachtsstern': 'Weihnachtsstern im Topf',
+    'briefkasten': 'Briefkasten für Wunschzettel',
+    'zuckerstange': 'Riesige Zuckerstange',
+    'doppellaterne': 'Laterne mit zwei Köpfen',
+    'feuerkorb': 'Feuerkorb mit Glut und Funken',
+    'lichterbogen': 'Bogen voller Lichter',
+    'schwibbogen': 'Erzgebirgischer Lichterbogen mit Kerzen',
+    'laterne': 'Straßenlaterne mit warmem Licht',
+    'pyramide': 'Weihnachtspyramide, die sich dreht',
+    'bank': 'Holzbank für zwei',
+    'bande': 'Rot-weiße Eisbahn-Bande, Stück für Stück',
+    'eislaeufer': 'Schlittschuhläufer, der Kreise zieht',
+    'holzstapel': 'Gestapeltes Brennholz',
+    'holzzaun': 'Lattenzaun mit Schneekante, Stück für Stück',
+    'zaun': 'Niedriger Marktzaun',
+    'schneehaufen': 'Zusammengeschobener Schnee',
+    'sitzgruppe': 'Tisch mit Bänken unter einem Dach',
+    'stehtisch': 'Stehtisch mit Bechern',
+    'wegweiser': 'Wegweiser mit Schildern',
+    'geschenk_klein': 'Kleines Geschenk, Farbe wählbar',
+    'geschenk_mittel': 'Mittleres Geschenk, Farbe wählbar',
+    'geschenk_gross': 'Großes Geschenk, Farbe wählbar',
+    'geschenksack': 'Prall gefüllter Geschenksack',
+    'geschenkstapel': 'Stapel aus Geschenken',
+    'dampfkessel': 'Riesiger Kupferkessel mit Dampf und Warnlicht',
+    'fliessband': 'Fließband, drei Blöcke lang',
+    'geschenkkiste': 'Kiste am Bandende, Pakete fallen hinein',
+    'kistenstapel': 'Gestapelte Holzkisten',
+    'kontrollpult': 'Pult mit Knöpfen und Bildschirm',
+    'riesen_verpackung': 'Riesen-Verpackungsmaschine mit Auswurf fürs Paketband',
+    'riesen_presse': 'Riesenpresse, die stempelt und Funken sprüht',
+    'spielzeugpresse': 'Kleine Presse für Spielzeug',
+    'spielzeugregal': 'Regal voller Spielzeug',
+    'verpackungsmaschine': 'Verpackungsmaschine mit Glasfenster',
+    'zuckerstangenmaschine': 'Maschine für Zuckerstangen',
+    'riesen_zuckerwerk': 'Zuckerstangenwerk mit Rührwerken',
+    'deckenlichter': 'Lichterkette unter der Decke',
+    'deckenrohr': 'Rohrleitung unter der Decke',
+    'fabriklampe': 'Hängelampe mit echtem Licht',
+    'rohrleitung': 'Rohrleitung an der Wand',
+    'tuerkranz': 'Kranz für Haustüren',
+    'wandlaterne': 'Laterne an der Wand',
+    'zahnrad': 'Zahnrad an der Wand, das sich dreht',
+}
+TITLES = {'geschenk_klein': 'Geschenk klein', 'geschenk_mittel': 'Geschenk mittel', 'geschenk_gross': 'Geschenk groß'}
+GLOWS = LIGHTS | {'fabriklampe', 'wandlaterne', 'deckenlichter', 'maronenofen', 'eisbahn', 'eingangstor', 'sterntor'}
+
+
+def place_of(prop):
+    if getattr(prop, 'wall', False):
+        return 'Wand (Wand anschauen)'
+    if getattr(prop, 'ceiling', False):
+        return 'Decke (Decke anschauen)'
+    return 'Boden'
+
+
+def size_of(prop):
+    if prop.art in LINKED:
+        return '1 × 1 Block, verbindet sich'
+    if prop.art == 'eislaeufer':
+        return 'Kreis mit 4 Blöcken Radius'
+    cells = prop.footprint
+    if not cells:
+        boxes = [b for part in prop.parts if part.boxes for b in part.boxes]
+        if not boxes:
+            return '1 × 1'
+        lo = [min(world_bounds(b)[0][i] for b in boxes) for i in range(3)]
+        hi = [max(world_bounds(b)[1][i] for b in boxes) for i in range(3)]
+        return f'{max(1, round((hi[0] - lo[0]) / 16))} × {max(1, round((hi[2] - lo[2]) / 16))}'
+    width = max(c[0] for c in cells) - min(c[0] for c in cells) + 1
+    depth = max(c[2] for c in cells) - min(c[2] for c in cells) + 1
+    height = max(c[1] for c in cells) + 1
+    base = '1 × 1 Block' if width == depth == 1 else f'{width} × {depth} Blöcke'
+    return f'{base}, {height} hoch'
+
+
+def features_of(prop):
+    out = []
+    tags = {t for part in prop.parts for t in part.tags}
+    if tags or prop.art in ('geschenkkiste', 'eislaeufer'):
+        out.append('bewegt sich')
+    if prop.light or prop.art in GLOWS:
+        out.append('leuchtet')
+    if any(part.item == 'rauch' for part in prop.parts):
+        out.append('raucht')
+    if prop.art in LINKED:
+        out.append('verbindet sich mit Nachbarn')
+    if prop.art.startswith('geschenk_'):
+        out.append('Farbe mit „Geschenk umfärben“')
+    return out
+
+
 def category_of(prop):
     if getattr(prop, 'wall', False) or getattr(prop, 'ceiling', False):
         return 'Wand/Decke'
@@ -4537,7 +4668,8 @@ def catalogue(icons):
     entries = []
     for prop in props():
         icon = f'hideandseek:props/deko/icon/{prop.art}' if prop.art in icons else f'hideandseek:props/deko/{ICON_FALLBACK.get(prop.art, prop.art)}'
-        entries.append({'art': prop.art, 'title': prop.title, 'category': category_of(prop), 'icon': icon})
+        entries.append({'art': prop.art, 'title': TITLES.get(prop.art, prop.title), 'category': category_of(prop), 'icon': icon,
+                        'text': DESCRIPTIONS.get(prop.art, ''), 'size': size_of(prop), 'place': place_of(prop), 'features': features_of(prop)})
     entries.sort(key=lambda e: (CATEGORY_ORDER.index(e['category']), e['title']))
     return {'categories': CATEGORY_ORDER, 'props': entries}
 
@@ -4573,6 +4705,11 @@ def main():
         boxes = [b for part in prop.parts if part.boxes is not None for b in part.boxes]
         if boxes:
             previews.append((prop.art, model_json(sheet, boxes, (0, 0, 0), prop.art, check=False)))
+    for art, (_, post, run, _) in LINKED.items():
+        boxes = post() + run(-8, 8)
+        clean(boxes)
+        previews.append((art, model_json(sheet, boxes, (0, 0, 0), art, check=False)))
+    previews.append(('eislaeufer', model_json(sheet, skater(1), (0, 0, 0), 'eislaeufer', check=False)))
     sheet.pack()
     preview_dir = ROOT / 'build/deko-preview'
     preview_dir.mkdir(parents=True, exist_ok=True)
