@@ -1,0 +1,499 @@
+{
+	"categories": [
+		"St\u00e4nde",
+		"Markt",
+		"Licht",
+		"Bauteile",
+		"Geschenke",
+		"Fabrik",
+		"Wand/Decke"
+	],
+	"props": [
+		{
+			"art": "stand_bratapfel",
+			"title": "Bratapfelstand",
+			"category": "St\u00e4nde",
+			"icon": "hideandseek:props/deko/icon/stand_bratapfel"
+		},
+		{
+			"art": "stand_wurst",
+			"title": "Bratwurststand",
+			"category": "St\u00e4nde",
+			"icon": "hideandseek:props/deko/icon/stand_wurst"
+		},
+		{
+			"art": "stand_brezeln",
+			"title": "Brezelstand",
+			"category": "St\u00e4nde",
+			"icon": "hideandseek:props/deko/icon/stand_brezeln"
+		},
+		{
+			"art": "stand_crepes",
+			"title": "Cr\u00eapesstand",
+			"category": "St\u00e4nde",
+			"icon": "hideandseek:props/deko/icon/stand_crepes"
+		},
+		{
+			"art": "marktstand",
+			"title": "Gl\u00fchweinstand",
+			"category": "St\u00e4nde",
+			"icon": "hideandseek:props/deko/icon/marktstand"
+		},
+		{
+			"art": "stand_honig",
+			"title": "Honigstand",
+			"category": "St\u00e4nde",
+			"icon": "hideandseek:props/deko/icon/stand_honig"
+		},
+		{
+			"art": "stand_kakao",
+			"title": "Kakaostand",
+			"category": "St\u00e4nde",
+			"icon": "hideandseek:props/deko/icon/stand_kakao"
+		},
+		{
+			"art": "stand_puffer",
+			"title": "Kartoffelpufferstand",
+			"category": "St\u00e4nde",
+			"icon": "hideandseek:props/deko/icon/stand_puffer"
+		},
+		{
+			"art": "stand_kerzen",
+			"title": "Kerzenstand",
+			"category": "St\u00e4nde",
+			"icon": "hideandseek:props/deko/icon/stand_kerzen"
+		},
+		{
+			"art": "stand_kugeln",
+			"title": "Kugelstand",
+			"category": "St\u00e4nde",
+			"icon": "hideandseek:props/deko/icon/stand_kugeln"
+		},
+		{
+			"art": "stand_lebkuchen",
+			"title": "Lebkuchenstand",
+			"category": "St\u00e4nde",
+			"icon": "hideandseek:props/deko/icon/stand_lebkuchen"
+		},
+		{
+			"art": "stand_mandeln",
+			"title": "Mandelstand",
+			"category": "St\u00e4nde",
+			"icon": "hideandseek:props/deko/icon/stand_mandeln"
+		},
+		{
+			"art": "stand_raclette",
+			"title": "Raclettestand",
+			"category": "St\u00e4nde",
+			"icon": "hideandseek:props/deko/icon/stand_raclette"
+		},
+		{
+			"art": "stand_schoko",
+			"title": "Schokofruchtstand",
+			"category": "St\u00e4nde",
+			"icon": "hideandseek:props/deko/icon/stand_schoko"
+		},
+		{
+			"art": "stand_spielzeug",
+			"title": "Spielzeugstand",
+			"category": "St\u00e4nde",
+			"icon": "hideandseek:props/deko/icon/stand_spielzeug"
+		},
+		{
+			"art": "stand_sterne",
+			"title": "Sternestand",
+			"category": "St\u00e4nde",
+			"icon": "hideandseek:props/deko/icon/stand_sterne"
+		},
+		{
+			"art": "stand_strick",
+			"title": "Strickstand",
+			"category": "St\u00e4nde",
+			"icon": "hideandseek:props/deko/icon/stand_strick"
+		},
+		{
+			"art": "stand_post",
+			"title": "Wichtelpost",
+			"category": "St\u00e4nde",
+			"icon": "hideandseek:props/deko/icon/stand_post"
+		},
+		{
+			"art": "stand_werkstatt",
+			"title": "Wichtelwerkstatt",
+			"category": "St\u00e4nde",
+			"icon": "hideandseek:props/deko/icon/stand_werkstatt"
+		},
+		{
+			"art": "adventskranz",
+			"title": "Adventskranz",
+			"category": "Markt",
+			"icon": "hideandseek:props/deko/icon/adventskranz"
+		},
+		{
+			"art": "brunnen",
+			"title": "Brunnen",
+			"category": "Markt",
+			"icon": "hideandseek:props/deko/icon/brunnen"
+		},
+		{
+			"art": "christbaumverkauf",
+			"title": "Christbaumverkauf",
+			"category": "Markt",
+			"icon": "hideandseek:props/deko/icon/christbaumverkauf"
+		},
+		{
+			"art": "eingangstor",
+			"title": "Eingangstor",
+			"category": "Markt",
+			"icon": "hideandseek:props/deko/icon/eingangstor"
+		},
+		{
+			"art": "eisbahn",
+			"title": "Eisbahn",
+			"category": "Markt",
+			"icon": "hideandseek:props/deko/icon/eisbahn"
+		},
+		{
+			"art": "engel",
+			"title": "Engel",
+			"category": "Markt",
+			"icon": "hideandseek:props/deko/icon/engel"
+		},
+		{
+			"art": "karussell",
+			"title": "Kinderkarussell",
+			"category": "Markt",
+			"icon": "hideandseek:props/deko/icon/karussell"
+		},
+		{
+			"art": "lebkuchenhaus",
+			"title": "Lebkuchenhaus",
+			"category": "Markt",
+			"icon": "hideandseek:props/deko/icon/lebkuchenhaus"
+		},
+		{
+			"art": "maronenofen",
+			"title": "Maronenofen",
+			"category": "Markt",
+			"icon": "hideandseek:props/deko/icon/maronenofen"
+		},
+		{
+			"art": "nussknacker",
+			"title": "Nussknacker",
+			"category": "Markt",
+			"icon": "hideandseek:props/deko/icon/nussknacker"
+		},
+		{
+			"art": "pinguin",
+			"title": "Pinguin",
+			"category": "Markt",
+			"icon": "hideandseek:props/deko/icon/pinguin"
+		},
+		{
+			"art": "rentier",
+			"title": "Rentier",
+			"category": "Markt",
+			"icon": "hideandseek:props/deko/icon/rentier"
+		},
+		{
+			"art": "schlitten",
+			"title": "Schlitten",
+			"category": "Markt",
+			"icon": "hideandseek:props/deko/icon/schlitten"
+		},
+		{
+			"art": "schneekugel",
+			"title": "Schneekugel",
+			"category": "Markt",
+			"icon": "hideandseek:props/deko/icon/schneekugel"
+		},
+		{
+			"art": "schneemann",
+			"title": "Schneemann",
+			"category": "Markt",
+			"icon": "hideandseek:props/deko/icon/schneemann"
+		},
+		{
+			"art": "sterntor",
+			"title": "Sterntor",
+			"category": "Markt",
+			"icon": "hideandseek:props/deko/icon/sterntor"
+		},
+		{
+			"art": "tannenbaum",
+			"title": "Tannenbaum",
+			"category": "Markt",
+			"icon": "hideandseek:props/deko/icon/tannenbaum"
+		},
+		{
+			"art": "vogelhaus",
+			"title": "Vogelhaus",
+			"category": "Markt",
+			"icon": "hideandseek:props/deko/icon/vogelhaus"
+		},
+		{
+			"art": "krippe",
+			"title": "Weihnachtskrippe",
+			"category": "Markt",
+			"icon": "hideandseek:props/deko/icon/krippe"
+		},
+		{
+			"art": "weihnachtsstern",
+			"title": "Weihnachtsstern",
+			"category": "Markt",
+			"icon": "hideandseek:props/deko/icon/weihnachtsstern"
+		},
+		{
+			"art": "briefkasten",
+			"title": "Wunschzettel-Briefkasten",
+			"category": "Markt",
+			"icon": "hideandseek:props/deko/icon/briefkasten"
+		},
+		{
+			"art": "zuckerstange",
+			"title": "Zuckerstange",
+			"category": "Markt",
+			"icon": "hideandseek:props/deko/icon/zuckerstange"
+		},
+		{
+			"art": "doppellaterne",
+			"title": "Doppellaterne",
+			"category": "Licht",
+			"icon": "hideandseek:props/deko/icon/doppellaterne"
+		},
+		{
+			"art": "feuerkorb",
+			"title": "Feuerkorb",
+			"category": "Licht",
+			"icon": "hideandseek:props/deko/icon/feuerkorb"
+		},
+		{
+			"art": "lichterbogen",
+			"title": "Lichterbogen",
+			"category": "Licht",
+			"icon": "hideandseek:props/deko/icon/lichterbogen"
+		},
+		{
+			"art": "schwibbogen",
+			"title": "Schwibbogen",
+			"category": "Licht",
+			"icon": "hideandseek:props/deko/icon/schwibbogen"
+		},
+		{
+			"art": "laterne",
+			"title": "Stra\u00dfenlaterne",
+			"category": "Licht",
+			"icon": "hideandseek:props/deko/icon/laterne"
+		},
+		{
+			"art": "pyramide",
+			"title": "Weihnachtspyramide",
+			"category": "Licht",
+			"icon": "hideandseek:props/deko/icon/pyramide"
+		},
+		{
+			"art": "bank",
+			"title": "Bank",
+			"category": "Bauteile",
+			"icon": "hideandseek:props/deko/icon/bank"
+		},
+		{
+			"art": "bande",
+			"title": "Eisbahn-Bande",
+			"category": "Bauteile",
+			"icon": "hideandseek:props/deko/bande_gerade"
+		},
+		{
+			"art": "eislaeufer",
+			"title": "Eisl\u00e4ufer",
+			"category": "Bauteile",
+			"icon": "hideandseek:props/deko/eislaeufer_1"
+		},
+		{
+			"art": "holzstapel",
+			"title": "Holzstapel",
+			"category": "Bauteile",
+			"icon": "hideandseek:props/deko/icon/holzstapel"
+		},
+		{
+			"art": "holzzaun",
+			"title": "Holzzaun",
+			"category": "Bauteile",
+			"icon": "hideandseek:props/deko/holzzaun_gerade"
+		},
+		{
+			"art": "zaun",
+			"title": "Marktzaun",
+			"category": "Bauteile",
+			"icon": "hideandseek:props/deko/icon/zaun"
+		},
+		{
+			"art": "schneehaufen",
+			"title": "Schneehaufen",
+			"category": "Bauteile",
+			"icon": "hideandseek:props/deko/icon/schneehaufen"
+		},
+		{
+			"art": "sitzgruppe",
+			"title": "Sitzgruppe",
+			"category": "Bauteile",
+			"icon": "hideandseek:props/deko/icon/sitzgruppe"
+		},
+		{
+			"art": "stehtisch",
+			"title": "Stehtisch",
+			"category": "Bauteile",
+			"icon": "hideandseek:props/deko/icon/stehtisch"
+		},
+		{
+			"art": "wegweiser",
+			"title": "Wegweiser",
+			"category": "Bauteile",
+			"icon": "hideandseek:props/deko/icon/wegweiser"
+		},
+		{
+			"art": "geschenk_klein",
+			"title": "Geschenk",
+			"category": "Geschenke",
+			"icon": "hideandseek:props/deko/icon/geschenk_klein"
+		},
+		{
+			"art": "geschenk_mittel",
+			"title": "Geschenk",
+			"category": "Geschenke",
+			"icon": "hideandseek:props/deko/icon/geschenk_mittel"
+		},
+		{
+			"art": "geschenk_gross",
+			"title": "Geschenk",
+			"category": "Geschenke",
+			"icon": "hideandseek:props/deko/icon/geschenk_gross"
+		},
+		{
+			"art": "geschenksack",
+			"title": "Geschenksack",
+			"category": "Geschenke",
+			"icon": "hideandseek:props/deko/icon/geschenksack"
+		},
+		{
+			"art": "geschenkstapel",
+			"title": "Geschenkstapel",
+			"category": "Geschenke",
+			"icon": "hideandseek:props/deko/icon/geschenkstapel"
+		},
+		{
+			"art": "dampfkessel",
+			"title": "Dampfkessel",
+			"category": "Fabrik",
+			"icon": "hideandseek:props/deko/icon/dampfkessel"
+		},
+		{
+			"art": "fliessband",
+			"title": "Flie\u00dfband",
+			"category": "Fabrik",
+			"icon": "hideandseek:props/deko/icon/fliessband"
+		},
+		{
+			"art": "geschenkkiste",
+			"title": "Geschenkkiste",
+			"category": "Fabrik",
+			"icon": "hideandseek:props/deko/icon/geschenkkiste"
+		},
+		{
+			"art": "kistenstapel",
+			"title": "Kistenstapel",
+			"category": "Fabrik",
+			"icon": "hideandseek:props/deko/icon/kistenstapel"
+		},
+		{
+			"art": "kontrollpult",
+			"title": "Kontrollpult",
+			"category": "Fabrik",
+			"icon": "hideandseek:props/deko/icon/kontrollpult"
+		},
+		{
+			"art": "riesen_verpackung",
+			"title": "Riesen-Verpackungsmaschine",
+			"category": "Fabrik",
+			"icon": "hideandseek:props/deko/icon/riesen_verpackung"
+		},
+		{
+			"art": "riesen_presse",
+			"title": "Riesenpresse",
+			"category": "Fabrik",
+			"icon": "hideandseek:props/deko/icon/riesen_presse"
+		},
+		{
+			"art": "spielzeugpresse",
+			"title": "Spielzeugpresse",
+			"category": "Fabrik",
+			"icon": "hideandseek:props/deko/icon/spielzeugpresse"
+		},
+		{
+			"art": "spielzeugregal",
+			"title": "Spielzeugregal",
+			"category": "Fabrik",
+			"icon": "hideandseek:props/deko/icon/spielzeugregal"
+		},
+		{
+			"art": "verpackungsmaschine",
+			"title": "Verpackungsmaschine",
+			"category": "Fabrik",
+			"icon": "hideandseek:props/deko/icon/verpackungsmaschine"
+		},
+		{
+			"art": "zuckerstangenmaschine",
+			"title": "Zuckerstangenmaschine",
+			"category": "Fabrik",
+			"icon": "hideandseek:props/deko/icon/zuckerstangenmaschine"
+		},
+		{
+			"art": "riesen_zuckerwerk",
+			"title": "Zuckerstangenwerk",
+			"category": "Fabrik",
+			"icon": "hideandseek:props/deko/icon/riesen_zuckerwerk"
+		},
+		{
+			"art": "deckenlichter",
+			"title": "Deckenlichter",
+			"category": "Wand/Decke",
+			"icon": "hideandseek:props/deko/icon/deckenlichter"
+		},
+		{
+			"art": "deckenrohr",
+			"title": "Deckenrohr",
+			"category": "Wand/Decke",
+			"icon": "hideandseek:props/deko/icon/deckenrohr"
+		},
+		{
+			"art": "fabriklampe",
+			"title": "Fabriklampe",
+			"category": "Wand/Decke",
+			"icon": "hideandseek:props/deko/icon/fabriklampe"
+		},
+		{
+			"art": "rohrleitung",
+			"title": "Rohrleitung",
+			"category": "Wand/Decke",
+			"icon": "hideandseek:props/deko/icon/rohrleitung"
+		},
+		{
+			"art": "tuerkranz",
+			"title": "T\u00fcrkranz",
+			"category": "Wand/Decke",
+			"icon": "hideandseek:props/deko/icon/tuerkranz"
+		},
+		{
+			"art": "wandlaterne",
+			"title": "Wandlaterne",
+			"category": "Wand/Decke",
+			"icon": "hideandseek:props/deko/icon/wandlaterne"
+		},
+		{
+			"art": "zahnrad",
+			"title": "Zahnrad",
+			"category": "Wand/Decke",
+			"icon": "hideandseek:props/deko/icon/zahnrad"
+		}
+	]
+}
