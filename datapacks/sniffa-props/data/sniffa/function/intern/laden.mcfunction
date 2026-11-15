@@ -8,3 +8,4 @@ scoreboard players set #6 sniffa_deko 6
 scoreboard players set #90 sniffa_deko 90
 scoreboard players set #360 sniffa_deko 360
 scoreboard objectives add sniffa_deko_dreh dummy
+scoreboard objectives add sniffa_deko_weg dummy
