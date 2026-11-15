@@ -19,7 +19,7 @@ SHEET = 1024
 MAX_FACE = 64
 PAD = 2
 NUDGE = 0.04
-NO_EDGES = {'glaskugel', 'netz', 'stern_weiss', 'stern_rot', 'eis_flaeche', 'flamme_tief', 'flamme_kern', 'eiszapfen', 'feder', 'feder_hell', 'sack', 'schneeball', 'glas', 'lampen', 'stern', 'flamme', 'glut', 'schnee_rand', 'bonbons', 'kugeln', 'tanne', 'beere'}
+NO_EDGES = {'bildschirm', 'band_schwarz', 'glaskugel', 'netz', 'stern_weiss', 'stern_rot', 'eis_flaeche', 'flamme_tief', 'flamme_kern', 'eiszapfen', 'feder', 'feder_hell', 'sack', 'schneeball', 'glas', 'lampen', 'stern', 'flamme', 'glut', 'schnee_rand', 'bonbons', 'kugeln', 'tanne', 'beere'}
 RIVETS = {'eisen', 'kessel'}
 
 
@@ -388,6 +388,21 @@ def glass_globe(img, rnd):
             img.putpixel((x, y), (215, 238, 250, alpha))
 
 
+def belt(img, rnd):
+    for y in range(TILE):
+        for x in range(TILE):
+            img.putpixel((x, y), hexcolour('#2a2a2e') if (x // 2) % 3 else hexcolour('#3c3c42'))
+
+
+def screen(img, rnd):
+    for y in range(TILE):
+        for x in range(TILE):
+            c = hexcolour('#0f3a2a')
+            if y % 5 == 2 and (x * 7 + y) % 11 < 7:
+                c = hexcolour('#55f0a0')
+            img.putpixel((x, y), c)
+
+
 def flame(img, rnd):
     for y in range(TILE):
         for x in range(TILE):
@@ -599,6 +614,9 @@ def build_atlas():
     atlas.add('schild_post_stand', lettered(hexcolour('#2f1a0c'), hexcolour('#f2c14e'), 'POSTAMT', 64, 14, size=2), density=64 / 46, span=2)
     atlas.add('schild_puffer', lettered(hexcolour('#2f1a0c'), hexcolour('#f2c14e'), 'PUFFER', 64, 14, size=2), density=64 / 46, span=2)
     atlas.add('schild_werkstatt', lettered(hexcolour('#2f1a0c'), hexcolour('#f2c14e'), 'WICHTEL', 64, 14, size=2), density=64 / 46, span=2)
+    atlas.add('band_schwarz', belt)
+    atlas.add('bildschirm', screen)
+    atlas.add('kiste_schild', lettered(hexcolour('#c9a26a'), hexcolour('#7a1420'), 'NORDPOL', 32, 9), density=32 / 7)
     atlas.add('creme', flat(hexcolour('#efe3c8'), 0.04))
     atlas.add('stein', stones)
     atlas.add('fass', planks(hexcolour('#7a4e2c'), 4))
@@ -3027,6 +3045,222 @@ def wall_lantern():
     return b
 
 
+def roller(x0, x1, y, z, r=0.9):
+    return Box((x0, y - r, z - r), (x1, y + r, z + r), 'eisen')
+
+
+def gauge(x, y, z, face=-1):
+    zz = z if face < 0 else z
+    return [
+        Box((x - 1.4, y - 1.4, zz - 0.5), (x + 1.4, y + 1.4, zz), 'messing'),
+        Box((x - 1, y - 1, zz - 0.6), (x + 1, y + 1, zz - 0.5), 'zuckerguss'),
+        Box((x - 0.12, y - 0.1, zz - 0.7), (x + 0.6, y + 0.1, zz - 0.6), 'kohle', rotation=((x, y, zz - 0.65), (0, 0, 35))),
+    ]
+
+
+def lamp_dot(x, y, z, colour, size=1.0):
+    h = size / 2
+    return Box((x - h, y - h, z - 0.5), (x + h, y + h, z), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, colour))
+
+
+def conveyor():
+    b = []
+    for side in (-1, 1):
+        z = side * 6.5
+        b += [Box((-24, 6, z - 1), (24, 9, z + 1), 'eisen'), Box((-24, 8.6, z - 1.3), (24, 9.4, z + 1.3), 'lack_gelb')]
+        for x in (-20, -6, 6, 20):
+            b += [Box((x - 1, 0, z - 1), (x + 1, 6, z + 1), 'eisen'), Box((x - 1.6, 0, z - 1.6), (x + 1.6, 0.8, z + 1.6), 'kessel')]
+    b += [Box((-24, 7.6, -5.5), (24, 8.4, 5.5), 'band_schwarz')]
+    for x in range(-22, 23, 4):
+        b += soft([Box((x - 0.8, 6.6, -5.5), (x + 0.8, 7.6, 5.5), 'messing')])
+    b += [Box((-24, 3, -5.5), (24, 3.6, 5.5), 'eisen')]
+    b += gift(-15, 0, 7, 6, 7, 8.4, 'papier_rot', 'band_rot', turn=10)
+    b += gift(-1, 0, 6, 7, 6, 8.4, 'papier_gruen', 'band_gruen', turn=-8)
+    b += gift(13, 0, 8, 5, 7, 8.4, 'papier_blau', 'band_blau', turn=4)
+    return b
+
+
+def wrapping_machine():
+    b = [
+        Box((-22, 0, -14), (22, 2, 14), 'kessel'),
+        Box((-20, 2, -12), (4, 30, 12), 'lack_rot'),
+        Box((-20.4, 28, -12.4), (4.4, 31, 12.4), 'messing'),
+        Box((-20.4, 2, -12.4), (4.4, 4, 12.4), 'messing'),
+        Box((-14, 31, -6), (-2, 34, 6), 'eisen'),
+        Box((-16, 34, -8), (0, 36, 8), 'eisen'),
+        Box((-18, 36, -10), (2, 40, 10), 'kupfer'),
+        Box((-18.4, 39.6, -10.4), (2.4, 41, 10.4), 'messing'),
+        Box((-17, 8, -12.6), (1, 24, -12), 'glas_hell'),
+        Box((-17.4, 7.6, -12.8), (1.4, 8.4, -12), 'messing'),
+        Box((-17.4, 23.6, -12.8), (1.4, 24.4, -12), 'messing'),
+        Box((4, 2, -8), (22, 9, 8), 'eisen'),
+        Box((4, 9, -7), (22, 10, 7), 'band_schwarz'),
+        Box((4, 8.8, -8.4), (22, 9.6, -7), 'lack_gelb'),
+        Box((4, 8.8, 7), (22, 9.6, 8.4), 'lack_gelb'),
+        Box((4, 10, -8), (8, 18, 8), 'lack_rot'),
+        Box((4.4, 10, -6), (4.8, 15, 6), 'kohle'),
+    ]
+    for k, colour in enumerate(('rot', 'gruen', 'gold')):
+        z = -7 + k * 7
+        b += [Box((-26, 16, z - 2.4), (-20, 22, z + 2.4), 'band_' + colour), Box((-27, 18.4, z - 0.6), (-20, 19.6, z + 0.6), 'eisen')]
+    b += gauge(-14, 26, -12)
+    b += gauge(-6, 26, -12)
+    for k, colour in enumerate(('rot', 'gelb', 'gruen')):
+        b += soft([lamp_dot(-2 + k * 2.4 - 2, 5.6, -12, colour, 1.3)])
+    for k, (y, gx) in enumerate(((12, -12), (16, -6), (20, -10))):
+        b += gift(gx, -10 + k * 3, 4, 3.6, 4, y, ('papier_rot', 'papier_gruen', 'papier_gold')[k], ('band_rot', 'band_gruen', 'band_gold')[k], turn=k * 15, bow=False)
+    b += gift(15, 0, 6, 5, 6, 10, 'papier_lila', 'band_lila', turn=12)
+    b += [rod((2, 30, 10), (2, 44, 10), 1.6, 'kupfer'), rod((2, 44, 10), (-8, 44, 10), 1.6, 'kupfer')]
+    b += soft([Box((-1, 40, -2), (1, 44, 0), 'eisen')])
+    return b
+
+
+def candy_machine():
+    b = [
+        Box((-14, 0, -12), (14, 2, 12), 'kessel'),
+        Box((-12, 2, -4), (12, 18, 10), 'lack_gruen'),
+        Box((-12.4, 16, -4.4), (12.4, 18.6, 10.4), 'messing'),
+        Box((-12.4, 2, -4.4), (12.4, 4, 10.4), 'messing'),
+    ]
+    for k, colour in enumerate(('zuckerguss', 'apfel')):
+        x = -6 + k * 12
+        b += [Box((x - 4.4, 18.6, -1), (x + 4.4, 34, 7.8), colour), Box((x - 4.8, 34, -1.4), (x + 4.8, 35.4, 8.2), 'eisen'), Box((x - 4.6, 24, -1.2), (x + 4.6, 25, 8), 'messing')]
+    b += [
+        Box((-2, 10, -6), (2, 14, -4), 'eisen'),
+        Box((-1.4, 10.6, -8), (1.4, 13.4, -6), 'zucker'),
+        Box((-12, 2, -12), (12, 8, -4), 'eisen'),
+        Box((-12, 8, -11.6), (12, 8.6, -4.4), 'band_schwarz'),
+    ]
+    for k, x in enumerate((-9, -5, -1, 3, 7)):
+        b.append(Box((x - 0.6, 8.6, -11), (x + 0.6, 9.8, -5), 'zucker'))
+        b += arc((x + 1.2, 9.2, -11), 1.2, 180, 0, 3, 1, 1.2, 'zucker')
+    b += gauge(-6, 13, -4)
+    b += gauge(6, 13, -4)
+    b += soft([lamp_dot(0, 16, -4, 'rot', 1.2)])
+    for k in range(4):
+        b.append(Box((-12 + k * 6.6 - 0.3, 18.6, 10), (-12 + k * 6.6 + 0.3, 30, 10.6), 'zucker'))
+    return b
+
+
+def toy_press():
+    b = [
+        Box((-14, 0, -12), (14, 3, 12), 'kessel'),
+        Box((-12, 3, 4), (-6, 40, 10), 'eisen'),
+        Box((6, 3, 4), (12, 40, 10), 'eisen'),
+        Box((-14, 38, 2), (14, 44, 12), 'lack_blau'),
+        Box((-14.4, 43.6, 1.6), (14.4, 45, 12.4), 'messing'),
+        Box((-2, 22, -2), (2, 38, 6), 'messing'),
+        Box((-8, 18, -6), (8, 22, 8), 'eisen'),
+        Box((-8.4, 17.4, -6.4), (8.4, 18, 8.4), 'kohle'),
+        Box((-10, 3, -10), (10, 6, 8), 'eisen'),
+        Box((-9, 6, -9), (9, 6.6, 7), 'band_schwarz'),
+    ]
+    b += rocking_horse(0, 6.6, -1, 0.7, 'lack_rot')
+    b += gauge(-9, 32, 2)
+    b += soft([lamp_dot(9, 32, 2, 'gelb', 1.6), lamp_dot(9, 28, 2, 'gruen', 1.6)])
+    for k in range(8):
+        b.append(Box((11.6, 18, 5.4), (16, 20, 8.6), 'messing', rotation=((12, 19, 7), (0, 0, k * 45))))
+    b.append(Box((11.4, 16, 5), (14.6, 22, 9), 'eisen'))
+    return b
+
+
+def control_desk():
+    b = [
+        Box((-14, 0, -4), (14, 12, 6), 'kessel'),
+        Box((-14.4, 11.6, -6), (14.4, 13, 6.4), 'messing'),
+        Box((-14, 12, -6), (14, 18, 6), 'eisen', rotation=((0, 12, 6), (-30, 0, 0))),
+        Box((-12, 18, 4), (12, 28, 6), 'eisen'),
+        Box((-11, 19, 3.6), (11, 27, 4), 'bildschirm', emit=10, shade=False),
+    ]
+    colours = ['rot', 'gelb', 'gruen', 'blau', 'warm', 'rosa']
+    for k in range(12):
+        x = -11 + (k % 6) * 4.4
+        z = -3 + (k // 6) * 4
+        b += soft([Box((x - 0.8, 13, z - 0.8), (x + 0.8, 14.2, z + 0.8), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, colours[k % 6]), rotation=((0, 12, 6), (-30, 0, 0)))])
+    b += [Box((8, 16, -1), (9, 22, 0), 'eisen', rotation=((8.5, 16, -0.5), (0, 0, -20))), Box((9.6, 21.6, -1.6), (12, 24, 0.8), 'apfel')]
+    b += gauge(-6, 23, 3.6)
+    return b
+
+
+def toy_shelf():
+    b = []
+    for x in (-23, 22):
+        b.append(Box((x, 0, -6), (x + 1, 46, 6), 'eisen'))
+    for y in (2, 16, 30, 44):
+        b += [Box((-23, y, -6), (23, y + 1.4, 6), 'holz_hell'), Box((-23, y - 0.4, -6.4), (23, y, 6.4), 'eisen')]
+    b += [Box((-23, 0, 5), (23, 46, 6), 'holz_dunkel')]
+    b += teddy(-16, 3.4, 0, 0.7)
+    b += toy_train(-2, 3.4, 0, 0.8)
+    b += rocking_horse(14, 3.4, 0, 0.6, 'lack_blau')
+    b += nutcracker(-15, 17.4, 0, 0.6)
+    b += parcel(-4, 17.4, 0, 6, 5, 6, 10)
+    b += teddy(10, 17.4, 0, 0.6)
+    b += parcel(17, 17.4, 0, 5, 4, 5, -12)
+    for k, x in enumerate((-17, -9, -1, 7, 15)):
+        b += gift(x, 0, 5, 5, 5, 31.4, ('papier_rot', 'papier_gruen', 'papier_blau', 'papier_gold', 'papier_lila')[k], ('band_rot', 'band_gruen', 'band_blau', 'band_gold', 'band_lila')[k], turn=(k * 13) % 30 - 15)
+    return b
+
+
+def crate(x, y, z, s=12, turn=0):
+    rot = ((x, y + s / 2, z), (0, turn, 0)) if turn else None
+    h = s / 2
+    b = [Box((x - h, y, z - h), (x + h, y + s, z + h), 'holz', rotation=rot)]
+    for dy in (0.5, s - 1.5):
+        b.append(Box((x - h - 0.2, y + dy, z - h - 0.2), (x + h + 0.2, y + dy + 1, z + h + 0.2), 'holz_dunkel', rotation=rot))
+    b.append(Box((x - h * 0.6, y + s * 0.35, z - h - 0.3), (x + h * 0.6, y + s * 0.65, z - h), 'kiste_schild', rotation=rot))
+    b.append(Box((x - h + 0.6, y + s, z - h + 0.6), (x + h - 0.6, y + s + 0.6, z + h - 0.6), 'stroh', rotation=rot))
+    return b
+
+
+def crate_stack():
+    b = []
+    b += crate(-6, 0, -6, 12, 4)
+    b += crate(7, 0, -5, 12, -6)
+    b += crate(0, 0, 8, 12, 10)
+    b += crate(0, 12.6, -4, 12, -10)
+    b += crate(14, 0, 9, 9, 20)
+    b += gift(-6, 7, 5, 5, 5, 12.6, 'papier_rot', 'band_rot', turn=20)
+    return b
+
+
+def wall_gear():
+    b = []
+    for k in range(8):
+        b.append(Box((-2, 14, 5.4), (2, 18.6, 7.4), 'messing', rotation=((0, 8, 6.4), (0, 0, k * 45))))
+    b += ring((0, 8, 6.4), 4.4, 3.2, 2, 12, 'messing')
+    for k in range(4):
+        b.append(Box((-0.6, 4, 5.6), (0.6, 12, 7.2), 'messing', rotation=((0, 8, 6.4), (0, 0, k * 45))))
+    b += [Box((-1.6, 6.4, 5), (1.6, 9.6, 8), 'eisen')]
+    return b
+
+
+def wall_gear_mount():
+    return [Box((-2.4, 5.6, 7.2), (2.4, 10.4, 8), 'kessel'), Box((-1, 7, 6.6), (1, 9, 7.2), 'eisen')]
+
+
+def ceiling_lamp():
+    b = [
+        Box((-1.6, 15, -1.6), (1.6, 16, 1.6), 'eisen'),
+        Box((-0.2, 8, -0.2), (0.2, 15, 0.2), 'kohle'),
+        Box((-1, 7, -1), (1, 8.4, 1), 'eisen'),
+        Box((-5, 5, -5), (5, 7, 5), 'lack_gruen'),
+        Box((-6.4, 3.6, -6.4), (6.4, 5, 6.4), 'lack_gruen'),
+        Box((-6.6, 3.2, -6.6), (6.6, 3.6, 6.6), 'messing'),
+        Box((-2.6, 2, -2.6), (2.6, 3.6, 2.6), 'glas', emit=15, shade=False),
+    ]
+    return b
+
+
+def pipe_wall():
+    b = []
+    b += [Box((-24, 8.5, 3.7), (24, 11.5, 6.7), 'kupfer'), Box((-24, 3, 4.6), (24, 5, 6.6), 'eisen')]
+    for x in (-18, 0, 18):
+        b += [Box((x - 2.4, 7.4, 3.2), (x + 2.4, 12.6, 8), 'messing'), Box((x - 0.6, 2.4, 6.2), (x + 0.6, 5.6, 8), 'eisen')]
+    b += [Box((-8, 12, 4.4), (-6, 14, 6), 'eisen'), Box((-10, 14, 3.6), (-4, 15, 6.8), 'apfel')]
+    b += gauge(9, 10, 3.6)
+    return b
+
+
 STALLS = {
     'marktstand': ('Glühweinstand', 'rot', 'schild_gluehwein', gluehwein_big, []),
     'stand_lebkuchen': ('Lebkuchenstand', 'gruen', 'schild_lebkuchen', lebkuchen_big, []),
@@ -3381,6 +3615,20 @@ def build_props():
         prop = Prop(art, [Part(art, maker(), (0, 0, 0))], [], title=title)
         prop.wall = True
         result.append(prop)
+    for art, title, maker in (('fliessband', 'Fließband', conveyor), ('verpackungsmaschine', 'Verpackungsmaschine', wrapping_machine),
+                              ('zuckerstangenmaschine', 'Zuckerstangenmaschine', candy_machine), ('spielzeugpresse', 'Spielzeugpresse', toy_press),
+                              ('kontrollpult', 'Kontrollpult', control_desk), ('spielzeugregal', 'Spielzeugregal', toy_shelf), ('kistenstapel', 'Kistenstapel', crate_stack)):
+        boxes = maker()
+        result.append(Prop(art, auto_parts(art, boxes), footprint_of(boxes), title=title))
+    gear = Prop('zahnrad', [Part('zahnrad_halter', wall_gear_mount(), (0, 0, 0)), Part('zahnrad_rad', wall_gear(), (0, 0.5, 0), tags=('deko_dreh_z',))], [], title='Zahnrad')
+    gear.wall = True
+    result.append(gear)
+    pipe = Prop('rohrleitung', [Part('rohrleitung', pipe_wall(), (0, 0, 0))], [], title='Rohrleitung')
+    pipe.wall = True
+    result.append(pipe)
+    lamp = Prop('fabriklampe', [Part('fabriklampe', ceiling_lamp(), (0, 0, 0))], [], light=(0, 0, 0), title='Fabriklampe')
+    lamp.ceiling = True
+    result.append(lamp)
     result.append(Prop('stehtisch', [Part('stehtisch', table(), (0, None, 0))], column(2), title='Stehtisch'))
     base = pyramid_big_base()
     spin = pyramid_big_spin()
@@ -3453,7 +3701,7 @@ def functions(prop):
     write(base / 'frei.mcfunction', '\n'.join(frei) + '\n')
     write(base / 'setzen.mcfunction', '\n'.join(setzen) + '\n')
     write(base / 'raeumen.mcfunction', '\n'.join(raeumen) + '\n' if raeumen else 'return 1\n')
-    modus = '_wand' if getattr(prop, 'wall', False) else ''
+    modus = '_wand' if getattr(prop, 'wall', False) else '_decke' if getattr(prop, 'ceiling', False) else ''
     write(FUNCTIONS / f'{prop.art}.mcfunction', f'function sniffa:intern/deko/platzieren {{art:"{prop.art}",name:"{prop.title}",modus:"{modus}"}}\n')
 
 
