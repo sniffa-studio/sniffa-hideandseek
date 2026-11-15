@@ -32,7 +32,7 @@ class DekoScreen : Screen(Component.literal("Deko")) {
         val features: List<String>,
     )
 
-    private class Hit(val x: Int, val y: Int, val w: Int, val h: Int, val action: () -> Unit, val lore: List<FormattedCharSequence>?)
+    private class Hit(val x: Int, val y: Int, val w: Int, val h: Int, val action: (Boolean) -> Unit, val lore: List<FormattedCharSequence>?)
 
     private val entries = load() + TOOLS
     private val categories = entries.map { it.category }.distinct()
@@ -114,9 +114,9 @@ class DekoScreen : Screen(Component.literal("Deko")) {
                 val sx = gridX + (slot % columns) * SLOT
                 val sy = gridTop + (slot / columns) * SLOT
                 slot(graphics, entry.icon, sx, sy, mouseX, mouseY)
-                hits += Hit(sx, sy, SLOT - 2, SLOT - 2, { run(entry.command) }, lore(entry))
+                hits += Hit(sx, sy, SLOT - 2, SLOT - 2, { shift -> pick(entry, shift) }, lore(entry))
             }
-            footer(graphics, panelX, panelY + panelH - 18, panelW, "${list.size} Teile · Klick setzt an der angeschauten Stelle · Mausrad blättert")
+            footer(graphics, panelX, panelY + panelH - 18, panelW, "${list.size} Teile · Klick: ins Inventar · Shift + Klick: direkt setzen · Mausrad blättert")
         }
 
         hits.firstOrNull { it.lore != null && mouseX in it.x until it.x + it.w && mouseY in it.y until it.y + it.h }?.let {
@@ -137,7 +137,7 @@ class DekoScreen : Screen(Component.literal("Deko")) {
             val count = entries.count { it.category == name }
             graphics.text(font, name, tx + SLOT + 2, ty + 10, if (hover) INK_DARK else INK, false)
             graphics.text(font, "$count Teile", tx + SLOT + 2, ty + 22, if (hover) INK_DARK else MUTED, false)
-            hits += Hit(tx, ty, tileW - 4, SLOT, {
+            hits += Hit(tx, ty, tileW - 4, SLOT, { _ ->
                 category = name
                 remembered = name
                 page = 0
@@ -154,6 +154,10 @@ class DekoScreen : Screen(Component.literal("Deko")) {
     }
 
     private fun drawIcon(graphics: GuiGraphicsExtractor, icon: ItemStack, x: Int, y: Int) {
+        if (icon.get(DataComponents.ITEM_MODEL)?.path?.contains("/katalog/") == true) {
+            graphics.item(icon, x + 8, y + 8)
+            return
+        }
         graphics.pose().pushMatrix()
         graphics.pose().translate(x.toFloat(), y.toFloat())
         graphics.pose().scale(2f, 2f)
@@ -166,7 +170,7 @@ class DekoScreen : Screen(Component.literal("Deko")) {
         val hover = active && mouseX in x until x + w && mouseY in y until y + 16
         graphics.fill(x, y, x + w, y + 16, if (!active) BUTTON_OFF else if (hover) SLOT_HOVER else BUTTON)
         graphics.text(font, label, x + (w - font.width(label)) / 2, y + 4, if (!active) MUTED else if (hover) INK_DARK else INK, false)
-        if (active) hits += Hit(x, y, w, 16, action, null)
+        if (active) hits += Hit(x, y, w, 16, { _ -> action() }, null)
     }
 
     private fun footer(graphics: GuiGraphicsExtractor, x: Int, y: Int, w: Int, text: String) {
@@ -182,7 +186,12 @@ class DekoScreen : Screen(Component.literal("Deko")) {
         entry.place?.let { lines += Component.literal("Platz: ").withStyle(ChatFormatting.DARK_AQUA).append(Component.literal(it).withStyle(ChatFormatting.WHITE)) }
         for (feature in entry.features) lines += Component.literal("✦ $feature").withStyle(ChatFormatting.YELLOW)
         if (entry.size != null || entry.place != null || entry.features.isNotEmpty()) lines += Component.empty()
-        lines += Component.literal(if (entry.category == TOOLS_CATEGORY) "Klick: benutzen" else "Klick: setzen").withStyle(ChatFormatting.GREEN)
+        if (entry.category == TOOLS_CATEGORY) {
+            lines += Component.literal("Klick: benutzen").withStyle(ChatFormatting.GREEN)
+        } else {
+            lines += Component.literal("Klick: ins Inventar").withStyle(ChatFormatting.GREEN)
+            lines += Component.literal("Shift + Klick: direkt setzen").withStyle(ChatFormatting.GREEN)
+        }
         lines += Component.literal("/function sniffa:${entry.command}").withStyle(ChatFormatting.DARK_GRAY)
         return lines.flatMap { line -> font.split(line, LORE_WIDTH).ifEmpty { listOf(FormattedCharSequence.EMPTY) } }
     }
@@ -192,7 +201,7 @@ class DekoScreen : Screen(Component.literal("Deko")) {
             val x = event.x().toInt()
             val y = event.y().toInt()
             hits.firstOrNull { x in it.x until it.x + it.w && y in it.y until it.y + it.h }?.let {
-                it.action()
+                it.action(event.hasShiftDown())
                 return true
             }
         }
@@ -217,6 +226,16 @@ class DekoScreen : Screen(Component.literal("Deko")) {
     }
 
     override fun isPauseScreen(): Boolean = false
+
+    private fun pick(entry: Entry, shift: Boolean) {
+        if (entry.category == TOOLS_CATEGORY || shift) {
+            run(entry.command)
+            return
+        }
+        val player = Minecraft.getInstance().player ?: return
+        player.connection.sendCommand("function sniffa:item/${entry.command}")
+        player.sendOverlayMessage(Component.literal("${entry.title} liegt im Inventar"))
+    }
 
     private fun run(command: String) {
         val client = Minecraft.getInstance()

@@ -1,0 +1,22 @@
+{
+	"parent": "hideandseek:item/props/deko/icon/sitzgruppe",
+	"display": {
+		"gui": {
+			"rotation": [
+				25,
+				210,
+				0
+			],
+			"translation": [
+				0,
+				0,
+				0
+			],
+			"scale": [
+				1.6,
+				1.6,
+				1.6
+			]
+		}
+	}
+}
