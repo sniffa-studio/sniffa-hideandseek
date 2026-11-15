@@ -13,3 +13,7 @@ execute if score #takt sniffa_deko matches 0 as @e[type=minecraft:marker,tag=sni
 execute if score #takt sniffa_deko matches 0 run function sniffa:intern/deko/dampf
 execute if score #takt sniffa_deko matches 13 run function sniffa:intern/deko/dampf
 execute if score #takt sniffa_deko matches 26 run function sniffa:intern/deko/dampf
+execute if score #takt sniffa_deko matches 0 run function sniffa:intern/deko/laufen
+execute if score #takt sniffa_deko matches 10 run function sniffa:intern/deko/laufen
+execute if score #takt sniffa_deko matches 20 run function sniffa:intern/deko/laufen
+execute if score #takt sniffa_deko matches 30 run function sniffa:intern/deko/laufen
