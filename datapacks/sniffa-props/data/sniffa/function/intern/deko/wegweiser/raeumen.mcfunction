@@ -1,3 +1,7 @@
 execute if block ^ ^ ^ minecraft:barrier run setblock ^ ^ ^ minecraft:air strict
 execute if block ^ ^1 ^ minecraft:barrier run setblock ^ ^1 ^ minecraft:air strict
 execute if block ^ ^2 ^ minecraft:barrier run setblock ^ ^2 ^ minecraft:air strict
+execute if block ^-1 ^1 ^ minecraft:barrier run setblock ^-1 ^1 ^ minecraft:air strict
+execute if block ^1 ^1 ^ minecraft:barrier run setblock ^1 ^1 ^ minecraft:air strict
+execute if block ^-1 ^2 ^ minecraft:barrier run setblock ^-1 ^2 ^ minecraft:air strict
+execute if block ^1 ^2 ^ minecraft:barrier run setblock ^1 ^2 ^ minecraft:air strict

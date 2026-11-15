@@ -1,1 +1,1 @@
-return 1
+execute if block ^ ^ ^ minecraft:barrier run setblock ^ ^ ^ minecraft:air strict
