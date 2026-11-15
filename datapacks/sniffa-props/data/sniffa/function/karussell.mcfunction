@@ -1,1 +1,1 @@
-function sniffa:intern/deko/platzieren {art:"karussell",name:"Kinderkarussell"}
+function sniffa:intern/deko/platzieren {art:"karussell",name:"Kinderkarussell",modus:""}

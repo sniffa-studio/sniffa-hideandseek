@@ -1,1 +1,1 @@
-function sniffa:intern/deko/platzieren {art:"eingangstor",name:"Eingangstor"}
+function sniffa:intern/deko/platzieren {art:"eingangstor",name:"Eingangstor",modus:""}

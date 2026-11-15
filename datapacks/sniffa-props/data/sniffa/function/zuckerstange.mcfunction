@@ -1,1 +1,1 @@
-function sniffa:intern/deko/platzieren {art:"zuckerstange",name:"Zuckerstange"}
+function sniffa:intern/deko/platzieren {art:"zuckerstange",name:"Zuckerstange",modus:""}

@@ -1,1 +1,1 @@
-function sniffa:intern/deko/platzieren {art:"tannenbaum",name:"Tannenbaum"}
+function sniffa:intern/deko/platzieren {art:"tannenbaum",name:"Tannenbaum",modus:""}

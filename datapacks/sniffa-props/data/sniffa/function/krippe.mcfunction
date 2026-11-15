@@ -1,1 +1,1 @@
-function sniffa:intern/deko/platzieren {art:"krippe",name:"Weihnachtskrippe"}
+function sniffa:intern/deko/platzieren {art:"krippe",name:"Weihnachtskrippe",modus:""}

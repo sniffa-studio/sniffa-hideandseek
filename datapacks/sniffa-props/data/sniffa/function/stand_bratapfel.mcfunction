@@ -1,1 +1,1 @@
-function sniffa:intern/deko/platzieren {art:"stand_bratapfel",name:"Bratapfelstand"}
+function sniffa:intern/deko/platzieren {art:"stand_bratapfel",name:"Bratapfelstand",modus:""}

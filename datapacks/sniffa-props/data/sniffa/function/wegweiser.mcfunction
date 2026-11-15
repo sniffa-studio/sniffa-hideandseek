@@ -1,1 +1,1 @@
-function sniffa:intern/deko/platzieren {art:"wegweiser",name:"Wegweiser"}
+function sniffa:intern/deko/platzieren {art:"wegweiser",name:"Wegweiser",modus:""}
