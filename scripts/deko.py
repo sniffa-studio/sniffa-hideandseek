@@ -224,6 +224,29 @@ def awning(img, rnd):
             img.putpixel((x, y), shade(colour, 1 + rnd.uniform(-0.03, 0.03)))
 
 
+def ice(img, rnd):
+    top = hexcolour('#e9f6ff')
+    low = hexcolour('#9fd2f2')
+    for y in range(TILE):
+        for x in range(TILE):
+            img.putpixel((x, y), shade(mix(top, low, y / TILE), 1 + rnd.uniform(-0.04, 0.04)))
+
+
+def gingerbread(img, rnd):
+    fill_noise(img, rnd, hexcolour('#8b4f22'), 0.06)
+    for _ in range(14):
+        img.putpixel((rnd.randrange(TILE), rnd.randrange(TILE)), hexcolour('#a8662f'))
+
+
+def blanket(img, rnd):
+    red = hexcolour('#2f5d3a')
+    line = hexcolour('#e7d9b8')
+    for y in range(TILE):
+        for x in range(TILE):
+            colour = line if x % 6 == 0 or y % 6 == 0 else red
+            img.putpixel((x, y), shade(colour, 1 + rnd.uniform(-0.04, 0.04)))
+
+
 def bulbs(img, rnd):
     colours = ['#ff4b4b', '#ffd34d', '#57e36b', '#4fa3ff', '#ff8cf2', '#fff2c2']
     for index, value in enumerate(colours):
@@ -321,6 +344,17 @@ def build_atlas():
     atlas.add('schild_wichtel', lettered(hexcolour('#9a6a3c'), hexcolour('#2a1508'), 'WICHTEL', 32, 12), density=2)
     atlas.add('schild_gluehwein', lettered(hexcolour('#2f1a0c'), hexcolour('#f2c14e'), 'GLÜHWEIN', 64, 14, size=2), density=2, span=2)
     atlas.add('glut', flat(hexcolour('#ffb347'), 0.08))
+    atlas.add('band_tanne', ribbon(hexcolour('#2c8a45')))
+    atlas.add('tanne_blatt', flat(hexcolour('#23633a'), 0.08))
+    atlas.add('beere', flat(hexcolour('#d3202c'), 0.06))
+    atlas.add('eis', ice)
+    atlas.add('lebkuchen', gingerbread)
+    atlas.add('zuckerguss', flat(hexcolour('#f7f2ea'), 0.03))
+    atlas.add('flasche', flat(hexcolour('#1f5a36'), 0.1))
+    atlas.add('stern', flat(hexcolour('#ffd75a'), 0.05))
+    atlas.add('gluehwein', flat(hexcolour('#5b0f1c'), 0.05))
+    atlas.add('decke', blanket)
+    atlas.add('schild_kakao', lettered(hexcolour('#9a6a3c'), hexcolour('#2a1508'), 'KAKAO', 32, 12), density=2)
     return atlas
 
 
@@ -399,44 +433,65 @@ def model_json(atlas, boxes, shift, seed):
     }
 
 
+SNOW_SIDES = {'north': 'schnee_rand', 'south': 'schnee_rand', 'east': 'schnee_rand', 'west': 'schnee_rand'}
+
+
+def snow_cap(x0, z0, x1, z1, y, thick=0.6, rotation=None):
+    return Box((x0, y, z0), (x1, y + thick, z1), 'schnee', faces=SNOW_SIDES, skip=('down',), rotation=rotation)
+
+
+def ribbon_loop(cx, cz, top, length, height, width, band_name, tilt, turn, forward):
+    t = 0.7
+    z0, z1 = (cz, cz + length) if forward else (cz - length, cz)
+    end = (z1 - t, z1) if forward else (z0, z0 + t)
+    rot = ((cx, top, cz), (tilt, turn, 0))
+    x0, x1 = cx - width / 2, cx + width / 2
+    return [
+        Box((x0, top, z0), (x1, top + t, z1), band_name, rotation=rot),
+        Box((x0, top + height - t, z0), (x1, top + height, z1), band_name, rotation=rot),
+        Box((x0, top, end[0]), (x1, top + height, end[1]), band_name, rotation=rot),
+    ]
+
+
 def gift(cx, cz, w, h, d, y0, paper_name, band_name, turn=0.0, bow=True, band=None):
     band = band or max(1.5, round(w / 6 * 2) / 2)
+    lid = max(1.5, round(h * 0.24 * 2) / 2)
+    o = 0.5 if w < 16 else 1.0
     x0, x1 = cx - w / 2, cx + w / 2
     z0, z1 = cz - d / 2, cz + d / 2
     y1 = y0 + h
+    body_top = y1 - lid
     e = 0.12
     rot = ((cx, y0 + h / 2, cz), (0, turn, 0)) if turn else None
     boxes = [
-        Box((x0, y0, z0), (x1, y1, z1), paper_name, rotation=rot),
-        Box((x0 - e, y0 + e, cz - band / 2), (x1 + e, y1 + e, cz + band / 2), band_name, rotation=rot, skip=('down',)),
-        Box((cx - band / 2, y0 + e, z0 - e), (cx + band / 2, y1 + e * 2, z1 + e), band_name, rotation=rot, skip=('down',)),
+        Box((x0, y0, z0), (x1, body_top, z1), paper_name, rotation=rot),
+        Box((x0 - o, body_top, z0 - o), (x1 + o, y1, z1 + o), paper_name, rotation=rot),
+        Box((x0 - e, y0, cz - band / 2), (x1 + e, body_top, cz + band / 2), band_name, rotation=rot, skip=('down', 'up')),
+        Box((cx - band / 2, y0, z0 - e), (cx + band / 2, body_top, z1 + e), band_name, rotation=rot, skip=('down', 'up')),
+        Box((x0 - o - e, body_top - e, cz - band / 2), (x1 + o + e, y1 + e, cz + band / 2), band_name, rotation=rot),
+        Box((cx - band / 2, body_top - e, z0 - o - e), (cx + band / 2, y1 + e * 2, z1 + o + e), band_name, rotation=rot),
     ]
     if bow:
-        knot = band
-        loop_len = w * 0.32
-        loop_h = max(1.5, w * 0.18)
         top = y1 + e * 2
-        centre = (cx, top, cz)
+        length = max(2.5, w * 0.3)
+        height = max(1.8, w * 0.2)
+        width = band * 0.9
+        boxes += ribbon_loop(cx, cz, top, length, height, width, band_name, -32, turn, True)
+        boxes += ribbon_loop(cx, cz, top, length, height, width, band_name, 32, turn, False)
+        tail = max(2.5, w * 0.34)
         for sign in (-1, 1):
-            tilt = -35 * sign
-            boxes.append(Box(
-                (cx - band * 0.4, top, cz + (0 if sign > 0 else -loop_len)),
-                (cx + band * 0.4, top + loop_h, cz + (loop_len if sign > 0 else 0)),
-                band_name, rotation=(centre, (tilt, turn + 45, 0)),
-            ))
-            boxes.append(Box(
-                (cx - band * 0.4, top, cz + (0 if sign > 0 else -loop_len)),
-                (cx + band * 0.4, top + loop_h, cz + (loop_len if sign > 0 else 0)),
-                band_name, rotation=(centre, (tilt, turn - 45, 0)),
-            ))
-        boxes.append(Box((cx - knot / 2, top, cz - knot / 2), (cx + knot / 2, top + knot * 0.8, cz + knot / 2), band_name, rotation=((cx, top, cz), (0, turn, 0)) if turn else None))
+            boxes.append(Box((cx - width / 2, top, cz), (cx + width / 2, top + 0.4, cz + tail), band_name,
+                             rotation=((cx, top, cz), (14, turn + 90 * sign + 20, 0))))
+        knot = band * 1.1
+        boxes.append(Box((cx - knot / 2, top - 0.2, cz - knot / 2), (cx + knot / 2, top + knot * 0.8, cz + knot / 2), band_name,
+                         rotation=((cx, top, cz), (0, turn, 0)) if turn else None))
     return boxes
 
 
 GIFT_SIZES = {
-    'klein': dict(w=10, h=8, centre=(0, 0), footprint=[], height=0),
-    'mittel': dict(w=14, h=13, centre=(0, 0), footprint=[(0, 0, 0)], height=1),
-    'gross': dict(w=30, h=27, centre=(8, 8), footprint=[(x, y, z) for x in (0, 1) for z in (0, 1) for y in (0, 1)], height=2),
+    'klein': dict(w=10, h=9, centre=(0, 0), footprint=[(0, 0, 0)]),
+    'mittel': dict(w=14, h=13, centre=(0, 0), footprint=[(0, 0, 0)]),
+    'gross': dict(w=28, h=26, centre=(8, 8), footprint=[(x, y, z) for x in (0, 1) for z in (0, 1) for y in (0, 1)]),
 }
 
 
@@ -448,9 +503,9 @@ def gift_model(size, colour):
 
 def stack_model():
     boxes = []
-    boxes += gift(6, 6, 20, 16, 20, 0, 'papier_rot', 'band_rot', bow=False)
-    boxes += gift(6, 6, 14, 11, 14, 16.25, 'papier_gruen', 'band_gruen', turn=22.5, bow=False)
-    boxes += gift(6, 6, 9, 8, 9, 27.5, 'papier_gold', 'band_gold', turn=-15)
+    boxes += gift(6, 6, 20, 15, 20, 0, 'papier_rot', 'band_rot', bow=False)
+    boxes += gift(6, 6, 14, 11, 14, 16, 'papier_gruen', 'band_gruen', turn=22.5, bow=False)
+    boxes += gift(6, 6, 9, 8, 9, 28, 'papier_gold', 'band_gold', turn=-15)
     boxes += gift(19.5, 19.5, 8, 8, 8, 0, 'papier_blau', 'band_blau', turn=12)
     boxes += gift(19.5, -2.5, 7, 6, 7, 0, 'papier_lila', 'band_lila', turn=-30)
     boxes += gift(-3, 19, 7, 7, 7, 0, 'papier_weiss', 'band_weiss', turn=20)
@@ -469,50 +524,80 @@ def ring(centre, radius, thickness, depth, segments, mat, plane='xy'):
     return boxes
 
 
+def flat_bow(cx, cy, z, mat, size=1.0):
+    s = size
+    return [
+        Box((cx - 1.1 * s, cy - 0.9 * s, z - 0.6), (cx + 1.1 * s, cy + 0.9 * s, z), mat),
+        Box((cx - 3.4 * s, cy - 0.8 * s, z - 0.4), (cx - 1.1 * s, cy + 1.4 * s, z), mat, rotation=((cx - 1.1 * s, cy, z), (0, 0, -18))),
+        Box((cx + 1.1 * s, cy - 0.8 * s, z - 0.4), (cx + 3.4 * s, cy + 1.4 * s, z), mat, rotation=((cx + 1.1 * s, cy, z), (0, 0, 18))),
+        Box((cx - 1.5 * s, cy - 4 * s, z - 0.3), (cx - 0.4 * s, cy - 0.9 * s, z), mat, rotation=((cx - 1, cy - 0.9 * s, z), (0, 0, -12))),
+        Box((cx + 0.4 * s, cy - 4 * s, z - 0.3), (cx + 1.5 * s, cy - 0.9 * s, z), mat, rotation=((cx + 1, cy - 0.9 * s, z), (0, 0, 12))),
+    ]
+
+
+def ribs(x, z, y0, y1, half, depth, mat):
+    return [
+        Box((x - 0.4, y0, z - half - depth), (x + 0.4, y1, z - half), mat),
+        Box((x - 0.4, y0, z + half), (x + 0.4, y1, z + half + depth), mat),
+        Box((x - half - depth, y0, z - 0.4), (x - half, y1, z + 0.4), mat),
+        Box((x + half, y0, z - 0.4), (x + half + depth, y1, z + 0.4), mat),
+    ]
+
+
 def lantern_mast():
     m = 'eisen'
     boxes = [
-        Box((-5, 0, -5), (5, 2, 5), m),
-        Box((-4, 2, -4), (4, 4, 4), m),
-        Box((-3, 4, -3), (3, 7, 3), m),
-        Box((-2, 7, -2), (2, 9, 2), m),
-        Box((-1.5, 9, -1.5), (1.5, 48, 1.5), m),
-        Box((-2.5, 20, -2.5), (2.5, 21.5, 2.5), m),
-        Box((-2.5, 46, -2.5), (2.5, 48, 2.5), m),
-        Box((-6.5, 42.5, -0.75), (6.5, 44, 0.75), m),
-        Box((-5.2, 1.9, -5.2), (5.2, 2.4, 5.2), 'schnee', faces={'north': 'schnee_rand', 'south': 'schnee_rand', 'east': 'schnee_rand', 'west': 'schnee_rand'}, skip=('down',)),
-        Box((-6.6, 44, -0.85), (6.6, 44.5, 0.85), 'schnee', skip=('down',)),
+        Box((-5, 0, -5), (5, 1.5, 5), m),
+        Box((-4.5, 1.5, -4.5), (4.5, 3, 4.5), m),
+        Box((-3.5, 3, -3.5), (3.5, 9, 3.5), m),
+        Box((-4, 9, -4), (4, 10, 4), m),
+        Box((-2.5, 10, -2.5), (2.5, 12, 2.5), m),
+        Box((-1.5, 12, -1.5), (1.5, 44, 1.5), m),
+        Box((-2.2, 22, -2.2), (2.2, 23.2, 2.2), 'messing'),
+        Box((-2.5, 43, -2.5), (2.5, 44.5, 2.5), m),
+        Box((-3, 44.5, -3), (3, 46, 3), m),
+        Box((-3.6, 46, -3.6), (3.6, 47.2, 3.6), m),
+        Box((-6.5, 39.5, -0.7), (6.5, 40.9, 0.7), m),
+        Box((-7.3, 39.1, -1), (-6.3, 41.3, 1), 'messing'),
+        Box((6.3, 39.1, -1), (7.3, 41.3, 1), 'messing'),
+        snow_cap(-5.1, -5.1, 5.1, 5.1, 1.5, 0.5),
+        snow_cap(-4.1, -4.1, 4.1, 4.1, 10, 0.5),
+        snow_cap(-6.6, -0.8, 6.6, 0.8, 40.9, 0.5),
     ]
-    boxes += ring((0, 31, -2.4), 4.2, 2.2, 1.6, 10, 'tanne')
-    boxes += [
-        Box((-1.2, 34.2, -3.6), (1.2, 36, -2.6), 'band_rot'),
-        Box((-3.4, 34.4, -3.4), (-1.2, 36.4, -2.8), 'band_rot', rotation=((-1.2, 35.2, -3.1), (0, 0, -20))),
-        Box((1.2, 34.4, -3.4), (3.4, 36.4, -2.8), 'band_rot', rotation=((1.2, 35.2, -3.1), (0, 0, 20))),
-        Box((-1.6, 30.5, -3.3), (-0.4, 34.2, -2.8), 'band_rot', rotation=((-1, 34.2, -3), (0, 0, -12))),
-        Box((0.4, 30.5, -3.3), (1.6, 34.2, -2.8), 'band_rot', rotation=((1, 34.2, -3), (0, 0, 12))),
-    ]
+    boxes += ribs(0, 0, 3, 9, 3.5, 0.5, m)
+    boxes += ribs(0, 0, 12, 43, 1.5, 0.4, m)
+    boxes += ring((0, 30, -2.6), 4.4, 2.4, 1.8, 12, 'tanne')
+    boxes += flat_bow(0, 34.4, -3.5, 'band_gruen')
+    for angle, ry in ((40, 0.6), (140, 0.4), (250, -0.2), (320, 0.3)):
+        x = 4.4 * math.cos(math.radians(angle))
+        y = 30 + 4.4 * math.sin(math.radians(angle))
+        boxes.append(Box((x - 0.6, y - 0.6, -3.9), (x + 0.6, y + 0.6, -3.2), 'beere'))
     return boxes
 
 
 def lantern_head():
     m = 'eisen'
     boxes = [
-        Box((-4, 48, -4), (4, 49.5, 4), m),
-        Box((-3, 49.5, -3), (3, 57, 3), 'glas', emit=15, shade=False),
-        Box((-2, 47, -2), (2, 48, 2), m),
+        Box((-4.2, 47.2, -4.2), (4.2, 48.6, 4.2), m),
+        Box((-3.4, 48.6, -3.4), (3.4, 57.4, 3.4), 'glas', emit=15, shade=False),
+        Box((-4.4, 57.4, -4.4), (4.4, 58.6, 4.4), m),
+        Box((-3.8, 58.6, -3.8), (3.8, 59.6, 3.8), m),
+        Box((-2.8, 59.6, -2.8), (2.8, 60.6, 2.8), m),
+        Box((-1.8, 60.6, -1.8), (1.8, 61.6, 1.8), m),
+        Box((-0.6, 61.6, -0.6), (0.6, 62.4, 0.6), m),
+        Box((-1, 62.4, -1), (1, 64.2, 1), 'messing'),
+        snow_cap(-4.5, -4.5, 4.5, 4.5, 58.6, 0.4),
+        snow_cap(-3.9, -3.9, 3.9, 3.9, 59.6, 0.4),
+        snow_cap(-2.9, -2.9, 2.9, 2.9, 60.6, 0.4),
     ]
     for sx in (-1, 1):
         for sz in (-1, 1):
-            boxes.append(Box((sx * 3.6 - 0.5, 49.5, sz * 3.6 - 0.5), (sx * 3.6 + 0.5, 57, sz * 3.6 + 0.5), m))
-    boxes += [
-        Box((-3.6, 49.5, -3.1), (3.6, 50.2, -3), m),
-        Box((-4.6, 57, -4.6), (4.6, 58.2, 4.6), m),
-        Box((-3.6, 58.2, -3.6), (3.6, 59.6, 3.6), m),
-        Box((-2.2, 59.6, -2.2), (2.2, 61, 2.2), m),
-        Box((-0.8, 61, -0.8), (0.8, 63, 0.8), 'messing'),
-        Box((-4.7, 58.2, -4.7), (4.7, 58.7, 4.7), 'schnee', faces={'north': 'schnee_rand', 'south': 'schnee_rand', 'east': 'schnee_rand', 'west': 'schnee_rand'}, skip=('down',)),
-        Box((-3.7, 59.6, -3.7), (3.7, 60.1, 3.7), 'schnee', faces={'north': 'schnee_rand', 'south': 'schnee_rand', 'east': 'schnee_rand', 'west': 'schnee_rand'}, skip=('down',)),
-    ]
+            boxes.append(Box((sx * 3.7 - 0.55, 48.6, sz * 3.7 - 0.55), (sx * 3.7 + 0.55, 57.4, sz * 3.7 + 0.55), m))
+    for side in (-1, 1):
+        boxes.append(Box((-0.3, 48.6, side * 3.4 - 0.25), (0.3, 57.4, side * 3.4 + 0.25), m))
+        boxes.append(Box((side * 3.4 - 0.25, 48.6, -0.3), (side * 3.4 + 0.25, 57.4, 0.3), m))
+        boxes.append(Box((-3.4, 52.7, side * 3.4 - 0.25), (3.4, 53.3, side * 3.4 + 0.25), m))
+        boxes.append(Box((side * 3.4 - 0.25, 52.7, -3.4), (side * 3.4 + 0.25, 53.3, 3.4), m))
     return boxes
 
 
@@ -531,19 +616,31 @@ def arc(centre, radius, start, end, steps, thickness, depth, mat, length_scale=1
     return boxes
 
 
+def rounded_rod(x0, y0, x1, y1, r, mat, z=0.0):
+    return [
+        Box((x0 - r, y0, z - r * 0.65), (x1 + r, y1, z + r * 0.65), mat),
+        Box((x0 - r * 0.65, y0, z - r), (x1 + r * 0.65, y1, z + r), mat),
+    ]
+
+
 def candy_cane():
     boxes = [
-        Box((-1.5, 0, -1.5), (1.5, 36, 1.5), 'zucker'),
-        Box((-4.5, 0, -4.5), (4.5, 1.2, 4.5), 'schnee', faces={'north': 'schnee_rand', 'south': 'schnee_rand', 'east': 'schnee_rand', 'west': 'schnee_rand'}),
-        Box((-3, 1.2, -3), (3, 2.4, 3), 'schnee', faces={'north': 'schnee_rand', 'south': 'schnee_rand', 'east': 'schnee_rand', 'west': 'schnee_rand'}),
+        Box((-4.5, 0, -4.5), (4.5, 1.2, 4.5), 'schnee', faces=SNOW_SIDES),
+        Box((-3.2, 1.2, -3.2), (3.2, 2.4, 3.2), 'schnee', faces=SNOW_SIDES),
+        Box((-1.8, 2.4, -1.8), (1.8, 3.2, 1.8), 'schnee', faces=SNOW_SIDES),
     ]
-    boxes += arc((5, 36, 0), 5, 180, 0, 8, 3, 3, 'zucker')
-    boxes += [Box((8.5, 28, -1.5), (11.5, 36, 1.5), 'zucker')]
+    boxes += rounded_rod(0, 0, 0, 36, 1.6, 'zucker')
+    boxes += arc((5.2, 36, 0), 5.2, 180, 0, 12, 3.2, 2.1, 'zucker')
+    boxes += arc((5.2, 36, 0), 5.2, 180, 0, 12, 2.1, 3.2, 'zucker')
+    boxes += rounded_rod(10.4, 29, 10.4, 36, 1.6, 'zucker')
+    boxes += [Box((9.3, 28.2, -1.1), (11.5, 29, 1.1), 'zucker')]
+    boxes += [Box((-1.9, 23.5, -1.9), (1.9, 25.3, 1.9), 'band_tanne')]
+    boxes += flat_bow(0, 24.4, -1.9, 'band_tanne', 0.9)
+    for dx, angle in ((-2.2, 35), (2.2, -35)):
+        boxes.append(Box((dx - 1.6, 26.2, -2.5), (dx + 1.6, 27.2, -2), 'tanne_blatt', rotation=((dx, 26.7, -2.2), (0, 0, angle))))
     boxes += [
-        Box((-1.8, 24, -1.8), (1.8, 25.5, 1.8), 'band_gruen'),
-        Box((-1.2, 23.6, -3.2), (1.2, 25.8, -1.8), 'band_gruen'),
-        Box((-4.4, 23.8, -2.6), (-1.2, 26, -2), 'band_gruen', rotation=((-1.2, 24.9, -2.3), (0, 0, -18))),
-        Box((1.2, 23.8, -2.6), (4.4, 26, -2), 'band_gruen', rotation=((1.2, 24.9, -2.3), (0, 0, 18))),
+        Box((-0.9, 26.4, -2.9), (0, 27.3, -2.2), 'beere'),
+        Box((0, 26.9, -2.9), (0.9, 27.8, -2.2), 'beere'),
     ]
     return boxes
 
@@ -552,9 +649,9 @@ def sleigh():
     b = []
     for z in (-6, 6):
         b.append(Box((-7, 0, z - 1), (20, 1.5, z + 1), 'messing'))
-        b += arc((20, 4.75, z), 4, -90, 90, 7, 1.5, 2, 'messing')
+        b += arc((20, 4.75, z), 4, -90, 90, 10, 1.5, 2, 'messing')
         b.append(Box((14, 7.6, z - 1), (20, 9.1, z + 1), 'messing'))
-        b += arc((-7, 2.5, z), 1.8, 270, 140, 3, 1.5, 2, 'messing')
+        b += arc((-7, 2.5, z), 1.8, 270, 130, 5, 1.5, 2, 'messing')
         for x in (-3, 5, 13):
             b.append(Box((x - 0.75, 1.5, z - 0.75), (x + 0.75, 5, z + 0.75), 'messing'))
     b += [
@@ -567,13 +664,26 @@ def sleigh():
         Box((-8, 12, -7.8), (16, 12.8, -6.2), 'messing'),
         Box((-8, 12, 6.2), (16, 12.8, 7.8), 'messing'),
         Box((-9.8, 17.5, -7.8), (-7.7, 18.5, 7.8), 'messing'),
+        Box((0, 8, -7.9), (8, 10.5, -7.5), 'messing'),
+        Box((3, 7, -7.95), (5, 11.5, -7.5), 'messing'),
+        Box((0, 8, 7.5), (8, 10.5, 7.9), 'messing'),
+        Box((3, 7, 7.5), (5, 11.5, 7.95), 'messing'),
         Box((-8, 6.5, -6.5), (0, 9.5, 6.5), 'samt'),
         Box((-8, 9.5, -6.5), (-6.5, 16.5, 6.5), 'samt'),
-        Box((-9.8, 18.5, -7.8), (-7.7, 19, 7.8), 'schnee', skip=('down',)),
-        Box((-8, 12.8, -7.9), (16, 13.2, -6.1), 'schnee', skip=('down',)),
+        Box((-6.5, 9.4, -6.6), (-0.5, 10.2, 6.6), 'decke'),
+        Box((-1.3, 4.5, -6.6), (-0.5, 10.2, 6.6), 'decke'),
+        snow_cap(-9.8, -7.8, -7.7, 7.8, 18.5, 0.5),
+        snow_cap(-8, -7.9, 16, -6.1, 12.8, 0.4),
+        snow_cap(-8, 6.1, 16, 7.9, 12.8, 0.4),
         Box((4, 6.5, -5), (12, 15, 2), 'sack'),
         Box((5, 15, -4), (11, 17, 1), 'sack', rotation=((8, 15, -1.5), (0, 20, 0))),
         Box((7, 16.5, -2.5), (9, 18, -0.5), 'band_gold'),
+        Box((19, 9, -0.6), (20.2, 22, 0.6), 'messing'),
+        Box((17.5, 21.5, -0.6), (20.2, 22.7, 0.6), 'messing'),
+        Box((16.6, 16.5, -1.6), (19, 17.2, 1.6), 'eisen'),
+        Box((16.9, 17.2, -1.3), (18.7, 20.6, 1.3), 'glas', emit=15, shade=False),
+        Box((16.6, 20.6, -1.6), (19, 21.3, 1.6), 'eisen'),
+        Box((17.5, 21.3, -0.3), (18.1, 21.6, 0.3), 'eisen'),
     ]
     b += gift(9, 4.5, 6, 6, 5, 6.5, 'papier_blau', 'band_blau', turn=15)
     b += gift(2.5, 3.5, 5, 5, 5, 9.5, 'papier_gruen', 'band_gruen', turn=-10, bow=False)
@@ -581,82 +691,134 @@ def sleigh():
     return b
 
 
+def heart(cx, cy, z):
+    m = 'lebkuchen'
+    return [
+        Box((cx - 1.6, cy - 1.6, z - 0.5), (cx + 1.6, cy + 1.6, z), m, rotation=((cx, cy, z), (0, 0, 45))),
+        Box((cx - 2.4, cy + 0.2, z - 0.5), (cx - 0.1, cy + 2.2, z), m),
+        Box((cx + 0.1, cy + 0.2, z - 0.5), (cx + 2.4, cy + 2.2, z), m),
+        Box((cx - 1.2, cy + 0.4, z - 0.6), (cx + 1.2, cy + 1.2, z - 0.5), 'zuckerguss'),
+        Box((cx - 0.15, cy + 2.2, z - 0.35), (cx + 0.15, cy + 5, z - 0.15), 'band_gruen'),
+    ]
+
+
 def market_stall():
     b = []
     b += [
-        Box((-23, 0, -7), (23, 15, -5), 'holz_dunkel'),
-        Box((-24, 15, -9.5), (24, 17, -3), 'holz_hell'),
-        Box((-24, 0, -8), (-21, 15, -4), 'holz'),
-        Box((21, 0, -8), (24, 15, -4), 'holz'),
-        Box((-24, 0, 21), (24, 40, 23), 'holz'),
-        Box((-24, 17, -8), (-21.5, 39, -5.5), 'holz'),
-        Box((21.5, 17, -8), (24, 39, -5.5), 'holz'),
-        Box((-24, 0, 18), (-21.5, 40, 21), 'holz'),
-        Box((21.5, 0, 18), (24, 40, 21), 'holz'),
-        Box((-21, 26, 18.5), (21, 27, 21), 'holz_hell'),
-        Box((-21, 12, 15), (21, 13, 21), 'holz_hell'),
+        Box((-24, 0, -6.5), (24, 15, -4.5), 'holz_dunkel'),
+        Box((-24, 12.6, -7), (24, 13.6, -6.5), 'messing'),
+        Box((-24, 1, -7), (24, 2, -6.5), 'messing'),
+        Box((-24, 15, -9), (24, 17, 0), 'holz_hell'),
+        Box((-24, 0, -6.5), (-21.5, 15, 6), 'holz'),
+        Box((21.5, 0, -6.5), (24, 15, 6), 'holz'),
+        Box((-24, 0, -9), (-21, 31, -6), 'holz'),
+        Box((21, 0, -9), (24, 31, -6), 'holz'),
+        Box((-24, 0, 30), (-21, 31, 33), 'holz'),
+        Box((21, 0, 30), (24, 31, 33), 'holz'),
+        Box((-21, 0, 31), (21, 31, 33), 'holz'),
+        Box((-21, 11, 26), (21, 12, 31), 'holz_hell'),
+        Box((-21, 20, 26), (21, 21, 31), 'holz_hell'),
+        Box((-24, 28, -10), (24, 31, -7), 'holz_dunkel'),
+        Box((-24, 28, 30), (24, 31, 33), 'holz_dunkel'),
+        Box((-24, 28, -7), (-22, 31, 30), 'holz_dunkel'),
+        Box((22, 28, -7), (24, 31, 30), 'holz_dunkel'),
+        Box((-24, 26, -11), (24, 28.5, -9.5), 'tanne'),
     ]
-    roof = ((0, 38.5, -12), (-12.9, 0, 0))
+    rise = 11.0
+    run = 24.0
+    angle = math.degrees(math.atan2(rise, run))
+    length = math.hypot(rise, run) + 1
+    front = ((0, 31, -12), (-angle, 0, 0))
+    back = ((0, 31, 36), (angle, 0, 0))
     b += [
-        Box((-24, 38.5, -12), (24, 40, 24), 'lack_rot', rotation=roof, faces={'down': 'markise', 'north': 'markise'}),
-        Box((-24, 40, -12), (24, 40.8, 24), 'schnee', rotation=roof, faces={'north': 'schnee_rand', 'south': 'schnee_rand', 'east': 'schnee_rand', 'west': 'schnee_rand'}, skip=('down',)),
-        Box((-24, 34.5, -9.5), (24, 37.5, -7.5), 'tanne'),
-        Box((-16, 39, -11.5), (16, 46, -10.5), 'holz_dunkel', faces={'north': 'schild_gluehwein'}, uv={'north': (0, 0)}),
-        Box((-16.3, 46, -11.7), (16.3, 46.6, -10.3), 'schnee', skip=('down',)),
+        Box((-24, 31, -12), (24, 32.4, -12 + length), 'lack_rot', rotation=front, faces={'down': 'markise', 'north': 'markise'}),
+        Box((-24, 31, 36 - length), (24, 32.4, 36), 'lack_rot', rotation=back, faces={'down': 'markise', 'south': 'markise'}),
+        Box((-24, 32.4, -12), (24, 33.4, -12 + length), 'schnee', rotation=front, faces=SNOW_SIDES, skip=('down',)),
+        Box((-24, 32.4, 36 - length), (24, 33.4, 36), 'schnee', rotation=back, faces=SNOW_SIDES, skip=('down',)),
+    ]
+    for side in (-1, 1):
+        x0, x1 = (-24, -22.5) if side < 0 else (22.5, 24)
+        for k in range(5):
+            y = 31 + k * 2.2
+            inset = k * 4.8 + 1
+            b.append(Box((x0, y, -12 + inset), (x1, y + 2.2, 36 - inset), 'holz'))
+    b += [
+        Box((-1.2, 42.2, 10.8), (1.2, 46.4, 13.2), 'stern', emit=15, shade=False, rotation=((0, 44.3, 12), (0, 0, 45))),
+        Box((-0.6, 41.8, 11.4), (0.6, 47.6, 12.6), 'stern', emit=15, shade=False),
+        Box((-2.9, 43.7, 11.4), (2.9, 44.9, 12.6), 'stern', emit=15, shade=False),
+        Box((-16, 31.5, -11.6), (16, 38.5, -10.6), 'holz_dunkel', faces={'north': 'schild_gluehwein'}, uv={'north': (0, 0)}),
+        Box((-16.4, 31, -11.8), (16.4, 31.6, -10.4), 'messing'),
+        Box((-16.4, 38.4, -11.8), (16.4, 39, -10.4), 'messing'),
+        Box((-16.4, 39, -11.9), (16.4, 39.6, -10.3), 'schnee', faces=SNOW_SIDES, skip=('down',)),
     ]
     colours = ['rot', 'gelb', 'gruen', 'blau', 'rosa', 'warm']
     for k, x in enumerate(range(-22, 23, 4)):
         slot = BULB_SLOTS[colours[k % len(colours)]]
         u = (slot % 3) * 10 + 2
         v = (slot // 3) * 10 + 2
-        b.append(Box((x - 0.6, 32.8, -9), (x + 0.6, 34.5, -7.8), 'lampen', emit=15, shade=False,
+        sag = 1.2 * math.sin(math.pi * ((x + 22) % 8) / 8)
+        b.append(Box((x - 0.6, 24.6 - sag, -11), (x + 0.6, 26.2 - sag, -9.8), 'lampen', emit=15, shade=False,
                      uv={s: (u, v) for s in ('north', 'south', 'east', 'west', 'up', 'down')}))
     for x in (-18, -6, 6, 18):
-        b += [
-            Box((x - 1.2, 34, -10), (x + 1.2, 36.4, -9.4), 'band_rot'),
-            Box((x - 3.2, 34.4, -9.9), (x - 1.2, 36.2, -9.5), 'band_rot', rotation=((x - 1.2, 35.3, -9.7), (0, 0, -20))),
-            Box((x + 1.2, 34.4, -9.9), (x + 3.2, 36.2, -9.5), 'band_rot', rotation=((x + 1.2, 35.3, -9.7), (0, 0, 20))),
-        ]
+        b += flat_bow(x, 27.2, -11, 'band_gruen', 0.9)
+    for x in (-12, 0, 12):
+        b += heart(x, 21, -9.5)
     b += [
-        Box((7, 17, -8), (15, 23, 0), 'kessel'),
-        Box((6.5, 23, -8.5), (15.5, 24, 0.5), 'kessel'),
-        Box((10, 24, -5), (12, 25.5, -3), 'messing'),
-        Box((6, 17, -8.5), (16, 17.6, 0.5), 'glut', emit=12),
+        Box((6, 17, -7), (14, 23, 0), 'kessel'),
+        Box((5.5, 23, -7.5), (14.5, 24, 0.5), 'kessel'),
+        Box((9, 24, -4.5), (11, 25.5, -2.5), 'messing'),
+        Box((13, 21, -4), (13.6, 27, -3.4), 'messing', rotation=((13.3, 21, -3.7), (0, 0, -20))),
+        Box((5, 17, -7.5), (15, 17.6, 0.5), 'glut', emit=12),
     ]
-    for k, x in enumerate((-18, -14.5, -11, -4)):
-        b.append(Box((x, 17, -8), (x + 2.4, 20, -5.6), 'becher'))
-        b.append(Box((x + 2.4, 17.6, -7.3), (x + 3.2, 19.4, -6.3), 'becher'))
+    for x in (-18, -14.5, -11, -4.5):
+        b.append(Box((x, 17, -7), (x + 2.4, 20, -4.6), 'becher'))
+        b.append(Box((x + 2.4, 17.6, -6.3), (x + 3.2, 19.4, -5.3), 'becher'))
+        b.append(Box((x + 0.3, 19.4, -6.7), (x + 2.1, 19.8, -4.9), 'gluehwein'))
+    for k, x in enumerate(range(-19, 20, 5)):
+        shelf = 12 if k % 2 == 0 else 21
+        b.append(Box((x - 0.9, shelf, 27.5), (x + 0.9, shelf + 5, 29.3), 'flasche'))
+        b.append(Box((x - 0.4, shelf + 5, 28), (x + 0.4, shelf + 7, 28.8), 'flasche'))
+        b.append(Box((x + 1.6, 21 if shelf == 12 else 12, 27.4), (x + 3.6, (21 if shelf == 12 else 12) + 2.8, 29.4), 'becher'))
     return b
 
 
 def signpost():
     b = [
-        Box((-1.5, 0, -1.5), (1.5, 40, 1.5), 'holz_dunkel'),
-        Box((-2, 40, -2), (2, 41.5, 2), 'holz_dunkel'),
-        Box((-2.1, 41.5, -2.1), (2.1, 42.2, 2.1), 'schnee', faces={'north': 'schnee_rand', 'south': 'schnee_rand', 'east': 'schnee_rand', 'west': 'schnee_rand'}, skip=('down',)),
-        Box((-3.5, 0, -3.5), (3.5, 1.2, 3.5), 'schnee', faces={'north': 'schnee_rand', 'south': 'schnee_rand', 'east': 'schnee_rand', 'west': 'schnee_rand'}),
+        Box((-1.5, 0, -1.5), (1.5, 42, 1.5), 'holz_dunkel'),
+        Box((-2.2, 0, -2.2), (2.2, 3, 2.2), 'holz_dunkel'),
+        Box((-2, 42, -2), (2, 43.2, 2), 'holz_dunkel'),
+        Box((-1.2, 43.2, -1.2), (1.2, 44.4, 1.2), 'holz_dunkel'),
+        snow_cap(-2.1, -2.1, 2.1, 2.1, 43.2, 0.5),
+        snow_cap(-1.3, -1.3, 1.3, 1.3, 44.4, 0.5),
+        Box((-4, 0, -4), (4, 1, 4), 'schnee', faces=SNOW_SIDES),
+        Box((-2.8, 1, -2.8), (2.8, 3.6, 2.8), 'schnee', faces=SNOW_SIDES),
     ]
 
-    def board(y, direction, text):
+    def board(y, direction, text, turn):
         length = 16
-        if direction > 0:
-            x0, x1 = 1.5, 1.5 + length
-        else:
-            x0, x1 = -1.5 - length, -1.5
+        x0, x1 = (1.5, 1.5 + length) if direction > 0 else (-1.5 - length, -1.5)
         tile = 'schild_' + text
-        plain = 'holz'
-        north_uv = (0, 0)
+        rot = ((0, y + 3, 0), (0, turn, 0)) if turn else None
         boxes = [
-            Box((x0, y, -0.75), (x1, y + 6, 0.75), plain, faces={'north': tile, 'south': tile}, uv={'north': north_uv, 'south': north_uv}),
+            Box((x0, y, -0.75), (x1, y + 6, 0.75), 'holz', faces={'north': tile, 'south': tile}, uv={'north': (0, 0), 'south': (0, 0)}, rotation=rot),
+            Box((x0, y + 5.6, -0.95), (x1, y + 6.3, 0.95), 'holz_dunkel', rotation=rot),
+            Box((x0, y - 0.3, -0.95), (x1, y + 0.4, 0.95), 'holz_dunkel', rotation=rot),
+            Box((x0, y + 6.3, -1), (x1, y + 6.8, 1), 'schnee', faces=SNOW_SIDES, skip=('down',), rotation=rot),
         ]
         tip_x = x1 if direction > 0 else x0
         size = 6 / math.sqrt(2)
-        boxes.append(Box((tip_x - size / 2, y + 3 - size / 2, -0.7), (tip_x + size / 2, y + 3 + size / 2, 0.7), plain, rotation=((tip_x, y + 3, 0), (0, 0, 45))))
-        boxes.append(Box((x0, y + 6, -0.85), (x1, y + 6.5, 0.85), 'schnee', skip=('down',)))
+        tip_rot = ((tip_x, y + 3, 0), (0, turn, 45)) if turn else ((tip_x, y + 3, 0), (0, 0, 45))
+        boxes.append(Box((tip_x - size / 2, y + 3 - size / 2, -0.7), (tip_x + size / 2, y + 3 + size / 2, 0.7), 'holz', rotation=tip_rot))
+        for k, offset in enumerate((3, 7.5, 12)):
+            x = x0 + offset if direction > 0 else x1 - offset
+            drop = (2.2, 3.2, 1.6)[k]
+            boxes.append(Box((x - 0.5, y - 0.3 - drop * 0.55, -0.4), (x + 0.5, y - 0.3, 0.4), 'eis', rotation=rot))
+            boxes.append(Box((x - 0.25, y - 0.3 - drop, -0.2), (x + 0.25, y - 0.3 - drop * 0.55, 0.2), 'eis', rotation=rot))
         return boxes
 
-    b += board(31, 1, 'nordpol')
-    b += board(22, -1, 'wichtel')
+    b += board(34, 1, 'nordpol', 8)
+    b += board(26.5, -1, 'wichtel', -6)
+    b += board(19, 1, 'kakao', -10)
     return b
 
 
@@ -691,15 +853,16 @@ def props():
         ox = spec['centre'][0] / 16
         oz = spec['centre'][1] / 16
         result.append(Prop('geschenk_' + size, [Part('geschenk_' + size + '_rot', gift_model(size, 'rot'), (ox, None, oz))], spec['footprint'], title='Geschenk'))
-    result.append(Prop('geschenkstapel', [Part('geschenkstapel', stack_model(), (0.5, None, 0.5))], [(x, y, z) for x in (0, 1) for z in (0, 1) for y in (0, 1)], title='Geschenkstapel'))
+    result.append(Prop('geschenkstapel', [Part('geschenkstapel', stack_model(), (0.5, None, 0.5))], [(x, y, z) for x in (0, 1) for z in (0, 1) for y in (0, 1, 2)], title='Geschenkstapel'))
     result.append(Prop('laterne', [
         Part('laterne_mast', lantern_mast(), (0, None, 0)),
         Part('laterne_kopf', lantern_head(), (0, None, 0)),
     ], column(3), light=(0, 3, 0), title='Straßenlaterne'))
-    result.append(Prop('zuckerstange', [Part('zuckerstange', candy_cane(), (0, None, 0))], column(3), title='Zuckerstange'))
-    result.append(Prop('schlitten', [Part('schlitten', sleigh(), (0.5, None, 0))], [(0, 0, 0), (1, 0, 0)], title='Schlitten'))
-    result.append(Prop('marktstand', [Part('marktstand', market_stall(), (0, None, 0.5))], [(x, 0, 0) for x in (-1, 0, 1)], title='Glühweinstand'))
-    result.append(Prop('wegweiser', [Part('wegweiser', signpost(), (0, None, 0))], column(3), title='Wegweiser'))
+    result.append(Prop('zuckerstange', [Part('zuckerstange', candy_cane(), (0, None, 0))], column(3) + [(1, 2, 0)], title='Zuckerstange'))
+    result.append(Prop('schlitten', [Part('schlitten', sleigh(), (0.5, None, 0))], [(x, y, 0) for x in (0, 1) for y in (0, 1)], title='Schlitten'))
+    stall = [(x, y, z) for x in (-1, 0, 1) for z in (0, 2) for y in (0, 1)]
+    result.append(Prop('marktstand', [Part('marktstand', market_stall(), (0, None, 0.75))], stall, title='Glühweinstand'))
+    result.append(Prop('wegweiser', [Part('wegweiser', signpost(), (0, None, 0))], column(3) + [(1, 1, 0), (-1, 1, 0), (1, 2, 0), (-1, 2, 0)], title='Wegweiser'))
     return result
 
 
