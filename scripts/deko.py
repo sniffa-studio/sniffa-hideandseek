@@ -18,7 +18,7 @@ JITTER = 0.0
 SHEET = 1024
 MAX_FACE = 64
 PAD = 2
-NUDGE = 0.04
+NUDGE = 0.1
 NO_EDGES = {'warnlicht', 'warnstreifen', 'riffel', 'bildschirm', 'band_schwarz', 'glaskugel', 'netz', 'stern_weiss', 'stern_rot', 'eis_flaeche', 'flamme_tief', 'flamme_kern', 'eiszapfen', 'feder', 'feder_hell', 'sack', 'schneeball', 'glas', 'lampen', 'stern', 'flamme', 'glut', 'schnee_rand', 'bonbons', 'kugeln', 'tanne', 'beere'}
 RIVETS = {'eisen', 'kessel'}
 
@@ -921,8 +921,10 @@ def ring(centre, radius, thickness, depth, segments, mat, plane='xy'):
     length = 2 * radius * math.tan(math.pi / segments) + thickness * 0.6
     for k in range(segments):
         angle = 360 / segments * k
-        a = (cx - length / 2, cy + radius - thickness / 2, cz - depth / 2)
-        b = (cx + length / 2, cy + radius + thickness / 2, cz + depth / 2)
+        level = 2 if segments % 2 and k == segments - 1 else k % 2
+        half = depth / 2 - level * NUDGE
+        a = (cx - length / 2, cy + radius - thickness / 2, cz - half)
+        b = (cx + length / 2, cy + radius + thickness / 2, cz + half)
         boxes.append(Box(a, b, mat, rotation=(centre, (0, 0, angle))))
     return boxes
 
@@ -1233,6 +1235,7 @@ def clone_box(piece, a, b):
                 skip=set(piece.skip), uv=dict(piece.uv), shade=piece.shade)
     clone.solid = piece.solid
     clone.cuts = set(getattr(piece, 'cuts', set()))
+    clone.inner = set(getattr(piece, 'inner', set()))
     return clone
 
 
@@ -1256,6 +1259,10 @@ def split_at(boxes, axis, cuts):
             a[axis], b[axis] = edges[k], edges[k + 1]
             clone = clone_box(piece, a, b)
             clone.cuts.add(axis)
+            if k > 0:
+                clone.inner.add(SIDE_NAMES[(axis, -1)])
+            if k < len(edges) - 2:
+                clone.inner.add(SIDE_NAMES[(axis, 1)])
             out.append(clone)
     return out
 
@@ -2075,7 +2082,7 @@ def poinsettia():
 
 def gift_sack():
     b = []
-    b += ball(0, 8, 0, 9, 'sack')
+    b += ball(0, 9, 0, 9, 'sack')
     b += ball(0, 15, 0, 7.4, 'sack')
     b += [
         Box((-4.4, 19, -4), (4.4, 22.4, 4), 'sack'),
@@ -3450,8 +3457,8 @@ def mega_wrapper():
         Box((-42.6, 63.4, -29.6), (-1.4, 64.2, -28.4), 'messing'),
         Box((-42.6, 73.8, -29.6), (-1.4, 74.6, -28.4), 'messing'),
     ])
-    b += pipe_run([(14, 76, 14), (14, 100, 14), (30, 100, 14), (30, 110, 14)], 3, 'kupfer')
-    b += pipe_run([(-38, 76, 18), (-38, 104, 18), (-38, 104, 30), (-38, 110, 30)], 2.4, 'eisen')
+    b += pipe_run([(14, 76, 14), (14, 100, 14), (30, 100, 14), (30, 108.4, 14)], 3, 'kupfer')
+    b += pipe_run([(-38, 76, 18), (-38, 104, 18), (-38, 104, 30), (-38, 109, 30)], 2.4, 'eisen')
     b += pipe_run([(-44, 40, 10), (-52, 40, 10), (-52, 4, 10)], 2.2, 'kupfer')
     b += valve_wheel(-52, 30, 7.4)
     b += [
@@ -3470,10 +3477,10 @@ def mega_wrapper():
     colours = ['rot', 'gelb', 'gruen', 'blau', 'warm', 'rot', 'gelb', 'gruen']
     for k, x in enumerate(range(-40, 18, 7)):
         b += soft([lamp_dot(x, 10, -28, colours[k % 8], 1.8)])
-    b += [Box((-20, 4, -40), (4, 10, -32), 'kessel'), Box((-20.4, 9.6, -40.4), (4.4, 11, -31.6), 'messing')]
+    b += [Box((24, 4, -38), (48, 10, -32), 'kessel'), Box((23.6, 9.6, -38.4), (48.4, 11, -31.6), 'messing')]
     for k in range(6):
-        b += soft([lamp_dot(-17 + k * 3.8, 11.5, -33, colours[k], 1.4)])
-    b.append(Box((-17 + 5 * 3.8 - 0.6, 11, -36), (-17 + 5 * 3.8 + 0.6, 16, -35), 'eisen', rotation=((-17 + 5 * 3.8, 11, -35.5), (-20, 0, 0))))
+        b += soft([lamp_dot(27 + k * 3.8, 11.5, -33, colours[k], 1.4)])
+    b.append(Box((27 + 5 * 3.8 - 0.6, 11, -36), (27 + 5 * 3.8 + 0.6, 16, -35), 'eisen', rotation=((27 + 5 * 3.8, 11, -35.5), (-20, 0, 0))))
     return b
 
 
@@ -3542,9 +3549,9 @@ def boiler():
     ]
     for x in (-31, -26, -21):
         b.append(Box((x - 0.5, 10, -32.9), (x + 0.5, 24, -32.6), 'kohle'))
-    b += pipe_run([(-26, 34, -23), (-26, 70, -23), (-26, 110, -23)], 4, 'eisen')
+    b += pipe_run([(-26, 34, -23), (-26, 70, -23), (-26, 107.4, -23)], 4, 'eisen')
     b += [Box((-31, 104, -28), (-21, 108, -18), 'messing')]
-    b += pipe_run([(20, 56, 0), (20, 76, 0), (36, 76, 0), (36, 110, 0)], 3, 'kupfer')
+    b += pipe_run([(20, 56, 0), (20, 76, 0), (36, 76, 0), (36, 108.4, 0)], 3, 'kupfer')
     b += pipe_run([(-8, 56, 0), (-8, 66, 0), (-8, 66, -26), (8, 66, -26), (8, 20, -26)], 2.2, 'eisen')
     b += valve_wheel(8, 40, -28.6, 4)
     b += big_gauge(20, 15, -32, 3.6)
@@ -3584,7 +3591,7 @@ def giant_press():
         b += soft([lamp_dot(x, 86, -4, ('rot', 'gelb', 'gruen', 'blau')[k], 2)])
     b += big_gauge(-30, 50, -4)
     b += [Box((28.8, 58.8, -5.6), (31.2, 61.2, -4), 'eisen')]
-    b += pipe_run([(-30, 108, 6), (-30, 110, 6)], 3, 'kupfer')
+    b += pipe_run([(-30, 106, 6), (-30, 108.4, 6)], 3, 'kupfer')
     for k, x in enumerate((-30, 30)):
         b += [Box((x - 4, 6, -30), (x + 4, 12, -22), 'kessel')]
         b += gift(x, -26, 6, 6, 6, 12, ('papier_gruen', 'papier_rot')[k], ('band_gruen', 'band_rot')[k], turn=15)
@@ -3845,88 +3852,251 @@ def column(height):
     return [(0, y, 0) for y in range(height)]
 
 
-def same_frame(box):
-    if not box.rotation:
-        return None
-    origin, angles = box.rotation
-    return (tuple(round(v, 3) for v in origin), tuple(round(v, 3) for v in angles))
+SIDES = {'west': (0, -1), 'east': (0, 1), 'down': (1, -1), 'up': (1, 1), 'north': (2, -1), 'south': (2, 1)}
+SIDE_NAMES = {v: k for k, v in SIDES.items()}
+FIGHT_GAP = NUDGE * 0.95
+TURN_STEPS = range(0, 360, 30)
+MOTIONS = {
+    'deko_dreh': [('turn', (0, 1, 0), a) for a in TURN_STEPS],
+    'deko_blitz': [('turn', (0, 1, 0), a) for a in TURN_STEPS],
+    'deko_dreh_z': [('turn', (0, 0, 1), a) for a in TURN_STEPS],
+    'deko_band': [('move', (4 * k, 0, 0)) for k in range(5)],
+    'deko_hub': [('move', (0, -2.2 * k, 0)) for k in range(5)],
+    'deko_hub_klein': [('move', (0, -0.8 * k, 0)) for k in range(5)],
+}
 
 
-def visible_faces(box):
+def axis_matrix(axis, degrees):
+    x, y, z = axis
+    c, s = math.cos(math.radians(degrees)), math.sin(math.radians(degrees))
+    t = 1 - c
+    return ((t * x * x + c, t * x * y - s * z, t * x * z + s * y),
+            (t * x * y + s * z, t * y * y + c, t * y * z - s * x),
+            (t * x * z - s * y, t * y * z + s * x, t * z * z + c))
+
+
+def apply(m, v):
+    return [sum(m[i][k] * v[k] for k in range(3)) for i in range(3)]
+
+
+def around(m, centre, points):
+    return [[centre[i] + r[i] for i in range(3)] for r in (apply(m, [p[i] - centre[i] for i in range(3)]) for p in points)]
+
+
+def motions_of(part):
+    for tag in part.tags:
+        if tag in MOTIONS:
+            centre = tuple(v * 16 for v in part.offset)
+            out = []
+            for step in MOTIONS[tag]:
+                if step[0] == 'move':
+                    out.append((None, centre, step[1]))
+                else:
+                    out.append((axis_matrix(step[1], step[2]), centre, (0, 0, 0)))
+            return out
+    return None
+
+
+def face_quads(box, motion):
     lo = [min(box.a[i], box.b[i]) for i in range(3)]
     hi = [max(box.a[i], box.b[i]) for i in range(3)]
-    names = {(0, -1): 'west', (0, 1): 'east', (1, -1): 'down', (1, 1): 'up', (2, -1): 'north', (2, 1): 'south'}
-    for axis in range(3):
-        for sign in (-1, 1):
-            if names[(axis, sign)] in box.skip or (axis == 1 and sign < 0):
-                continue
-            plane = lo[axis] if sign < 0 else hi[axis]
-            others = [i for i in range(3) if i != axis]
-            yield axis, sign, plane, [(lo[i], hi[i]) for i in others]
+    turn = euler_matrix(*box.rotation[1]) if box.rotation else None
+    out = []
+    for side, (axis, sign) in SIDES.items():
+        if side in box.skip or side in getattr(box, 'inner', ()):
+            continue
+        if side == 'down' and not turn and not motion and lo[1] <= 0.001:
+            continue
+        u, v = [i for i in range(3) if i != axis]
+        n = [0, 0, 0]
+        n[axis] = sign
+        points = []
+        for cu, cv in ((0, 0), (1, 0), (1, 1), (0, 1)):
+            p = [0, 0, 0]
+            p[axis] = (hi if sign > 0 else lo)[axis]
+            p[u] = (lo, hi)[cu][u]
+            p[v] = (lo, hi)[cv][v]
+            points.append(p)
+        if turn:
+            points = around(turn, box.rotation[0], points)
+            n = apply(turn, n)
+        if motion:
+            m, centre, shift = motion
+            if m:
+                points = around(m, centre, points)
+                n = apply(m, n)
+            points = [[p[i] + shift[i] for i in range(3)] for p in points]
+        out.append((side, axis, sign, n, points))
+    return out
 
 
-def overlap(r1, r2):
-    area = 1.0
-    for (a0, a1), (b0, b1) in zip(r1, r2):
-        d = min(a1, b1) - max(a0, b0)
-        if d <= 1e-4:
+def plane_poly(points, n):
+    t = (1, 0, 0) if abs(n[0]) < 0.9 else (0, 1, 0)
+    u = [n[1] * t[2] - n[2] * t[1], n[2] * t[0] - n[0] * t[2], n[0] * t[1] - n[1] * t[0]]
+    size = math.sqrt(sum(x * x for x in u))
+    u = [x / size for x in u]
+    v = [n[1] * u[2] - n[2] * u[1], n[2] * u[0] - n[0] * u[2], n[0] * u[1] - n[1] * u[0]]
+    poly = [(sum(p[i] * u[i] for i in range(3)), sum(p[i] * v[i] for i in range(3))) for p in points]
+    return poly if signed_area(poly) > 0 else poly[::-1]
+
+
+def signed_area(poly):
+    return sum(poly[i][0] * poly[i - 1][1] * -1 + poly[i - 1][0] * poly[i][1] for i in range(len(poly))) / 2
+
+
+def clip_area(subject, clipper):
+    out = subject
+    for i in range(len(clipper)):
+        a, b = clipper[i - 1], clipper[i]
+        inside = [(b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]) >= -1e-9 for p in out]
+        nxt = []
+        for k in range(len(out)):
+            p, q = out[k - 1], out[k]
+            if inside[k]:
+                if not inside[k - 1]:
+                    nxt.append(cut(p, q, a, b))
+                nxt.append(q)
+            elif inside[k - 1]:
+                nxt.append(cut(p, q, a, b))
+        out = nxt
+        if len(out) < 3:
             return 0.0
-        area *= d
-    return area
+    return abs(signed_area(out))
 
 
-def clean(boxes):
-    fixed = 0
-    for _ in range(30):
-        planes = {}
-        for index, box in enumerate(boxes):
-            for axis, sign, plane, rect in visible_faces(box):
-                planes.setdefault((same_frame(box), axis, sign, round(plane, 3)), []).append((index, rect))
-        moved = set()
-        for (frame, axis, sign, plane), faces in planes.items():
-            if len(faces) < 2:
-                continue
-            for i in range(len(faces)):
-                for j in range(i + 1, len(faces)):
-                    (ia, ra), (ib, rb) = faces[i], faces[j]
-                    if ia in moved or ib in moved or overlap(ra, rb) <= 0:
+def cut(p, q, a, b):
+    den = (p[0] - q[0]) * (a[1] - b[1]) - (p[1] - q[1]) * (a[0] - b[0])
+    if abs(den) < 1e-12:
+        return q
+    t = ((p[0] - a[0]) * (a[1] - b[1]) - (p[1] - a[1]) * (a[0] - b[0])) / den
+    return (p[0] + t * (q[0] - p[0]), p[1] + t * (q[1] - p[1]))
+
+
+def face_entries(boxes, moves, state):
+    entries = []
+    for index, box in enumerate(boxes):
+        steps = moves[index] if moves else None
+        if state and not steps:
+            motion = None
+        else:
+            motion = steps[state % len(steps)] if steps else None
+        for side, axis, sign, n, points in face_quads(box, motion):
+            lo = [min(p[i] for p in points) for i in range(3)]
+            hi = [max(p[i] for p in points) for i in range(3)]
+            entries.append(dict(box=index, moving=bool(steps), side=side, axis=axis, sign=sign, n=n, points=points, lo=lo, hi=hi,
+                                key=tuple(round(x, 3) + 0.0 for x in n), d=sum(n[i] * points[0][i] for i in range(3))))
+    return entries
+
+
+def fights_of(boxes, moves=None, seen=None):
+    states = max([len(m) for m in moves or [] if m] or [1])
+    result = []
+    for state in range(states):
+        groups = {}
+        for entry in face_entries(boxes, moves, state):
+            groups.setdefault(entry['key'], []).append(entry)
+        if seen is not None and state == 0:
+            seen.update(groups)
+        for faces in groups.values():
+            faces.sort(key=lambda f: f['d'])
+            for x in range(len(faces)):
+                fa = faces[x]
+                for y in range(x + 1, len(faces)):
+                    fb = faces[y]
+                    if fb['d'] - fa['d'] >= FIGHT_GAP:
+                        break
+                    if fa['box'] == fb['box'] or (state and not (fa['moving'] or fb['moving'])):
                         continue
-                    area_a = (ra[0][1] - ra[0][0]) * (ra[1][1] - ra[1][0])
-                    area_b = (rb[0][1] - rb[0][0]) * (rb[1][1] - rb[1][0])
-                    target = ib if area_b <= area_a else ia
-                    box = boxes[target]
-                    a = list(box.a)
-                    b = list(box.b)
-                    if sign > 0:
-                        if a[axis] >= b[axis]:
-                            a[axis] += NUDGE
-                        else:
-                            b[axis] += NUDGE
-                    else:
-                        if a[axis] <= b[axis]:
-                            a[axis] -= NUDGE
-                        else:
-                            b[axis] -= NUDGE
-                    box.a, box.b = tuple(a), tuple(b)
-                    moved.add(target)
-                    fixed += 1
-        if not moved:
+                    if any(min(fa['hi'][i], fb['hi'][i]) - max(fa['lo'][i], fb['lo'][i]) < -FIGHT_GAP for i in range(3)):
+                        continue
+                    pa = plane_poly(fa['points'], fa['n'])
+                    pb = plane_poly(fb['points'], fb['n'])
+                    if clip_area(pa, pb) > 0.01:
+                        result.append((fa, fb, abs(signed_area(pa)), abs(signed_area(pb))))
+    return result
+
+
+def shifted(box, axis, sign, steps):
+    a = list(box.a)
+    b = list(box.b)
+    move = steps * NUDGE * sign
+    if (a[axis] >= b[axis]) == (sign > 0):
+        a[axis] += move
+    else:
+        b[axis] += move
+    return tuple(a), tuple(b)
+
+
+def fits(a, b, limit, axis):
+    if not limit:
+        return True
+    low, high = limit
+    return low[axis] - 1e-6 <= min(a[axis], b[axis]) and max(a[axis], b[axis]) <= high[axis] + 1e-6
+
+
+def near(face, groups):
+    for other in groups.get(face['key'], ()):
+        if other['box'] == face['box'] or abs(other['d'] - face['d']) > 8 * NUDGE:
+            continue
+        if all(min(face['hi'][i], other['hi'][i]) - max(face['lo'][i], other['lo'][i]) > -8 * NUDGE for i in range(3)):
+            yield other
+
+
+def clean(boxes, moves=None, limits=None):
+    fixed = 0
+    for _ in range(40):
+        groups = {}
+        pairs = fights_of(boxes, moves, groups)
+        if not pairs:
             return fixed
+        links = {}
+        faces = {}
+        areas = {}
+        planes = {}
+        for fa, fb, area_a, area_b in pairs:
+            ka = (fa['box'], fa['side'])
+            kb = (fb['box'], fb['side'])
+            links.setdefault(ka, set()).add(kb)
+            links.setdefault(kb, set()).add(ka)
+            areas[ka] = max(areas.get(ka, 0), area_a)
+            areas[kb] = max(areas.get(kb, 0), area_b)
+            planes.setdefault(ka, fa['d'])
+            planes.setdefault(kb, fb['d'])
+            faces.setdefault(ka, fa)
+            faces.setdefault(kb, fb)
+        layers = {}
+        for node in sorted(links, key=lambda k: (-areas[k], k)):
+            taken = [layers[o] for o in links[node] if o in layers]
+            taken += [other['d'] for other in near(faces[node], groups) if (other['box'], other['side']) not in links]
+            box = boxes[node[0]]
+            axis, sign = SIDES[node[1]]
+            for step in (0, 1, 2, 3, 4, 5, 6, -1, -2, -3, -4, -5, -6):
+                plane = planes[node] + step * NUDGE
+                if any(abs(plane - other) < FIGHT_GAP for other in taken):
+                    continue
+                if step == 0:
+                    layers[node] = plane
+                    break
+                a, b = shifted(box, axis, sign, step)
+                if abs(a[axis] - b[axis]) > NUDGE and fits(a, b, limits[node[0]] if limits else None, axis):
+                    box.a, box.b = a, b
+                    layers[node] = plane
+                    fixed += 1
+                    break
     return fixed
 
 
-def count_fights(boxes):
-    planes = {}
-    for index, box in enumerate(boxes):
-        for axis, sign, plane, rect in visible_faces(box):
-            planes.setdefault((same_frame(box), axis, sign, round(plane, 3)), []).append((index, rect))
-    total = 0
-    for faces in planes.values():
-        for i in range(len(faces)):
-            for j in range(i + 1, len(faces)):
-                if overlap(faces[i][1], faces[j][1]) > 0:
-                    total += 1
-    return total
+def clamp_box(box, shift):
+    a = list(box.a)
+    b = list(box.b)
+    for i in range(3):
+        low, high = shift[i] - 16, shift[i] + 32
+        for v in (a, b):
+            if low - 6 * NUDGE < v[i] < low:
+                v[i] = low
+            if high < v[i] < high + 6 * NUDGE:
+                v[i] = high
+    box.a, box.b = tuple(a), tuple(b)
 
 
 _PROPS = None
@@ -3937,9 +4107,19 @@ def props():
     if _PROPS is None:
         _PROPS = build_props()
         for prop in _PROPS:
-            boxes = [b for part in prop.parts if part.boxes is not None for b in part.boxes]
-            prop.fixed = clean(boxes)
-            prop.fights = count_fights(boxes)
+            boxes, moves, limits = [], [], []
+            for part in prop.parts:
+                if part.boxes is None:
+                    continue
+                steps = motions_of(part)
+                shift = part_shift(part)
+                for box in part.boxes:
+                    clamp_box(box, shift)
+                    boxes.append(box)
+                    moves.append(steps)
+                    limits.append(([s - 16 for s in shift], [s + 32 for s in shift]))
+            prop.fixed = clean(boxes, moves, limits)
+            prop.fights = len(fights_of(boxes, moves))
     return _PROPS
 
 
