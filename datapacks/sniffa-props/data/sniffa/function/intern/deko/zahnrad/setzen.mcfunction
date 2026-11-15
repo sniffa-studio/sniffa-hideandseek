@@ -1,0 +1,2 @@
+$summon minecraft:item_display ^ ^0.5 ^ {Tags:["sniffa_prop","sniffa_deko_teil","deko_teil_neu","deko_dreh_z"],Rotation:[$(yaw)f,0f],item:{id:"minecraft:stick",count:1,components:{"minecraft:item_model":"hideandseek:props/deko/zahnrad_rad"}}}
+$summon minecraft:item_display ^ ^ ^ {Tags:["sniffa_prop","sniffa_deko_teil","deko_teil_neu"],Rotation:[$(yaw)f,0f],item:{id:"minecraft:stick",count:1,components:{"minecraft:item_model":"hideandseek:props/deko/zahnrad_halter"}}}
