@@ -17,7 +17,7 @@ TEXTURE = 'hideandseek:item/props/deko'
 JITTER = 0.0
 SHEET = 1024
 MAX_FACE = 64
-NO_EDGES = {'sack', 'schneeball', 'glas', 'lampen', 'stern', 'flamme', 'glut', 'schnee_rand', 'bonbons', 'kugeln', 'tanne', 'beere'}
+NO_EDGES = {'flamme_tief', 'flamme_kern', 'eiszapfen', 'feder', 'feder_hell', 'sack', 'schneeball', 'glas', 'lampen', 'stern', 'flamme', 'glut', 'schnee_rand', 'bonbons', 'kugeln', 'tanne', 'beere'}
 RIVETS = {'eisen', 'kessel'}
 
 
@@ -112,12 +112,14 @@ def flat(base, spread=0.05):
 
 def snow(img, rnd):
     base = hexcolour('#eef3f9')
+    shadow = hexcolour('#d9e3ee')
     for y in range(TILE):
         for x in range(TILE):
-            img.putpixel((x, y), base)
+            wave = math.sin((x + y * 0.4) * 0.45) + math.sin((x * 0.3 - y) * 0.7)
+            img.putpixel((x, y), shadow if wave > 1.45 else base)
     for x, y in ((3, 4), (11, 9), (22, 3), (27, 15), (7, 20), (17, 25), (29, 28), (14, 15)):
         img.putpixel((x, y), hexcolour('#ffffff'))
-        img.putpixel((x + 1, y + 1), hexcolour('#dbe5f0'))
+        img.putpixel((x + 1, y), hexcolour('#c9e6ff'))
 
 
 def snow_side(img, rnd):
@@ -494,6 +496,11 @@ def build_atlas():
     atlas.add('schild_maronen', lettered(hexcolour('#2f1a0c'), hexcolour('#f2c14e'), 'MARONEN', 32, 5), density=32 / 13)
     atlas.add('schild_post', lettered(hexcolour('#5a3820'), hexcolour('#f7e7b0'), 'POST', 32, 24, size=2), density=4)
     atlas.add('sack_flick', flat(hexcolour('#8c6a43'), 0.04))
+    atlas.add('feder', flat(hexcolour('#f5f2ea'), 0.03))
+    atlas.add('feder_hell', flat(hexcolour('#e3d9b6'), 0.03))
+    atlas.add('flamme_tief', flat(hexcolour('#ff6a1a'), 0.04))
+    atlas.add('flamme_kern', flat(hexcolour('#fff2b0'), 0.02))
+    atlas.add('eiszapfen', ice)
     atlas.add('creme', flat(hexcolour('#efe3c8'), 0.04))
     atlas.add('stein', stones)
     atlas.add('fass', planks(hexcolour('#7a4e2c'), 4))
@@ -626,7 +633,7 @@ class FaceSheet:
         return [round(px * su, 5), round(py * sv, 5), round((px + key[1]) * su, 5), round((py + key[2]) * sv, 5)]
 
 
-def model_json(sheet, boxes, shift, seed):
+def model_json(sheet, boxes, shift, seed, check=True):
     elements = []
     for box in boxes:
         a = [box.a[i] - shift[i] for i in range(3)]
@@ -634,7 +641,7 @@ def model_json(sheet, boxes, shift, seed):
         lo = [round(min(a[i], b[i]), 4) for i in range(3)]
         hi = [round(max(a[i], b[i]), 4) for i in range(3)]
         for value in lo + hi:
-            if value < -16 or value > 32:
+            if check and (value < -16 or value > 32):
                 raise ValueError(f'out of range {lo} {hi} for {box.mat}')
         faces = {}
         for side in ('north', 'east', 'south', 'west', 'up', 'down'):
@@ -1252,6 +1259,11 @@ def stall_big(colour, sign):
         Box((-41.5, ridge_y - 1, ridge_z - 2), (41.5, ridge_y + 2, ridge_z + 2), 'holz_dunkel'),
         Box((-41.5, ridge_y + 2, ridge_z - 2), (41.5, ridge_y + 2.6, ridge_z + 2), 'schnee', skip=('down',)),
     ]
+    for k, x in enumerate(range(-40, 41, 3)):
+        drop = (3.5, 1.6, 2.6, 1.2, 4.2, 2)[k % 6]
+        b += soft([Box((x - 0.6, eave_y - 0.2 - drop * 0.5, front_z - 1.4), (x + 0.6, eave_y + 0.6, front_z - 0.2), 'eiszapfen'),
+                   Box((x - 0.3, eave_y - 0.2 - drop, front_z - 1.1), (x + 0.3, eave_y - 0.2 - drop * 0.5, front_z - 0.5), 'eiszapfen')])
+        b += soft([Box((x - 1.6, eave_y + 0.6, front_z - 1.8), (x + 1.6, eave_y + 2.2, front_z + 0.2), 'schnee')])
     edge_colours = ['warm', 'rot', 'warm', 'gelb', 'warm', 'gruen']
     for k, x in enumerate(range(-39, 40, 4)):
         b += soft([Box((x - 0.6, 47.2, -31.8), (x + 0.6, 48.6, -30.8), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, edge_colours[k % 6]))])
@@ -1829,9 +1841,15 @@ def angel_statue():
         Box((1.6, 28.6, -4.6), (3.4, 31, -2.8), 'holz_hell'),
     ]
     for side in (-1, 1):
-        for k, (length, height, tilt) in enumerate(((12, 14, 25), (10, 11, 10), (7, 8, -5))):
-            b.append(Box((side * 1.5, 22 + k * 2, 2.8), (side * (1.5 + length), 22 + k * 2 + height, 3.8), robe,
-                         rotation=((side * 1.5, 26, 3.3), (0, side * -25, side * -tilt))))
+        for k in range(6):
+            length = 13 - k * 1.6
+            y = 31 - k * 2.2
+            b.append(Box((side * 1.5 if side > 0 else side * (1.5 + length), y, 3), (side * (1.5 + length) if side > 0 else side * 1.5, y + 2.4, 4.2),
+                         'feder' if k % 2 == 0 else 'feder_hell', rotation=((side * 1.5, 30, 3.6), (0, side * -28, side * 18))))
+    b += [
+        Box((-4.4, 14.6, -3.6), (4.4, 15.4, 3.6), 'messing'),
+        Box((-0.4, 26, -2.9), (0.4, 31, -2.7), 'messing'),
+    ]
     return b
 
 
@@ -1848,10 +1866,21 @@ def gingerbread_house():
         rot = ((0, 17, z0), (-angle if side < 0 else angle, 0, 0))
         if side < 0:
             b.append(Box((-15, 17, z0), (15, 19, z0 + length), 'lebkuchen', rotation=rot))
-            b.append(Box((-15.2, 19, z0), (15.2, 20.4, z0 + length), 'zuckerguss', rotation=rot, skip=('down',)))
+            b.append(Box((-15.2, 18.6, z0 - 0.2), (15.2, 20, z0 + 2.4), 'zuckerguss', rotation=rot))
+            for k in range(1, 4):
+                zz = z0 + k * length / 4
+                b.append(Box((-15.1, 18.8, zz - 0.5), (15.1, 19.5, zz + 0.5), 'zuckerguss', rotation=rot))
+            for k, x in enumerate(range(-12, 13, 6)):
+                b.append(Box((x - 1, 19, z0 + 3.2 + (k % 2) * 4), (x + 1, 20.2, z0 + 5.2 + (k % 2) * 4), ('beere', 'band_gruen', 'senf')[k % 3], rotation=rot))
         else:
             b.append(Box((-15, 17, z0 - length), (15, 19, z0), 'lebkuchen', rotation=rot))
-            b.append(Box((-15.2, 19, z0 - length), (15.2, 20.4, z0), 'zuckerguss', rotation=rot, skip=('down',)))
+            b.append(Box((-15.2, 18.6, z0 - 2.4), (15.2, 20, z0 + 0.2), 'zuckerguss', rotation=rot))
+            for k in range(1, 4):
+                zz = z0 - k * length / 4
+                b.append(Box((-15.1, 18.8, zz - 0.5), (15.1, 19.5, zz + 0.5), 'zuckerguss', rotation=rot))
+    b.append(Box((-15.4, 28.6, -1.4), (15.4, 30.6, 1.4), 'zuckerguss'))
+    for x in range(-14, 15, 2):
+        b.append(Box((x - 0.5, 15.6 - (x % 4 == 0) * 1.2, -11.6), (x + 0.5, 17.4, -11), 'zuckerguss'))
     for k in range(6):
         y = 18 + k * 2
         inset = (k * 2 + 1) / rise * run
@@ -2010,11 +2039,12 @@ def fire_basket():
         Box((-7, 11, -7), (7, 15, 7), 'glut', emit=15, shade=False),
         Box((-5, 15, -2), (5, 17, 2), 'holz_dunkel', rotation=((0, 16, 0), (0, 30, 0))),
         Box((-5, 16.4, -2), (5, 18.4, 2), 'holz_dunkel', rotation=((0, 17.4, 0), (0, -40, 0))),
-        Box((-3, 15, -3), (3, 21, 3), 'flamme', emit=15, shade=False),
-        Box((-1.8, 21, -1.8), (1.8, 24, 1.8), 'flamme', emit=15, shade=False),
-        Box((-4.5, 15, -0.8), (-2, 19, 0.8), 'flamme', emit=15, shade=False),
-        Box((2, 15, -0.8), (4.5, 19.5, 0.8), 'flamme', emit=15, shade=False),
     ]
+    tongues = ((0, 0, 9, 2.6, 0), (-2.6, -1, 6.5, 1.8, -14), (2.4, 1.2, 7, 1.8, 16), (-1, 2.6, 5.5, 1.6, 10), (1.4, -2.6, 6, 1.6, -10), (-3.6, 2, 4, 1.4, -20), (3.4, -1.8, 4.4, 1.4, 22))
+    for x, z, h, w, lean in tongues:
+        b.append(Box((x - w / 2, 15, z - w / 2), (x + w / 2, 15 + h * 0.55, z + w / 2), 'flamme_tief', emit=15, shade=False, rotation=((x, 15, z), (0, 0, lean))))
+        b.append(Box((x - w * 0.32, 15 + h * 0.45, z - w * 0.32), (x + w * 0.32, 15 + h, z + w * 0.32), 'flamme', emit=15, shade=False, rotation=((x, 15, z), (0, 0, lean))))
+    b.append(Box((-1, 15, -1), (1, 19, 1), 'flamme_kern', emit=15, shade=False))
     return b
 
 
@@ -2342,7 +2372,18 @@ def main():
         for colour in GIFT_COLOURS:
             name = f'geschenk_{size}_{colour}'
             models.append((name, model_json(sheet, gift_model(size, colour), shift, name)))
+    previews = []
+    for prop in props():
+        boxes = [b for part in prop.parts if part.boxes is not None for b in part.boxes]
+        if boxes:
+            previews.append((prop.art, model_json(sheet, boxes, (0, 0, 0), prop.art, check=False)))
     sheet.pack()
+    preview_dir = ROOT / 'build/deko-preview'
+    preview_dir.mkdir(parents=True, exist_ok=True)
+    for art, model in previews:
+        model = resolve(sheet, model)
+        model['textures'] = {'0': '../../src/main/resources/assets/hideandseek/textures/item/props/deko', 'particle': '../../src/main/resources/assets/hideandseek/textures/item/props/deko'}
+        (preview_dir / f'{art}.json').write_text(json.dumps(model))
     texture = ASSETS / 'textures/item/props/deko.png'
     texture.parent.mkdir(parents=True, exist_ok=True)
     sheet.image.save(texture)
