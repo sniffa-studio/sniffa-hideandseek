@@ -906,8 +906,8 @@ def gift_model(size, colour):
 def stack_model():
     boxes = []
     boxes += gift(6, 6, 20, 15, 20, 0, 'papier_rot', 'band_rot', bow=False)
-    boxes += gift(6, 6, 14, 11, 14, 16, 'papier_gruen', 'band_gruen', turn=22.5, bow=False)
-    boxes += gift(6, 6, 9, 8, 9, 28, 'papier_gold', 'band_gold', turn=-15)
+    boxes += gift(6, 6, 14, 11, 14, 15, 'papier_gruen', 'band_gruen', turn=22.5, bow=False)
+    boxes += gift(6, 6, 9, 8, 9, 26, 'papier_gold', 'band_gold', turn=-15)
     boxes += gift(19.5, 19.5, 8, 8, 8, 0, 'papier_blau', 'band_blau', turn=12)
     boxes += gift(19.5, -2.5, 7, 6, 7, 0, 'papier_lila', 'band_lila', turn=-30)
     boxes += gift(-3, 19, 7, 7, 7, 0, 'papier_weiss', 'band_weiss', turn=20)
@@ -1080,12 +1080,12 @@ def sleigh():
         Box((4, 6.5, -5), (12, 15, 2), 'sack'),
         Box((5, 15, -4), (11, 17, 1), 'sack', rotation=((8, 15, -1.5), (0, 20, 0))),
         Box((7, 16.5, -2.5), (9, 18, -0.5), 'band_gold'),
-        Box((19, 9, -0.6), (20.2, 22, 0.6), 'messing'),
-        Box((17.5, 21.5, -0.6), (20.2, 22.7, 0.6), 'messing'),
-        Box((16.6, 16.5, -1.6), (19, 17.2, 1.6), 'eisen'),
-        Box((16.9, 17.2, -1.3), (18.7, 20.6, 1.3), 'glas', emit=15, shade=False),
-        Box((16.6, 20.6, -1.6), (19, 21.3, 1.6), 'eisen'),
-        Box((17.5, 21.3, -0.3), (18.1, 21.6, 0.3), 'eisen'),
+        Box((15.4, 11, -0.6), (16.6, 22, 0.6), 'messing'),
+        Box((16.6, 21, -0.6), (19.4, 22.2, 0.6), 'messing'),
+        Box((17.5, 20.6, -0.3), (18.5, 21, 0.3), 'eisen'),
+        Box((16.8, 20, -1.2), (19.2, 20.6, 1.2), 'eisen'),
+        Box((17.1, 16.8, -0.9), (18.9, 20, 0.9), 'glas', emit=15, shade=False),
+        Box((16.8, 16.2, -1.2), (19.2, 16.8, 1.2), 'eisen'),
     ]
     b += gift(9, 4.5, 6, 6, 5, 6.5, 'papier_blau', 'band_blau', turn=15)
     b += gift(2.5, 3.5, 5, 5, 5, 9.5, 'papier_gruen', 'band_gruen', turn=-10, bow=False)
@@ -1324,20 +1324,19 @@ def dot(x, y, z, mat, size=0.7, depth=0.3):
     return Box((x - h, y - h, z - depth), (x + h, y + h, z), mat)
 
 
-def heart_big(cx, cy, z, s, ribbon=True):
+def heart_big(cx, cy, z, s, ribbon=True, hang=None):
     m = 'lebkuchen'
     b = [
         Box((cx - 1.6 * s, cy - 1.6 * s, z - 0.8), (cx + 1.6 * s, cy + 1.6 * s, z), m, rotation=((cx, cy, z), (0, 0, 45))),
         Box((cx - 2.4 * s, cy + 0.2 * s, z - 0.8), (cx - 0.1 * s, cy + 2.2 * s, z), m),
         Box((cx + 0.1 * s, cy + 0.2 * s, z - 0.8), (cx + 2.4 * s, cy + 2.2 * s, z), m),
     ]
-    for k in range(7):
-        a = math.radians(200 - k * 36.6)
-        b.append(dot(cx + 1.85 * s * math.cos(a) * 0.95, cy + 0.6 * s + 1.4 * s * math.sin(a) * 0.9, z - 0.8, 'zuckerguss', 0.45 * s / 1.4 + 0.25))
+    for dx, dy in ((-1.6, 1.6), (-0.8, 1.9), (0.8, 1.9), (1.6, 1.6), (-1.5, 0.7), (1.5, 0.7), (0, -0.4)):
+        b.append(dot(cx + dx * s, cy + dy * s, z - 0.8, 'zuckerguss', 0.45 * s / 1.4 + 0.25))
     b.append(dot(cx - 0.6 * s, cy + 0.4 * s, z - 0.8, 'beere', 0.5 * s / 1.4 + 0.3))
     b.append(dot(cx + 0.6 * s, cy + 0.4 * s, z - 0.8, 'band_gruen', 0.5 * s / 1.4 + 0.3))
     if ribbon:
-        b.append(Box((cx - 0.2, cy + 2.2 * s, z - 0.5), (cx + 0.2, cy + 2.2 * s + 4, z - 0.2), 'band_rot'))
+        b.append(Box((cx - 0.2, cy + 2.2 * s, z - 0.5), (cx + 0.2, hang if hang else cy + 2.2 * s + 4, z - 0.2), 'band_rot'))
     return b
 
 
@@ -1418,21 +1417,18 @@ def stall_big(colour, sign):
                    Box((x - 0.3, eave_y - 0.2 - drop, front_z - 1.1), (x + 0.3, eave_y - 0.2 - drop * 0.5, front_z - 0.5), 'eiszapfen')])
         b += soft([Box((x - 1.6, eave_y + 0.6, front_z - 1.8), (x + 1.6, eave_y + 2.2, front_z + 0.2), 'schnee')])
     edge_colours = ['warm', 'rot', 'warm', 'gelb', 'warm', 'gruen']
+    b += soft([Box((-40, 48.6, -31.6), (40, 49.2, -30.8), 'kohle')])
     for k, x in enumerate(range(-39, 40, 4)):
         b += soft([Box((x - 0.6, 47.2, -31.8), (x + 0.6, 48.6, -30.8), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, edge_colours[k % 6]))])
     for side in (-1, 1):
-        x = side * 42.1
+        x = side * 41.9
         for z0, z1 in ((front_z, ridge_z), (back_z, ridge_z)):
             for k in range(1, 9):
                 t = k / 9
                 z = z0 + (z1 - z0) * t
-                y = eave_y + 2.4 + (ridge_y - eave_y) * t
+                y = eave_y + 0.9 + (ridge_y - eave_y) * t
                 b += soft([Box((x - 0.6, y, z - 0.6), (x + 0.6, y + 1.4, z + 0.6), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, edge_colours[(k + (side > 0)) % 6]))])
-    b += soft([
-        Box((-1.6, 75.4, ridge_z - 0.8), (1.6, 80.4, ridge_z + 0.8), 'stern', emit=15, shade=False, rotation=((0, 77.9, ridge_z), (0, 0, 45))),
-        Box((-0.8, 74.6, ridge_z - 0.8), (0.8, 81.4, ridge_z + 0.8), 'stern', emit=15, shade=False),
-        Box((-3.4, 77.1, ridge_z - 0.8), (3.4, 78.7, ridge_z + 0.8), 'stern', emit=15, shade=False),
-    ])
+    b += soft(pixel_star(0, 74.5, ridge_z, 7.2))
     colours = list(BULB_SLOTS)
     for k, x in enumerate(range(-40, 40, 5)):
         long = k % 2 == 0
@@ -1444,10 +1440,8 @@ def stall_big(colour, sign):
     b += soft([Box((-41, 46, -29.4), (41, 49, -27), 'tanne')])
     for x in (-30, -10, 10, 30):
         b += soft(flat_bow(x, 47.5, -29.4, 'band_rot', 1.1))
-    for k, x in enumerate(range(-38, 39, 4)):
-        sag = 1.6 * math.sin(math.pi * ((x + 38) % 16) / 16)
-        b += soft([Box((x - 0.7, 37.4 - sag, -28.3), (x + 0.7, 39.2 - sag, -27), 'lampen', emit=15, shade=False,
-                       uv=patch(BULB_SLOTS, colours[k % len(colours)]))])
+    points = [(x, 39.7 - 1.6 * math.sin(math.pi * ((x + 38) % 16) / 16)) for x in range(-38, 39, 4)]
+    b += soft(light_string(points, -27.5, colours))
     b += soft([
         Box((-23, 51, -33), (23, 61.1, -31.8), 'holz_dunkel', faces={'north': sign}, uv={'north': (0, 0)}),
         Box((-23.6, 50.4, -33.3), (23.6, 51.2, -31.5), 'messing'),
@@ -1489,16 +1483,16 @@ def gluehwein_big():
 def lebkuchen_big():
     b = []
     for x in (-27, -9, 9, 27):
-        b += heart_big(x, 30, -24.2, 2.4)
+        b += heart_big(x, 30, -24.2, 2.4, hang=46.2)
     for x, colour in ((-34, 'rot'), (-28.5, 'gruen'), (-23, 'gold')):
         b += candy_jar(x, COUNTER_Y, -18, colour)
     for x in (-12, -4, 4, 12):
         b += gingerbread_figure(x, COUNTER_Y, -18, 1.0)
     for x in (22, 27, 32):
-        b += heart_big(x, COUNTER_Y + 3.2, -15, 1.1, ribbon=False)
+        b += heart_big(x, COUNTER_Y + 2.5, -15, 1.1, ribbon=False)
     for k, x in enumerate(range(-30, 31, 10)):
         b += gingerbread_figure(x, SHELF[0], 33.5, 1.0)
-        b += heart_big(x, SHELF[1] + 4, 33.6, 1.3, ribbon=False)
+        b += heart_big(x, SHELF[1] + 2.95, 33.6, 1.3, ribbon=False)
     for x in (-38.5, 38.5):
         b += [Box((x - 0.6, COUNTER_Y, -20), (x + 0.6, COUNTER_Y + 9, -18.8), 'zucker')]
         b += arc((x - 1.6 if x > 0 else x + 1.6, COUNTER_Y + 9, -19.4), 1.6, 0 if x > 0 else 180, 180 if x > 0 else 0, 5, 1.2, 1.2, 'zucker')
@@ -1557,8 +1551,7 @@ def kerzen_big():
     for x in (-30, -18, 18, 30):
         b += soft([
             Box((x - 0.15, 36, -24.6), (x + 0.15, 46, -24.3), 'messing'),
-            Box((x - 1.6, 33, -24.9), (x + 1.6, 36.2, -24.2), 'stern', emit=10, rotation=((x, 34.6, -24.5), (0, 0, 45))),
-            Box((x - 0.7, 32.2, -24.9), (x + 0.7, 37, -24.2), 'stern', emit=10),
+            *pixel_star(x, 30.6, -24.5, 5.4, depth=0.8, stem=False),
         ])
     return b
 
@@ -1576,7 +1569,7 @@ def kugel_big():
             b += bauble(x + row * 2, 20, z, colours[(k + row * 2) % len(colours)], 3.0)
     b += [Box((6, 17, -23), (36, 18.2, -14), 'holz_hell')]
     for k, x in enumerate(range(9, 35, 5)):
-        b += bauble(x, 20.4, -18.5, colours[(k + 3) % len(colours)], 3.6)
+        b += bauble(x, 20.0, -18.5, colours[(k + 3) % len(colours)], 3.6)
     for k, x in enumerate(range(-32, 33, 5)):
         b += bauble(x, SHELF[0] + 1.8, 33.5, colours[k % len(colours)], 3.2)
         b += bauble(x + 2.5, SHELF[1] + 1.8, 33.5, colours[(k + 2) % len(colours)], 3.2)
@@ -1608,7 +1601,7 @@ def mandeln_big():
         b += cone_bag(x, SHELF[0], 33.5, 0.9)
         b += cone_bag(x + 3, SHELF[1], 33.5, 0.9)
     for x in (-30, -18, 18, 30):
-        b += soft(cone_bag(x, 30, -24.5, 0.8) + [Box((x - 0.15, 37, -24.6), (x + 0.15, 46, -24.3), 'messing')])
+        b += soft(cone_bag(x, 30, -24.5, 0.8) + [Box((x - 0.15, 35.2, -24.6), (x + 0.15, 46, -24.3), 'messing')])
     return b
 
 
@@ -1672,8 +1665,7 @@ def kakao_big():
     for x in (-30, -18, 18, 30):
         b += soft([
             Box((x - 0.15, 36, -24.6), (x + 0.15, 46, -24.3), 'messing'),
-            Box((x - 1.6, 33, -24.9), (x + 1.6, 36.2, -24.2), 'stern', emit=10, rotation=((x, 34.6, -24.5), (0, 0, 45))),
-            Box((x - 0.7, 32.2, -24.9), (x + 0.7, 37, -24.2), 'stern', emit=10),
+            *pixel_star(x, 30.6, -24.5, 5.4, depth=0.8, stem=False),
         ])
     return b
 
@@ -1753,9 +1745,7 @@ def light_arch():
         if k % 3 == 0:
             b += soft([Box((x - 0.6, y + 1.6, -0.6), (x + 0.6, y + 2.8, 0.6), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, 'warm'))])
     b += soft([
-        Box((-2, 58.4, -0.8), (2, 64, 0.8), 'stern', emit=15, shade=False, rotation=((0, 61.2, 0), (0, 0, 45))),
-        Box((-1, 57.6, -0.8), (1, 64.8, 0.8), 'stern', emit=15, shade=False),
-        Box((-3.6, 60.4, -0.8), (3.6, 62, 0.8), 'stern', emit=15, shade=False),
+        *pixel_star(0, 59.6, 0, 7.2),
     ])
     return b
 
@@ -1785,8 +1775,7 @@ def potted_tree():
                            uv=patch(BULB_SLOTS, bulbs_[(k + 2) % 6]))])
             k += 1
     b += soft([
-        Box((-2, 41, -0.7), (2, 46, 0.7), 'stern', emit=15, shade=False, rotation=((0, 43.5, 0), (0, 0, 45))),
-        Box((-1, 40, -0.7), (1, 47, 0.7), 'stern', emit=15, shade=False),
+        *pixel_star(0, 39.6, 0, 6.3, depth=1.2),
     ])
     return b
 
@@ -1973,7 +1962,7 @@ def schwibbogen():
             Box((x - 1.6, 6, -1.6), (x + 1.6, 9, 1.6), 'tanne_blatt'),
             Box((x - 0.8, 9, -0.8), (x + 0.8, 11.5, 0.8), 'tanne_blatt'),
         ]
-    b += [Box((-0.8, 12, -1), (0.8, 18, 1), 'holz_hell'), Box((-3, 15, -1), (3, 16.5, 1), 'holz_hell')]
+
     return b
 
 
@@ -1992,9 +1981,7 @@ def angel_statue():
         Box((-4.6, 14.6, -3.8), (4.6, 16, 3.8), 'messing'),
         Box((-2.2, 33, -2.2), (2.2, 37.4, 2.2), 'holz_hell'),
         Box((-2.4, 36, -2.4), (2.4, 38.2, 2.4), 'stroh'),
-        Box((-3, 39.2, -0.3), (3, 39.8, 0.3), 'stern', emit=12),
-        Box((-0.3, 39.2, -3), (0.3, 39.8, 3), 'stern', emit=12),
-        Box((-3.4, 38.8, -3.4), (3.4, 39.2, 3.4), 'stern', emit=12),
+        Box((-3.4, 38.2, -3.4), (3.4, 38.7, 3.4), 'stern', emit=12),
         Box((-1.2, 29.4, -6.6), (1.2, 30.6, -3), 'messing', rotation=((0, 30, -3), (-20, 0, 0))),
         Box((-2, 28.6, -8.4), (2, 31.4, -6.6), 'messing', rotation=((0, 30, -3), (-20, 0, 0))),
         Box((-3.4, 28.6, -4.6), (-1.6, 31, -2.8), 'holz_hell'),
@@ -2060,11 +2047,10 @@ def gingerbread_house():
     ]
     for x in range(-12, 13, 4):
         b += [dot(x, 15, -11, ('beere', 'band_gruen', 'senf')[(x // 4) % 3], 1.4, 0.6)]
-    for x in (-15.5, 15.5):
-        for y in (3, 7, 11, 15):
-            b.append(Box((x - 0.4, y, -11.5), (x + 0.4, y + 2.4, -10.7), 'zucker'))
-    for z in (-15, 15):
-        for x in (-12, -6, 0, 6, 12):
+    for x in (-13.6, 13.6):
+        b.append(Box((x - 0.6, 1, -11.8), (x + 0.6, 18, -10.6), 'zucker'))
+    for z in (-12.2, 12.2):
+        for x in (-12, -7, 7, 12):
             b += [Box((x - 0.9, 1, z - 0.9), (x + 0.9, 3.4, z + 0.9), 'zucker')]
     return b
 
@@ -2156,21 +2142,22 @@ def penguin():
 def woodpile():
     b = [Box((-14, 0, -5), (14, 1, 5), 'holz_dunkel')]
     for row in range(5):
-        y = 1 + row * 4.4
-        count = 6 - row // 2
-        start = -12 + (row % 2) * 2.2
-        for k in range(count):
-            x = start + k * 4.6
-            if x > 12:
-                continue
+        y = 1 + row * 4
+        stagger = row % 2
+        for k in range(6 - stagger):
+            x = -10 + stagger * 2 + k * 4
             b += [
                 Box((x - 2, y, -5), (x + 2, y + 4, 5), 'holz'),
                 Box((x - 1.4, y + 0.6, -5.2), (x + 1.4, y + 3.4, -5), 'holz_hell'),
                 Box((x - 0.5, y + 1.5, -5.25), (x + 0.5, y + 2.5, -5.2), 'holz'),
             ]
     b += [
-        snow_cap(-14, -5, 14, 5, 23, 0.8),
-        Box((-14, 23, -5), (14, 24, 5), 'holz_dunkel'),
+        Box((-14, 0, -5.4), (-12, 24, -3.4), 'holz_dunkel'),
+        Box((12, 0, -5.4), (14, 24, -3.4), 'holz_dunkel'),
+        Box((-14, 0, 3.4), (-12, 24, 5.4), 'holz_dunkel'),
+        Box((12, 0, 3.4), (14, 24, 5.4), 'holz_dunkel'),
+        Box((-15, 24, -6.4), (15, 25.4, 6.4), 'holz_dunkel'),
+        snow_cap(-15, -6.4, 15, 6.4, 25.4, 0.8),
         Box((15, 0, -3), (21, 8, 3), 'holz_dunkel'),
         Box((14.8, 8, -3.2), (21.2, 8.8, 3.2), 'holz_hell'),
         Box((17.6, 8.8, -0.4), (18.4, 22, 0.4), 'holz_hell', rotation=((18, 8.8, 0), (0, 0, -15))),
@@ -2321,24 +2308,62 @@ def spielzeug_big():
 STAR_COLOURS = ('stern_weiss', 'stern', 'stern_rot')
 
 
+STAR_MASK = [
+    '....#....',
+    '....#....',
+    '...###...',
+    '#########',
+    '.#######.',
+    '..#####..',
+    '..##.##..',
+    '.##...##.',
+    '##.....##',
+]
+
+
+def pixel_star(cx, base, z, size, mat='stern', depth=1.6, stem=True):
+    p = size / 9
+    b = []
+    for row, line in enumerate(STAR_MASK):
+        y = base + (8 - row) * p
+        x = 0
+        while x < 9:
+            if line[x] != '#':
+                x += 1
+                continue
+            start = x
+            while x < 9 and line[x] == '#':
+                x += 1
+            b.append(Box((cx - 4.5 * p + start * p, y, z - depth / 2), (cx - 4.5 * p + x * p, y + p, z + depth / 2), mat, emit=15, shade=False))
+    if stem:
+        b.append(Box((cx - p / 2, base, z - depth / 2), (cx + p / 2, base + 3 * p, z + depth / 2), mat, emit=15, shade=False))
+    return b
+
+
+def light_string(points, z, colours, depth=1.2):
+    b = []
+    for (x0, y0), (x1, y1) in zip(points, points[1:]):
+        b.append(rod((x0, y0, z), (x1, y1, z), 0.35, 'kohle'))
+    for k, (x, y) in enumerate(points):
+        b.append(Box((x - 0.6, y - 1.7, z - depth / 2), (x + 0.6, y - 0.1, z + depth / 2), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, colours[k % len(colours)])))
+    return b
+
+
 def advent_star(x, y, z, s, mat):
     b = [Box((x - 1.2 * s, y - 1.2 * s, z - 1.2 * s), (x + 1.2 * s, y + 1.2 * s, z + 1.2 * s), mat, emit=15, shade=False)]
-    for axis in range(3):
-        for sign in (-1, 1):
-            a = [x - 0.7 * s, y - 0.7 * s, z - 0.7 * s]
-            c = [x + 0.7 * s, y + 0.7 * s, z + 0.7 * s]
-            centre = (x, y, z)[axis]
-            if sign > 0:
-                a[axis], c[axis] = centre + 1.2 * s, centre + 3.4 * s
-            else:
-                a[axis], c[axis] = centre - 3.4 * s, centre - 1.2 * s
-            if axis == 1 and sign > 0:
-                continue
-            b.append(Box(tuple(a), tuple(c), mat, emit=15, shade=False))
-    for ax, az in ((1, 1), (1, -1), (-1, 1), (-1, -1)):
-        b.append(Box((x - 0.55 * s, y - 0.55 * s, z - 0.55 * s), (x + 0.55 * s, y + 0.55 * s, z + 3 * s), mat, emit=15, shade=False,
-                     rotation=((x, y, z), (0, 45 * ax + (90 if az < 0 else 0), 0))))
-    b.append(Box((x - 0.5 * s, y + 1.2 * s, z - 0.5 * s), (x + 0.5 * s, y + 2.2 * s, z + 0.5 * s), 'messing'))
+    spike = []
+    for k, (w, d0, d1) in enumerate(((1.6, 0.8, 1.8), (1.1, 1.8, 2.8), (0.6, 2.8, 3.8))):
+        spike.append((w * s, d0 * s, d1 * s))
+    directions = []
+    for axis_rot in ((0, 0, 0), (0, 0, 90), (0, 0, 180), (0, 90, 0), (0, -90, 0)):
+        directions.append(axis_rot)
+    for rx, ry, rz in ((0, 0, 45), (0, 0, 135), (0, 0, -45), (0, 0, -135), (0, 45, 0), (0, 135, 0), (0, -45, 0), (0, -135, 0)):
+        directions.append((rx, ry, rz))
+    for ang in directions:
+        for w, d0, d1 in spike:
+            h = w / 2
+            b.append(Box((x + d0, y - h, z - h), (x + d1, y + h, z + h), mat, emit=15, shade=False, rotation=((x, y, z), ang)))
+    b.append(Box((x - 0.5 * s, y + 1.2 * s, z - 0.5 * s), (x + 0.5 * s, y + 2.4 * s, z + 0.5 * s), 'messing'))
     return b
 
 
@@ -2350,7 +2375,7 @@ def sterne_big():
         b += soft(advent_star(x, 35 - drop, -24.5, 1.0, STAR_COLOURS[k % 3]))
     for k, x in enumerate((-30, -22, -14)):
         b += advent_star(x, COUNTER_Y + 4.4, -18, 1.0, STAR_COLOURS[k % 3])
-        b += [Box((x - 0.4, COUNTER_Y, -18.4), (x + 0.4, COUNTER_Y + 1, -17.6), 'messing')]
+        b += [Box((x - 0.4, COUNTER_Y, -18.4), (x + 0.4, COUNTER_Y + 3.4, -17.6), 'messing'), Box((x - 1.4, COUNTER_Y, -19.4), (x + 1.4, COUNTER_Y + 0.6, -16.6), 'messing')]
     for k in range(6):
         x = -2 + (k % 3) * 6
         z = -21 + (k // 3) * 5
@@ -2361,11 +2386,12 @@ def sterne_big():
             Box((x - 1.6, COUNTER_Y + 0.1, z - 0.2), (x + 1.6, COUNTER_Y + 0.45, z + 0.2), 'stroh', rotation=((x, COUNTER_Y, z), (0, -45, 0))),
         ]
     for k, x in enumerate((22, 30)):
-        b += advent_star(x, COUNTER_Y + 4.4, -18, 1.2, STAR_COLOURS[(k + 1) % 3])
-        b += [Box((x - 0.4, COUNTER_Y, -18.4), (x + 0.4, COUNTER_Y + 1, -17.6), 'messing')]
+        b += advent_star(x, COUNTER_Y + 4.8, -18, 1.2, STAR_COLOURS[(k + 1) % 3])
+        b += [Box((x - 0.4, COUNTER_Y, -18.4), (x + 0.4, COUNTER_Y + 3.6, -17.6), 'messing'), Box((x - 1.4, COUNTER_Y, -19.4), (x + 1.4, COUNTER_Y + 0.6, -16.6), 'messing')]
     for k, x in enumerate(range(-28, 29, 14)):
-        b += advent_star(x, SHELF[0] + 3.6, 33.5, 0.9, STAR_COLOURS[k % 3])
-        b += advent_star(x + 7, SHELF[1] + 3.6, 33.5, 0.9, STAR_COLOURS[(k + 1) % 3])
+        for sx, sy, colour in ((x, SHELF[0], STAR_COLOURS[k % 3]), (x + 7, SHELF[1], STAR_COLOURS[(k + 1) % 3])):
+            b += advent_star(sx, sy + 3.6, 33.5, 0.9, colour)
+            b += [Box((sx - 0.35, sy, 33.15), (sx + 0.35, sy + 2.6, 33.85), 'messing'), Box((sx - 1.2, sy, 32.3), (sx + 1.2, sy + 0.5, 34.7), 'messing')]
     return b
 
 
@@ -2393,7 +2419,7 @@ def honig_big():
         b += honey_jar(x, SHELF[0], 33.5, 1.0)
         b += candle(x + 2, SHELF[1], 33.5, 5, 'bienenwachs', 1.4)
     for x in (-30, -18, 18, 30):
-        b += soft([Box((x - 0.15, 36, -24.6), (x + 0.15, 46, -24.3), 'messing')])
+        b += soft([Box((x - 0.15, 34.6, -24.6), (x + 0.15, 46, -24.3), 'messing')])
         b += soft(honey_jar(x, 31, -24.5, 0.9))
     return b
 
@@ -2473,9 +2499,7 @@ def nativity():
         Box((-5, 5.6, -1), (5, 6.6, 3), 'stroh'),
         Box((-2.2, 6, -0.2), (2.2, 7.6, 2.2), 'zuckerguss'),
         Box((-0.8, 6.4, -0.6), (0.8, 7.8, 0.8), 'holz_hell'),
-        Box((-2, 50, 0), (2, 54, 2), 'stern', emit=15, shade=False, rotation=((0, 52, 1), (0, 0, 45))),
-        Box((-0.8, 47, 0.2), (0.8, 57, 1.8), 'stern', emit=15, shade=False),
-        Box((-4, 51.2, 0.2), (4, 52.8, 1.8), 'stern', emit=15, shade=False),
+        *pixel_star(0, 46.6, 1, 9.9, depth=1.6),
         Box((-0.4, 40, 0.6), (0.4, 47, 1.4), 'holz_dunkel'),
     ]
     b += figure_big(-12, 1, 2, 'lack_blau', 1.9)
@@ -2740,8 +2764,8 @@ def star_gate():
         for k in range(6):
             y = 6 + k * 7
             b += soft([Box((x - 4.8, y, -4.8), (x + 4.8, y + 1.4, 4.8), 'band_rot')])
-            b += soft([Box((x - 0.6, y + 3.6, -5.4), (x + 0.6, y + 4.8, -4.8), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, list(BULB_SLOTS)[k % 6]))])
-            b += soft([Box((x - 0.6, y + 3.6, 4.8), (x + 0.6, y + 4.8, 5.4), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, list(BULB_SLOTS)[(k + 3) % 6]))])
+            b += soft([Box((x - 0.6, y + 3.6, -5.2), (x + 0.6, y + 4.8, -4.4), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, list(BULB_SLOTS)[k % 6]))])
+            b += soft([Box((x - 0.6, y + 3.6, 4.4), (x + 0.6, y + 4.8, 5.2), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, list(BULB_SLOTS)[(k + 3) % 6]))])
     b += arc((0, 48, 0), 33, 180, 0, 22, 8.8, 8.8, 'tanne', 1.08)
     colours = list(BULB_SLOTS)
     for k in range(1, 24):
@@ -2752,18 +2776,15 @@ def star_gate():
         b += soft([Box((x + nx * 4.4 - 0.6, y + ny * 4.4 - 0.6, -5.4), (x + nx * 4.4 + 0.6, y + ny * 4.4 + 0.6, -4.4), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, colours[k % 6]))])
         b += soft([Box((x - nx * 4.4 - 0.6, y - ny * 4.4 - 0.6, -5.4), (x - nx * 4.4 + 0.6, y - ny * 4.4 + 0.6, -4.4), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, colours[(k + 2) % 6]))])
     b += soft([
-        Box((-4, 84, -1.2), (4, 96, 1.2), 'stern', emit=15, shade=False, rotation=((0, 90, 0), (0, 0, 45))),
-        Box((-1.6, 82, -1.2), (1.6, 98, 1.2), 'stern', emit=15, shade=False),
-        Box((-8, 88.4, -1.2), (8, 91.6, 1.2), 'stern', emit=15, shade=False),
-        Box((-2.6, 87.4, -1.6), (2.6, 92.6, 1.6), 'stern_weiss', emit=15, shade=False),
+        *pixel_star(0, 84.6, 0, 13.5, depth=2.4),
     ])
     b += soft([
         Box((-23, 44, -1.5), (23, 52, 0), 'holz_dunkel', faces={'north': 'schild_frohe', 'south': 'schild_frohe'}, uv={'north': (0, 0), 'south': (0, 0)}),
         Box((-23.6, 43.4, -1.8), (23.6, 44.2, 0.3), 'messing'),
         Box((-23.6, 51.8, -1.8), (23.6, 52.6, 0.3), 'messing'),
         Box((-23.6, 52.6, -1.9), (23.6, 53.2, 0.4), 'schnee', skip=('down',)),
-        Box((-14.2, 52.6, -0.4), (-13.8, 66, 0), 'eisen'),
-        Box((13.8, 52.6, -0.4), (14.2, 66, 0), 'eisen'),
+        Box((-14.2, 52.6, -0.4), (-13.8, 74, 0), 'eisen'),
+        Box((13.8, 52.6, -0.4), (14.2, 74, 0), 'eisen'),
     ])
     return b
 
@@ -2774,16 +2795,14 @@ def market_fence():
         b += [Box((x - 1.4, 0, -1.4), (x + 1.4, 16, 1.4), 'holz_dunkel'), Box((x - 1.8, 16, -1.8), (x + 1.8, 17, 1.8), 'holz_dunkel'), snow_cap(x - 1.8, -1.8, x + 1.8, 1.8, 17, 0.5)]
     for y in (4, 11):
         b += [Box((-15, y, -0.8), (15, y + 2, 0.8), 'holz'), snow_cap(-15, -0.8, 15, 0.8, y + 2, 0.3)]
-    for k in range(12):
-        x = -14 + k * 2.55
-        sag = 2.2 * math.sin(math.pi * ((x + 15) % 15) / 15)
-        b += soft([Box((x - 1.4, 13 - sag, -1.6), (x + 1.4, 15 - sag, 1.6), 'tanne')])
+    pts = [(x, 14 - 2.2 * math.sin(math.pi * ((x + 15) % 15) / 15)) for x in frange(-15, 15, 1.5)]
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+        b += soft([rod((x0, y0, 0), (x1, y1, 0), 2.6, 'tanne')])
     for x in (-7.5, 7.5):
-        b += soft(flat_bow(x, 13.6, -1.6, 'band_rot', 0.9))
-    colours = list(BULB_SLOTS)
-    for k, x in enumerate(range(-13, 14, 3)):
-        sag = 2.2 * math.sin(math.pi * ((x + 15) % 15) / 15)
-        b += soft([Box((x - 0.5, 12.2 - sag, -2), (x + 0.5, 13.2 - sag, -1.4), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, colours[k % 6]))])
+        b += soft(flat_bow(x, 12.4, -1.4, 'band_rot', 0.9))
+    lights = [(x, y - 1.2) for x, y in pts[1:-1:2]]
+    for k, (x, y) in enumerate(lights):
+        b += soft([Box((x - 0.5, y - 1.2, -1.6), (x + 0.5, y, -0.8), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, list(BULB_SLOTS)[k % 6]))])
     return b
 
 
@@ -2942,28 +2961,40 @@ def snow_globe():
         Box((5.9, 18, 0.9), (7.1, 20, 2.1), 'tanne'),
         Box((6.1, 20, 1.1), (6.9, 20.8, 1.9), 'stern', emit=15, shade=False),
     ]
-    for k, (x, y, z) in enumerate(((-7, 22, -4), (3, 26, 6), (-2, 30, 2), (8, 19, -6), (-8, 15, 6), (4, 33, -3), (0, 24, -8), (-5, 28, 7))):
-        b += soft([Box((x - 0.5, y - 0.5, z - 0.5), (x + 0.5, y + 0.5, z + 0.5), 'zuckerguss')])
     radius = 12.5
     centre_y = 20
     layers = 12
+    rings = []
     for k in range(layers + 1):
         a0 = -math.pi / 2 + math.pi * k / (layers + 1)
         a1 = -math.pi / 2 + math.pi * (k + 1) / (layers + 1)
         y0 = centre_y + radius * math.sin(a0)
         y1 = centre_y + radius * math.sin(a1)
-        if y1 <= 8:
+        if y1 <= 9.4:
             continue
-        y0 = max(y0, 8)
-        r = radius * max(math.cos(a0), math.cos(a1))
-        t = 0.6
+        y0 = max(y0, 9.4)
+        rings.append((y0, y1, round(radius * max(math.cos(a0), math.cos(a1)), 2)))
+    t = 0.5
+    for y0, y1, r in rings:
         b += soft([
             Box((-r, y0, -r), (r, y1, -r + t), 'glaskugel', shade=False),
             Box((-r, y0, r - t), (r, y1, r), 'glaskugel', shade=False),
             Box((-r, y0, -r + t), (-r + t, y1, r - t), 'glaskugel', shade=False),
             Box((r - t, y0, -r + t), (r, y1, r - t), 'glaskugel', shade=False),
         ])
-    b += soft([Box((-2.5, centre_y + radius - 0.6, -2.5), (2.5, centre_y + radius, 2.5), 'glaskugel', shade=False)])
+    for (ya, yb, ra), (yc, yd, rb) in zip(rings, rings[1:]):
+        big, small = max(ra, rb), min(ra, rb)
+        if big - small < 0.1:
+            continue
+        y = yb - 0.15
+        b += soft([
+            Box((-big, y, -big), (big, y + 0.3, -small), 'glaskugel', shade=False),
+            Box((-big, y, small), (big, y + 0.3, big), 'glaskugel', shade=False),
+            Box((-big, y, -small), (-small, y + 0.3, small), 'glaskugel', shade=False),
+            Box((small, y, -small), (big, y + 0.3, small), 'glaskugel', shade=False),
+        ])
+    top = rings[-1]
+    b += soft([Box((-top[2], top[1] - 0.3, -top[2]), (top[2], top[1], top[2]), 'glaskugel', shade=False)])
     return b
 
 
@@ -2986,9 +3017,9 @@ def ice_rink():
         b += soft([Box((x - 0.6, 0.8, -6 + (k % 2) * 8), (x + 0.6, 1.2, -2 + (k % 2) * 8), 'zuckerguss', rotation=((x, 1, -4 + (k % 2) * 8), (0, k * 30, 0)))])
     for x in (-2.2, 2.2):
         b += [
-            Box((x - 0.9, 9, -26.4), (x + 0.9, 12, -25.4), 'zuckerguss'),
-            Box((x - 0.9, 9, -27.6), (x + 0.9, 10, -25.4), 'zuckerguss'),
-            Box((x - 0.15, 8, -27.6), (x + 0.15, 9, -25.4), 'eisen'),
+            Box((x - 0.9, 18.6, -24.4), (x + 0.9, 21.6, -23.4), 'zuckerguss'),
+            Box((x - 0.9, 18.6, -25.6), (x + 0.9, 19.6, -23.4), 'zuckerguss'),
+            Box((x - 0.15, 17.6, -25.6), (x + 0.15, 18.6, -23.4), 'eisen'),
         ]
     return b
 
@@ -3175,8 +3206,8 @@ def toy_press():
         Box((-9, 6, -9), (9, 6.6, 7), 'band_schwarz'),
     ]
     b += rocking_horse(0, 6.6, -1, 0.7, 'lack_rot')
-    b += gauge(-9, 32, 2)
-    b += soft([lamp_dot(9, 32, 2, 'gelb', 1.6), lamp_dot(9, 28, 2, 'gruen', 1.6)])
+    b += gauge(-9, 32, 4)
+    b += soft([lamp_dot(9, 32, 4, 'gelb', 1.6), lamp_dot(9, 28, 4, 'gruen', 1.6)])
     for k in range(8):
         b.append(Box((11.6, 18, 5.4), (16, 20, 8.6), 'messing', rotation=((12, 19, 7), (0, 0, k * 45))))
     b.append(Box((11.4, 16, 5), (14.6, 22, 9), 'eisen'))
@@ -3188,7 +3219,7 @@ def control_desk():
         Box((-14, 0, -4), (14, 12, 6), 'kessel'),
         Box((-14.4, 11.6, -6), (14.4, 13, 6.4), 'messing'),
         Box((-14, 12, -6), (14, 18, 6), 'eisen', rotation=((0, 12, 6), (-30, 0, 0))),
-        Box((-12, 18, 4), (12, 28, 6), 'eisen'),
+        Box((-12, 12, 4), (12, 28, 6), 'eisen'),
         Box((-11, 19, 3.6), (11, 27, 4), 'bildschirm', emit=10, shade=False),
     ]
     colours = ['rot', 'gelb', 'gruen', 'blau', 'warm', 'rosa']
@@ -3275,7 +3306,7 @@ def pipe_wall():
     b += [Box((-24, 8.5, 3.7), (24, 11.5, 6.7), 'kupfer'), Box((-24, 3, 4.6), (24, 5, 6.6), 'eisen')]
     for x in (-18, 0, 18):
         b += [Box((x - 2.4, 7.4, 3.2), (x + 2.4, 12.6, 8), 'messing'), Box((x - 0.6, 2.4, 6.2), (x + 0.6, 5.6, 8), 'eisen')]
-    b += [Box((-8, 12, 4.4), (-6, 14, 6), 'eisen'), Box((-10, 14, 3.6), (-4, 15, 6.8), 'apfel')]
+    b += [Box((-8, 11.4, 4.4), (-6, 14, 6), 'eisen'), Box((-10, 14, 3.6), (-4, 15, 6.8), 'apfel')]
     b += gauge(9, 10, 3.6)
     return b
 
@@ -3429,7 +3460,7 @@ def mega_wrapper():
         b += soft([lamp_dot(x, 10, -28, colours[k % 8], 1.8)])
     b += [Box((-20, 4, -40), (4, 10, -32), 'kessel'), Box((-20.4, 9.6, -40.4), (4.4, 11, -31.6), 'messing')]
     for k in range(6):
-        b += soft([lamp_dot(-17 + k * 3.8, 12.2, -33, colours[k], 1.4)])
+        b += soft([lamp_dot(-17 + k * 3.8, 11.5, -33, colours[k], 1.4)])
     b.append(Box((-17 + 5 * 3.8 - 0.6, 11, -36), (-17 + 5 * 3.8 + 0.6, 16, -35), 'eisen', rotation=((-17 + 5 * 3.8, 11, -35.5), (-20, 0, 0))))
     return b
 
@@ -3504,11 +3535,11 @@ def boiler():
     b += pipe_run([(20, 56, 0), (20, 76, 0), (36, 76, 0), (36, 110, 0)], 3, 'kupfer')
     b += pipe_run([(-8, 56, 0), (-8, 66, 0), (-8, 66, -26), (8, 66, -26), (8, 20, -26)], 2.2, 'eisen')
     b += valve_wheel(8, 40, -28.6, 4)
-    b += big_gauge(-2, 46, -18.6, 4.4)
-    b += big_gauge(4, 30, -18.6, 3.4)
+    b += big_gauge(20, 15, -32, 3.6)
+    b += big_gauge(32, 15, -32, 3.6)
     b += [Box((24.8, 34.8, -24.6), (27.2, 37.2, -17), 'eisen')]
     for k, x in enumerate((-6, 0, 6)):
-        b += soft([lamp_dot(x + 26, 14, -32, ('rot', 'gelb', 'gruen')[k], 2)])
+        b += soft([lamp_dot(x + 26, 7.5, -32, ('rot', 'gelb', 'gruen')[k], 2)])
     b += [Box((14, 4, -32), (38, 22, -24), 'kessel'), Box((13.6, 21.6, -32.4), (38.4, 23, -23.6), 'messing')]
     return b
 
@@ -3608,15 +3639,12 @@ def gate_big():
         Box((-23.8, 68.8, -1.9), (23.8, 69.8, 0.4), 'messing'),
         Box((-23.8, 80.6, -1.9), (23.8, 81.6, 0.4), 'messing'),
         Box((-23.8, 81.6, -2), (23.8, 82.4, 0.5), 'schnee', skip=('down',)),
-        Box((-1.8, 83.6, -0.8), (1.8, 88.8, 0.8), 'stern', emit=15, shade=False, rotation=((0, 86.2, 0), (0, 0, 45))),
-        Box((-0.9, 82.8, -0.8), (0.9, 89.6, 0.8), 'stern', emit=15, shade=False),
+        *pixel_star(0, 82.3, -0.75, 7.2, depth=1.4),
     ])
     colours = list(BULB_SLOTS)
-    for k, x in enumerate(range(-24, 25, 3)):
-        t = (x + 24) / 48
-        sag = 6 * math.sin(math.pi * t)
-        for z in (-9.6, 8.8):
-            b += soft([Box((x - 0.7, 54.6 - sag, z), (x + 0.7, 56.4 - sag, z + 0.8), 'lampen', emit=15, shade=False, uv=patch(BULB_SLOTS, colours[k % 6]))])
+    points = [(x, 57 - 6 * math.sin(math.pi * (x + 25) / 50)) for x in range(-25, 26, 3)] + [(25, 57)]
+    for z in (-8.6, 8.6):
+        b += soft(light_string(points, z, colours, 0.9))
     for x in (-24, 24):
         b += soft([
             Box((x - 0.2, 52, -0.2), (x + 0.2, 60, 0.2), 'eisen'),
@@ -3890,7 +3918,7 @@ def build_props():
                               ('krippe', 'Weihnachtskrippe', nativity), ('christbaumverkauf', 'Christbaumverkauf', tree_sale), ('brunnen', 'Brunnen', frozen_fountain),
                               ('vogelhaus', 'Vogelhaus', birdhouse), ('schneehaufen', 'Schneehaufen', snow_pile),
                               ('sterntor', 'Sterntor', star_gate), ('zaun', 'Marktzaun', market_fence), ('doppellaterne', 'Doppellaterne', double_lamp), ('sitzgruppe', 'Sitzgruppe', seating),
-                              ('schneekugel', 'Schneekugel', snow_globe), ('eisbahn', 'Eisbahn', ice_rink), ('rentiergehege', 'Rentiergehege', reindeer_pen)):
+                              ('schneekugel', 'Schneekugel', snow_globe), ('eisbahn', 'Eisbahn', ice_rink)):
         boxes = maker()
         parts = auto_parts(art, boxes)
         if art == 'maronenofen':
