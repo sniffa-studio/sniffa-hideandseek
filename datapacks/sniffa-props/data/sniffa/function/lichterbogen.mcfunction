@@ -1,1 +1,1 @@
-function sniffa:intern/deko/platzieren {art:"lichterbogen",name:"Lichterbogen"}
+function sniffa:intern/deko/platzieren {art:"lichterbogen",name:"Lichterbogen",modus:""}

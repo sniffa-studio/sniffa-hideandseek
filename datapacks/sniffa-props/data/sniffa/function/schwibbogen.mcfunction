@@ -1,1 +1,1 @@
-function sniffa:intern/deko/platzieren {art:"schwibbogen",name:"Schwibbogen"}
+function sniffa:intern/deko/platzieren {art:"schwibbogen",name:"Schwibbogen",modus:""}

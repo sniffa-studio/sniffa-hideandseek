@@ -1,1 +1,1 @@
-function sniffa:intern/deko/platzieren {art:"stand_spielzeug",name:"Spielzeugstand"}
+function sniffa:intern/deko/platzieren {art:"stand_spielzeug",name:"Spielzeugstand",modus:""}

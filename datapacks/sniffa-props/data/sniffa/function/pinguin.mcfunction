@@ -1,1 +1,1 @@
-function sniffa:intern/deko/platzieren {art:"pinguin",name:"Pinguin"}
+function sniffa:intern/deko/platzieren {art:"pinguin",name:"Pinguin",modus:""}

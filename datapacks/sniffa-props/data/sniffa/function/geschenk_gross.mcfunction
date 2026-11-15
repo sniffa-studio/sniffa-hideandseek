@@ -1,1 +1,1 @@
-function sniffa:intern/deko/platzieren {art:"geschenk_gross",name:"Geschenk"}
+function sniffa:intern/deko/platzieren {art:"geschenk_gross",name:"Geschenk",modus:""}

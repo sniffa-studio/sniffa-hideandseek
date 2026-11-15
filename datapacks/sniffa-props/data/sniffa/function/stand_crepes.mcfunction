@@ -1,1 +1,1 @@
-function sniffa:intern/deko/platzieren {art:"stand_crepes",name:"Crêpesstand"}
+function sniffa:intern/deko/platzieren {art:"stand_crepes",name:"Crêpesstand",modus:""}

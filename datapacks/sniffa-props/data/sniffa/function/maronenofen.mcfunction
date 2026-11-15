@@ -1,1 +1,1 @@
-function sniffa:intern/deko/platzieren {art:"maronenofen",name:"Maronenofen"}
+function sniffa:intern/deko/platzieren {art:"maronenofen",name:"Maronenofen",modus:""}

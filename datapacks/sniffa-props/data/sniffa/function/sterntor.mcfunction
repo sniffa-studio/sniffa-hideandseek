@@ -1,1 +1,1 @@
-function sniffa:intern/deko/platzieren {art:"sterntor",name:"Sterntor"}
+function sniffa:intern/deko/platzieren {art:"sterntor",name:"Sterntor",modus:""}
