@@ -14,6 +14,11 @@ ATLAS = 512
 TILE = 32
 COLUMNS = ATLAS // TILE
 TEXTURE = 'hideandseek:item/props/deko'
+JITTER = 0.0
+SHEET = 1024
+MAX_FACE = 64
+NO_EDGES = {'schneeball', 'glas', 'lampen', 'stern', 'flamme', 'glut', 'schnee_rand', 'bonbons', 'kugeln', 'tanne', 'beere'}
+RIVETS = {'eisen', 'kessel'}
 
 
 def clamp(value):
@@ -66,7 +71,7 @@ class Atlas:
 def fill_noise(img, rnd, base, spread=0.06, grain=None):
     for y in range(TILE):
         for x in range(TILE):
-            amount = 1 + rnd.uniform(-spread, spread)
+            amount = 1 + JITTER * rnd.uniform(-spread, spread)
             if grain:
                 amount += grain(x, y)
             img.putpixel((x, y), shade(base, amount))
@@ -85,7 +90,7 @@ def paper(base, pattern):
                 elif pattern == 'stars' and ((x % 8, y % 8) in ((3, 2), (2, 3), (3, 3), (4, 3), (3, 4))):
                     img.putpixel((x, y), light)
                 elif pattern == 'checks' and ((x // 4) + (y // 4)) % 2 == 0:
-                    img.putpixel((x, y), shade(base, 1.12 + rnd.uniform(-0.03, 0.03)))
+                    img.putpixel((x, y), shade(base, 1.12 + JITTER * rnd.uniform(-0.03, 0.03)))
     return paint
 
 
@@ -106,12 +111,13 @@ def flat(base, spread=0.05):
 
 
 def snow(img, rnd):
-    base = hexcolour('#eef4fb')
-    fill_noise(img, rnd, base, 0.025)
-    for _ in range(26):
-        img.putpixel((rnd.randrange(TILE), rnd.randrange(TILE)), hexcolour('#ffffff'))
-    for _ in range(18):
-        img.putpixel((rnd.randrange(TILE), rnd.randrange(TILE)), hexcolour('#d6e2f0'))
+    base = hexcolour('#eef3f9')
+    for y in range(TILE):
+        for x in range(TILE):
+            img.putpixel((x, y), base)
+    for x, y in ((3, 4), (11, 9), (22, 3), (27, 15), (7, 20), (17, 25), (29, 28), (14, 15)):
+        img.putpixel((x, y), hexcolour('#ffffff'))
+        img.putpixel((x + 1, y + 1), hexcolour('#dbe5f0'))
 
 
 def snow_side(img, rnd):
@@ -120,7 +126,7 @@ def snow_side(img, rnd):
         depth = 1 + rnd.choice((0, 0, 1, 1, 1, 2))
         for y in range(TILE):
             if y < depth or y < 2:
-                img.putpixel((x, y), shade(base, 1 + rnd.uniform(-0.03, 0.03)))
+                img.putpixel((x, y), shade(base, 1 + JITTER * rnd.uniform(-0.03, 0.03)))
 
 
 def metal(base):
@@ -142,7 +148,7 @@ def glass(img, rnd):
             dy = (y - 18) / 16
             t = max(0.0, 1 - math.sqrt(dx * dx * 2.2 + dy * dy * 1.4))
             colour = mix(outer, inner, min(1, t * 1.5))
-            img.putpixel((x, y), shade(colour, 1 + rnd.uniform(-0.03, 0.03)))
+            img.putpixel((x, y), shade(colour, 1 + JITTER * rnd.uniform(-0.03, 0.03)))
 
 
 def planks(base, height=4):
@@ -152,7 +158,7 @@ def planks(base, height=4):
         for y in range(TILE):
             board = y // height
             for x in range(TILE):
-                amount = tones[board] + rnd.uniform(-0.04, 0.04)
+                amount = tones[board] + JITTER * rnd.uniform(-0.04, 0.04)
                 if y % height == height - 1:
                     amount *= 0.62
                 elif (x + offsets[board]) % 16 == 0:
@@ -168,7 +174,7 @@ def grain(base):
         lines = [rnd.uniform(0.9, 1.08) for _ in range(TILE)]
         for y in range(TILE):
             for x in range(TILE):
-                img.putpixel((x, y), shade(base, lines[x] + rnd.uniform(-0.04, 0.04)))
+                img.putpixel((x, y), shade(base, lines[x] + JITTER * rnd.uniform(-0.04, 0.04)))
     return paint
 
 
@@ -181,19 +187,21 @@ def candy(img, rnd):
             colour = red if band < 3 else white
             if band == 3 or band == 7:
                 colour = mix(red, white, 0.5)
-            img.putpixel((x, y), shade(colour, 1 + rnd.uniform(-0.03, 0.03)))
+            img.putpixel((x, y), shade(colour, 1 + JITTER * rnd.uniform(-0.03, 0.03)))
 
 
 def fir(img, rnd):
-    dark = hexcolour('#1d4d2b')
-    light = hexcolour('#3d7a3f')
+    dark = hexcolour('#1e4f2e')
+    mid = hexcolour('#2b6a3a')
+    light = hexcolour('#3f8a47')
     for y in range(TILE):
         for x in range(TILE):
-            t = rnd.random()
-            colour = mix(dark, light, t * t)
+            k = (x + 2 * y) % 6
+            colour = dark if k in (0, 1) else mid
+            if (x * 7 + y * 3) % 11 == 0:
+                colour = light
             img.putpixel((x, y), colour)
-    for _ in range(9):
-        x, y = rnd.randrange(1, TILE - 1), rnd.randrange(1, TILE - 1)
+    for x, y in ((4, 5), (19, 8), (10, 21), (26, 26), (28, 13)):
         img.putpixel((x, y), hexcolour('#c4232c'))
         img.putpixel((x + 1, y), hexcolour('#e2484d'))
 
@@ -202,7 +210,7 @@ def burlap(img, rnd):
     base = hexcolour('#a58156')
     for y in range(TILE):
         for x in range(TILE):
-            amount = 1 + rnd.uniform(-0.05, 0.05)
+            amount = 1 + JITTER * rnd.uniform(-0.05, 0.05)
             if (x % 2 == 0) != (y % 2 == 0):
                 amount *= 0.9
             img.putpixel((x, y), shade(base, amount))
@@ -221,7 +229,7 @@ def awning(img, rnd):
     for y in range(TILE):
         for x in range(TILE):
             colour = red if (x // 4) % 2 == 0 else white
-            img.putpixel((x, y), shade(colour, 1 + rnd.uniform(-0.03, 0.03)))
+            img.putpixel((x, y), shade(colour, 1 + JITTER * rnd.uniform(-0.03, 0.03)))
 
 
 def ice(img, rnd):
@@ -229,7 +237,7 @@ def ice(img, rnd):
     low = hexcolour('#9fd2f2')
     for y in range(TILE):
         for x in range(TILE):
-            img.putpixel((x, y), shade(mix(top, low, y / TILE), 1 + rnd.uniform(-0.04, 0.04)))
+            img.putpixel((x, y), shade(mix(top, low, y / TILE), 1 + JITTER * rnd.uniform(-0.04, 0.04)))
 
 
 def gingerbread(img, rnd):
@@ -244,7 +252,7 @@ def blanket(img, rnd):
     for y in range(TILE):
         for x in range(TILE):
             colour = line if x % 6 == 0 or y % 6 == 0 else red
-            img.putpixel((x, y), shade(colour, 1 + rnd.uniform(-0.04, 0.04)))
+            img.putpixel((x, y), shade(colour, 1 + JITTER * rnd.uniform(-0.04, 0.04)))
 
 
 def awning_of(value):
@@ -255,7 +263,7 @@ def awning_of(value):
         for y in range(TILE):
             for x in range(TILE):
                 colour = base if (x // 4) % 2 == 0 else white
-                img.putpixel((x, y), shade(colour, 1 + rnd.uniform(-0.03, 0.03)))
+                img.putpixel((x, y), shade(colour, 1 + JITTER * rnd.uniform(-0.03, 0.03)))
     return paint
 
 
@@ -271,7 +279,7 @@ def candies(img, rnd):
                     colour = glass
                 else:
                     colour = hexcolour(rnd.choice([palette[name], palette[name], '#ffffff', palette[rnd.choice(list(palette))]]))
-                img.putpixel((x0 + x, y0 + y), shade(colour, 1 + rnd.uniform(-0.05, 0.05)))
+                img.putpixel((x0 + x, y0 + y), shade(colour, 1 + JITTER * rnd.uniform(-0.05, 0.05)))
 
 
 def baubles(img, rnd):
@@ -294,14 +302,14 @@ def stones(img, rnd):
         for x in range(TILE):
             row = y // 8
             edge = y % 8 == 7 or (x + (row % 2) * 6) % 12 == 11
-            img.putpixel((x, y), shade(base, (0.68 if edge else 1) + rnd.uniform(-0.06, 0.06)))
+            img.putpixel((x, y), shade(base, (0.68 if edge else 1) + JITTER * rnd.uniform(-0.06, 0.06)))
 
 
 def speckled(base_hex, dot_hex):
     def paint(img, rnd):
         fill_noise(img, rnd, hexcolour(base_hex), 0.06)
-        for _ in range(60):
-            img.putpixel((rnd.randrange(TILE), rnd.randrange(TILE)), hexcolour(dot_hex))
+        for k in range(22):
+            img.putpixel(((k * 13 + 5) % TILE, (k * 7 + k // 5) % TILE), hexcolour(dot_hex))
     return paint
 
 
@@ -311,7 +319,7 @@ def cone_paper(img, rnd):
     for y in range(TILE):
         for x in range(TILE):
             colour = red if ((x + y // 2) // 3) % 2 == 0 else white
-            img.putpixel((x, y), shade(colour, 1 + rnd.uniform(-0.03, 0.03)))
+            img.putpixel((x, y), shade(colour, 1 + JITTER * rnd.uniform(-0.03, 0.03)))
 
 
 def knit(img, rnd):
@@ -321,7 +329,7 @@ def knit(img, rnd):
         for x in range(TILE):
             colour = white if y % 8 in (3, 4) else red
             amount = 0.85 if (x + (y % 2)) % 2 == 0 else 1.0
-            img.putpixel((x, y), shade(colour, amount + rnd.uniform(-0.03, 0.03)))
+            img.putpixel((x, y), shade(colour, amount + JITTER * rnd.uniform(-0.03, 0.03)))
 
 
 def flame(img, rnd):
@@ -339,7 +347,7 @@ def bulbs(img, rnd):
         y0 = (index // 3) * 10
         for y in range(8):
             for x in range(8):
-                img.putpixel((x0 + x, y0 + y), shade(base, 1 + rnd.uniform(-0.03, 0.03)))
+                img.putpixel((x0 + x, y0 + y), shade(base, 1 + JITTER * rnd.uniform(-0.03, 0.03)))
 
 
 BULB_SLOTS = {'rot': 0, 'gelb': 1, 'gruen': 2, 'blau': 3, 'rosa': 4, 'warm': 5}
@@ -392,7 +400,7 @@ def lettered(base, ink, text, width_px, height_px, size=1, gap=1):
                         continue
                     for dy in range(size):
                         for dx in range(size):
-                            img.putpixel((x + col * size + dx, y0 + row * size + dy), shade(ink, 1 + rnd.uniform(-0.05, 0.05)))
+                            img.putpixel((x + col * size + dx, y0 + row * size + dy), shade(ink, 1 + JITTER * rnd.uniform(-0.05, 0.05)))
             x += len(FONT[letter][0]) * size + gap
     return paint
 
@@ -522,10 +530,103 @@ def face_size(box, side):
     return dx, dz
 
 
-def model_json(atlas, boxes, shift, seed):
-    rnd = random.Random(seed)
+FACE_AXES = {'north': (0, 1), 'south': (0, 1), 'east': (2, 1), 'west': (2, 1), 'up': (0, 2), 'down': (0, 2)}
+
+
+class FaceSheet:
+    def __init__(self, atlas):
+        self.atlas = atlas
+        self.requests = {}
+        self.slots = {}
+
+    def request(self, mat, pw, ph, side, fixed, cuts, emit):
+        tile = self.atlas.tiles[mat]
+        pw = max(1, min(MAX_FACE if not fixed else TILE * tile.span, round(pw)))
+        ph = max(1, min(MAX_FACE if not fixed else TILE, round(ph)))
+        ha, va = FACE_AXES[side]
+        edges = not fixed and not emit and mat not in NO_EDGES and side != 'down'
+        key = (mat, pw, ph, fixed, edges and ha not in cuts, edges and va not in cuts, side == 'down', side == 'up')
+        self.requests[key] = True
+        return key
+
+    def source(self, mat):
+        tile = self.atlas.tiles[mat]
+        crop = self.atlas.image.crop((tile.column * TILE, tile.row * TILE, (tile.column + tile.span) * TILE, (tile.row + 1) * TILE))
+        if tile.span > 1:
+            return crop
+        big = Image.new('RGBA', (MAX_FACE, MAX_FACE))
+        for ox in range(0, MAX_FACE, TILE):
+            for oy in range(0, MAX_FACE, TILE):
+                big.paste(crop, (ox, oy))
+        return big
+
+    def paint(self, key):
+        mat, pw, ph, fixed, h_edges, v_edges, down, up = key
+        src = self.source(mat)
+        ox, oy = fixed if fixed else (0, 0)
+        region = src.crop((ox, oy, ox + pw, oy + ph)).copy()
+        if down:
+            for y in range(ph):
+                for x in range(pw):
+                    c = region.getpixel((x, y))
+                    region.putpixel((x, y), shade(c, 0.78))
+            return region
+        if pw < 3 or ph < 3:
+            h_edges = v_edges = False
+
+        def light(c):
+            return (clamp(c[0] * 1.3 + 20), clamp(c[1] * 1.3 + 20), clamp(c[2] * 1.3 + 20), c[3])
+
+        def dark(c):
+            return (clamp(c[0] * 0.66), clamp(c[1] * 0.66), clamp(c[2] * 0.66), c[3])
+        base = [[region.getpixel((x, y)) for x in range(pw)] for y in range(ph)]
+        if v_edges:
+            for x in range(pw):
+                region.putpixel((x, 0), light(base[0][x]))
+                if x > 0 or not h_edges:
+                    region.putpixel((x, ph - 1), dark(base[ph - 1][x]))
+        if h_edges:
+            for y in range(ph):
+                region.putpixel((0, y), light(base[y][0]))
+                if y > 0 or not v_edges:
+                    region.putpixel((pw - 1, y), dark(base[y][pw - 1]))
+        if h_edges and v_edges and mat in RIVETS and pw >= 8 and ph >= 8:
+            for x, y in ((1, 1), (pw - 2, 1), (1, ph - 2), (pw - 2, ph - 2)):
+                region.putpixel((x, y), light(light(base[y][x])))
+        return region
+
+    def pack(self):
+        keys = sorted(self.requests, key=lambda k: (-k[2], -k[1]))
+        x = y = row = 0
+        placed = {}
+        for key in keys:
+            pw, ph = key[1], key[2]
+            if x + pw > SHEET:
+                x = 0
+                y += row
+                row = 0
+            placed[key] = (x, y)
+            x += pw
+            row = max(row, ph)
+        height = y + row
+        size = 64
+        while size < height:
+            size *= 2
+        self.height = size
+        self.image = Image.new('RGBA', (SHEET, size), (0, 0, 0, 0))
+        for key, (px, py) in placed.items():
+            self.image.paste(self.paint(key), (px, py))
+        self.slots = placed
+
+    def uv(self, key):
+        px, py = self.slots[key]
+        su = 16 / SHEET
+        sv = 16 / self.height
+        return [round(px * su, 5), round(py * sv, 5), round((px + key[1]) * su, 5), round((py + key[2]) * sv, 5)]
+
+
+def model_json(sheet, boxes, shift, seed):
     elements = []
-    scale = 16 / ATLAS
     for box in boxes:
         a = [box.a[i] - shift[i] for i in range(3)]
         b = [box.b[i] - shift[i] for i in range(3)]
@@ -538,23 +639,16 @@ def model_json(atlas, boxes, shift, seed):
         for side in ('north', 'east', 'south', 'west', 'up', 'down'):
             if side in box.skip:
                 continue
-            tile = atlas.tiles[box.faces.get(side, box.mat)]
+            mat = box.faces.get(side, box.mat)
+            tile = sheet.atlas.tiles[mat]
             w, h = face_size(box, side)
-            pw = min(TILE * tile.span, max(1.0, w * tile.density))
-            ph = min(TILE, max(1.0, h * tile.density))
+            fixed = None
             if side in box.uv:
-                ox, oy = box.uv[side]
+                fixed = tuple(round(v) for v in box.uv[side])
             elif tile.density > 1 or tile.name.startswith('schild') or tile.name == 'lampen':
-                ox, oy = 0, 0
-            else:
-                ox = rnd.uniform(0, TILE * tile.span - pw)
-                oy = rnd.uniform(0, TILE - ph)
-            u0 = (tile.column * TILE + ox) * scale
-            v0 = (tile.row * TILE + oy) * scale
-            faces[side] = {
-                'uv': [round(u0, 4), round(v0, 4), round(u0 + pw * scale, 4), round(v0 + ph * scale, 4)],
-                'texture': '#0',
-            }
+                fixed = (0, 0)
+            key = sheet.request(mat, w * tile.density, h * tile.density, side, fixed, getattr(box, 'cuts', set()), box.emit)
+            faces[side] = {'_key': key, 'texture': '#0'}
         element = {'from': lo, 'to': hi, 'faces': faces}
         if box.rotation:
             origin, angles = box.rotation
@@ -571,6 +665,13 @@ def model_json(atlas, boxes, shift, seed):
         'textures': {'0': TEXTURE, 'particle': TEXTURE},
         'elements': elements,
     }
+
+
+def resolve(sheet, model):
+    for element in model['elements']:
+        for face in element['faces'].values():
+            face['uv'] = sheet.uv(face.pop('_key'))
+    return model
 
 
 SNOW_SIDES = {'north': 'schnee_rand', 'south': 'schnee_rand', 'east': 'schnee_rand', 'west': 'schnee_rand'}
@@ -969,6 +1070,7 @@ def clone_box(piece, a, b):
     clone = Box(tuple(a), tuple(b), piece.mat, faces=dict(piece.faces), rotation=piece.rotation, emit=piece.emit,
                 skip=set(piece.skip), uv=dict(piece.uv), shade=piece.shade)
     clone.solid = piece.solid
+    clone.cuts = set(getattr(piece, 'cuts', set()))
     return clone
 
 
@@ -990,7 +1092,9 @@ def split_at(boxes, axis, cuts):
             a = list(piece.a)
             b = list(piece.b)
             a[axis], b[axis] = edges[k], edges[k + 1]
-            out.append(clone_box(piece, a, b))
+            clone = clone_box(piece, a, b)
+            clone.cuts.add(axis)
+            out.append(clone)
     return out
 
 
@@ -1949,23 +2053,28 @@ def functions(prop):
 
 def main():
     atlas = build_atlas()
-    texture = ASSETS / 'textures/item/props/deko.png'
-    texture.parent.mkdir(parents=True, exist_ok=True)
-    atlas.image.save(texture)
+    sheet = FaceSheet(atlas)
+    models = []
     for prop in props():
         for part in prop.parts:
             if part.boxes is None:
                 continue
-            write_json(ASSETS / f'models/item/props/deko/{part.item}.json', model_json(atlas, part.boxes, part_shift(part), part.item))
-            write_json(ASSETS / f'items/props/deko/{part.item}.json', item_definition(part.item))
+            models.append((part.item, model_json(sheet, part.boxes, part_shift(part), part.item)))
         functions(prop)
     for size in GIFT_SIZES:
         prop = next(p for p in props() if p.art == 'geschenk_' + size)
         shift = part_shift(prop.parts[0])
         for colour in GIFT_COLOURS:
             name = f'geschenk_{size}_{colour}'
-            write_json(ASSETS / f'models/item/props/deko/{name}.json', model_json(atlas, gift_model(size, colour), shift, name))
-            write_json(ASSETS / f'items/props/deko/{name}.json', item_definition(name))
+            models.append((name, model_json(sheet, gift_model(size, colour), shift, name)))
+    sheet.pack()
+    texture = ASSETS / 'textures/item/props/deko.png'
+    texture.parent.mkdir(parents=True, exist_ok=True)
+    sheet.image.save(texture)
+    for name, model in models:
+        write_json(ASSETS / f'models/item/props/deko/{name}.json', resolve(sheet, model))
+        write_json(ASSETS / f'items/props/deko/{name}.json', item_definition(name))
+    print('sheet', SHEET, sheet.height, len(sheet.requests), 'faces')
 
 
 if __name__ == '__main__':
