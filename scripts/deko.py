@@ -4477,6 +4477,8 @@ def functions(prop):
         setzen.insert(0, summon(prop, part))
     base = FUNCTIONS / 'intern/deko' / prop.art
     write(base / 'frei.mcfunction', '\n'.join(frei) + '\n')
+    heil = [f'execute if loaded {local(block)} if block {local(block)} minecraft:air run return 0' for block in prop.footprint]
+    write(base / 'heil.mcfunction', '\n'.join(heil + ['return 1']) + '\n')
     setzen += getattr(prop, 'extra', [])
     write(base / 'setzen.mcfunction', '\n'.join(setzen) + '\n')
     raeumen += getattr(prop, 'extra_raeumen', [])
@@ -4660,14 +4662,49 @@ def icon_model(model):
     return {
         'textures': {'0': TEXTURE, 'particle': TEXTURE},
         'elements': out,
-        'display': {'gui': {'rotation': [25, 210, 0], 'translation': [0, 0, 0], 'scale': [0.8, 0.8, 0.8]}},
+        'display': {
+            'gui': {'rotation': [25, 210, 0], 'translation': [0, 0, 0], 'scale': [0.8, 0.8, 0.8]},
+            'ground': {'rotation': [0, 0, 0], 'translation': [0, 3, 0], 'scale': [0.25, 0.25, 0.25]},
+            'fixed': {'rotation': [0, 0, 0], 'translation': [0, 0, 0], 'scale': [0.5, 0.5, 0.5]},
+            'thirdperson_righthand': {'rotation': [75, 45, 0], 'translation': [0, 2.5, 0], 'scale': [0.375, 0.375, 0.375]},
+            'thirdperson_lefthand': {'rotation': [75, 45, 0], 'translation': [0, 2.5, 0], 'scale': [0.375, 0.375, 0.375]},
+            'firstperson_righthand': {'rotation': [0, 45, 0], 'translation': [0, 0, 0], 'scale': [0.4, 0.4, 0.4]},
+            'firstperson_lefthand': {'rotation': [0, 225, 0], 'translation': [0, 0, 0], 'scale': [0.4, 0.4, 0.4]},
+            'head': {'rotation': [0, 0, 0], 'translation': [0, 0, 0], 'scale': [0.6, 0.6, 0.6]},
+        },
     }
+
+
+def text_json(text, colour, bold=False):
+    out = {'text': text, 'color': colour, 'italic': False}
+    if bold:
+        out['bold'] = True
+    return json.dumps(out, ensure_ascii=False)
+
+
+def give_function(prop, has_icon):
+    title = TITLES.get(prop.art, prop.title)
+    lore = [text_json(DESCRIPTIONS.get(prop.art, ''), 'gray'), text_json(f'Größe: {size_of(prop)}', 'dark_aqua'), text_json(f'Platz: {place_of(prop)}', 'dark_aqua')]
+    lore += [text_json(f'✦ {feature}', 'yellow') for feature in features_of(prop)]
+    lore += [text_json('Rechtsklick: setzen, wo du hinschaust', 'green'), text_json('Abbauen im Kreativmodus gibt es zurück', 'dark_gray')]
+    model = f'hideandseek:props/deko/icon/{prop.art}' if has_icon else f'hideandseek:props/deko/{ICON_FALLBACK.get(prop.art, prop.art)}'
+    modus = '_wand' if getattr(prop, 'wall', False) else '_decke' if getattr(prop, 'ceiling', False) else ''
+    name = prop.title.replace('"', '')
+    components = ','.join([
+        f'minecraft:item_model="{model}"',
+        f'minecraft:custom_name={text_json(title, "gold", True)}',
+        f'minecraft:lore=[{",".join(lore)}]',
+        f'minecraft:custom_data={{sniffa_deko:{{art:"{prop.art}",name:"{name}",modus:"{modus}"}}}}',
+        'minecraft:use_cooldown={seconds:0.3}',
+        '!minecraft:max_damage',
+    ])
+    write(FUNCTIONS / 'item' / f'{prop.art}.mcfunction', f'give @s minecraft:carrot_on_a_stick[{components}]\n')
 
 
 def catalogue(icons):
     entries = []
     for prop in props():
-        icon = f'hideandseek:props/deko/icon/{prop.art}' if prop.art in icons else f'hideandseek:props/deko/{ICON_FALLBACK.get(prop.art, prop.art)}'
+        icon = f'hideandseek:props/deko/katalog/{prop.art}' if prop.art in icons else f'hideandseek:props/deko/{ICON_FALLBACK.get(prop.art, prop.art)}'
         entries.append({'art': prop.art, 'title': TITLES.get(prop.art, prop.title), 'category': category_of(prop), 'icon': icon,
                         'text': DESCRIPTIONS.get(prop.art, ''), 'size': size_of(prop), 'place': place_of(prop), 'features': features_of(prop)})
     entries.sort(key=lambda e: (CATEGORY_ORDER.index(e['category']), e['title']))
@@ -4728,6 +4765,18 @@ def main():
     for art, model in icons.items():
         write_json(ASSETS / f'models/item/props/deko/icon/{art}.json', model)
         write_json(ASSETS / f'items/props/deko/icon/{art}.json', item_definition(f'icon/{art}'))
+        big = {'parent': f'hideandseek:item/props/deko/icon/{art}', 'display': {'gui': {'rotation': [25, 210, 0], 'translation': [0, 0, 0], 'scale': [1.6, 1.6, 1.6]}}}
+        write_json(ASSETS / f'models/item/props/deko/katalog/{art}.json', big)
+        write_json(ASSETS / f'items/props/deko/katalog/{art}.json', dict(item_definition(f'katalog/{art}'), oversized_in_gui=True))
+    for prop in props():
+        give_function(prop, prop.art in icons)
+    checks = ['execute as @e[type=minecraft:marker,tag=sniffa_deko,tag=!deko_getaggt] run function sniffa:intern/deko/item/taggen with entity @s data']
+    for prop in props():
+        if prop.footprint:
+            checks.append(f'execute as @e[type=minecraft:marker,tag=deko_art_{prop.art}] at @s rotated as @s unless function sniffa:intern/deko/{prop.art}/heil run function sniffa:intern/deko/item/abgebaut with entity @s data')
+    write(FUNCTIONS / 'intern/deko/pruefen.mcfunction', '\n'.join(checks) + '\n')
+    uses = [f'execute if items entity @s weapon.mainhand minecraft:carrot_on_a_stick[minecraft:custom_data~{{sniffa_deko:{{art:"{prop.art}"}}}}] run return run function sniffa:{prop.art}' for prop in props()]
+    write(FUNCTIONS / 'intern/deko/item/benutzen.mcfunction', '\n'.join(uses) + '\n')
     write_json(ASSETS / 'deko_katalog.json', catalogue(icons))
     print('sheet', SHEET, sheet.height, len(sheet.requests), 'faces')
     for prop in props():
