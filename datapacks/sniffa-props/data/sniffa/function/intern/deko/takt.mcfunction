@@ -17,3 +17,7 @@ execute if score #takt sniffa_deko matches 0 run function sniffa:intern/deko/lau
 execute if score #takt sniffa_deko matches 10 run function sniffa:intern/deko/laufen
 execute if score #takt sniffa_deko matches 20 run function sniffa:intern/deko/laufen
 execute if score #takt sniffa_deko matches 30 run function sniffa:intern/deko/laufen
+execute if score #takt sniffa_deko matches 5 run function sniffa:intern/deko/pruefen
+execute if score #takt sniffa_deko matches 15 run function sniffa:intern/deko/pruefen
+execute if score #takt sniffa_deko matches 25 run function sniffa:intern/deko/pruefen
+execute if score #takt sniffa_deko matches 35 run function sniffa:intern/deko/pruefen
