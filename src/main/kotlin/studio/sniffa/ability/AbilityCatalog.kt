@@ -7,7 +7,7 @@ object AbilityCatalog {
 
     val RADAR = Ability(
         id = "radar",
-        displayName = "Rentier-Nase",
+        displayName = "Spürnase",
         description = "Rudolph wittert, wie viele Verstecker in 50 Blöcken sind, und markiert sie kurz. Geschenkpapier schützt.",
         side = Side.SEEKER,
         cost = 5,
@@ -19,7 +19,7 @@ object AbilityCatalog {
 
     val FOOTPRINTS = Ability(
         id = "footprints",
-        displayName = "Fußspuren im Schnee",
+        displayName = "Spurenleser",
         description = "20 Sekunden lang leuchten die Spuren aller Verstecker, die sich bewegen. Filzpantoffeln schützen.",
         side = Side.SEEKER,
         cost = 5,
@@ -32,14 +32,14 @@ object AbilityCatalog {
     val ELYTRA = Ability(
         id = "elytra",
         displayName = "Rentier-Schlitten",
-        description = "Flügel für die ganze Runde und zwei Knallbonbons. Danach nur Knallbonbons nachkaufen.",
+        description = "Flügel und zwei Knallbonbons. Sind beide verbraucht und du landest, ist der Schlitten weg. Neu kaufen kostet 15 Punkte.",
         side = Side.SEEKER,
         cost = 15,
-        cooldownSeconds = 60,
+        cooldownSeconds = 110,
         icon = Items.ELYTRA,
         plannedModel = "Eigene Wings oder kleiner Jetpack",
         sprite = Hideandseek.id("ability/elytra"),
-        restockCost = 4,
+        restockCost = 15,
     )
 
     val SWAP = Ability(
@@ -69,7 +69,7 @@ object AbilityCatalog {
     val JAMMER = Ability(
         id = "jammer",
         displayName = "Geschenkpapier",
-        description = "Gut eingepackt: 25 Sekunden lang finden dich Rentier-Nase, Schlittenhund, Wichteln und Grinch nicht.",
+        description = "Gut eingepackt: 25 Sekunden lang finden dich Spürnase, Schlittenhund, Wichteln und Grinch nicht.",
         side = Side.HIDER,
         cost = 3,
         cooldownSeconds = 75,
@@ -80,7 +80,7 @@ object AbilityCatalog {
 
     val SNOWMAN_DISGUISE = Ability(
         id = "snowman_disguise",
-        displayName = "Schneemann-Verkleidung",
+        displayName = "Frosty-Kostüm",
         description = "60 Sekunden lang bist du ein Schneemann. Wer stillsteht, fällt nicht auf.",
         side = Side.HIDER,
         cost = 3,
@@ -104,8 +104,8 @@ object AbilityCatalog {
 
     val SNOW_CLOUD = Ability(
         id = "snow_cloud",
-        displayName = "Schneewolke",
-        description = "Eine dichte Schneewolke um dich herum. 8 Sekunden lang sieht niemand hinein oder hindurch.",
+        displayName = "Flockenvorhang",
+        description = "Ein dichter Flockenvorhang um dich herum. 8 Sekunden lang sieht niemand hinein oder hindurch.",
         side = Side.HIDER,
         cost = 5,
         cooldownSeconds = 60,
@@ -177,7 +177,7 @@ object AbilityCatalog {
 
     val SHRINK = Ability(
         id = "shrink",
-        displayName = "Wichtelgröße",
+        displayName = "Däumling",
         description = "12 Sekunden lang bist du winzig klein und passt durch jede Lücke.",
         side = Side.HIDER,
         cost = 5,
@@ -237,7 +237,7 @@ object AbilityCatalog {
 
     val REINDEER_SPRINT = Ability(
         id = "reindeer_sprint",
-        displayName = "Rentier-Sprint",
+        displayName = "Kufenturbo",
         description = "6 Sekunden lang rennst du wie ein Rentier, mit Schneestaub hinter dir.",
         side = Side.SEEKER,
         cost = 3,
