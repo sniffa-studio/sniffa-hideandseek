@@ -9,7 +9,6 @@ import org.lwjgl.glfw.GLFW
 import net.minecraft.network.chat.Component
 import net.minecraft.client.gui.screens.Screen
 import studio.sniffa.ability.AbilityCatalog
-import studio.sniffa.client.snow.ColourGrade
 import studio.sniffa.client.state.RoundState
 import studio.sniffa.client.ui.shop.AbilityShopScreen
 
@@ -19,7 +18,6 @@ object Keybindings {
 
     private lateinit var openShop: KeyMapping
     private lateinit var openWatch: KeyMapping
-    private lateinit var toggleGrade: KeyMapping
 
     fun install() {
         openShop = KeyMappingHelper.registerKeyMapping(
@@ -30,15 +28,7 @@ object Keybindings {
             KeyMapping("key.hideandseek.open_watch", GLFW.GLFW_KEY_R, CATEGORY)
         )
 
-        toggleGrade = KeyMappingHelper.registerKeyMapping(
-            KeyMapping("key.hideandseek.colour_grade", GLFW.GLFW_KEY_K, CATEGORY)
-        )
-
         ClientTickEvents.END_CLIENT_TICK.register { client ->
-            while (toggleGrade.consumeClick()) {
-                ColourGrade.enabled = !ColourGrade.enabled
-                client.player?.sendOverlayMessage(Component.literal(if (ColourGrade.enabled) "Farbstimmung an" else "Farbstimmung aus"))
-            }
             while (openWatch.consumeClick()) {
                 watch(client)
             }
