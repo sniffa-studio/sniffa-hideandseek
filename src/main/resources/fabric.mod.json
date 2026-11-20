@@ -43,6 +43,7 @@
 		"fabric-api": "*",
 		"fabric-language-kotlin": "*",
 		"owo": "*",
-		"geckolib": "*"
+		"geckolib": "*",
+		"sniffa_building": "*"
 	}
 }
