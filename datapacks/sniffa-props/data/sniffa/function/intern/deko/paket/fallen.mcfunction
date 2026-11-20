@@ -1,9 +1,0 @@
-execute if score #takt sniffa_deko matches 20 run data merge entity @s {teleport_duration:4}
-execute if score #takt sniffa_deko matches 21 run tp @s ^ ^-0.018125 ^-0.005625
-execute if score #takt sniffa_deko matches 21 run data merge entity @s {start_interpolation:0,interpolation_duration:4,transformation:{left_rotation:{angle:0.6108652f,axis:[1f,0f,0f]},right_rotation:[0f,0f,0f,1f],translation:[0f,0f,0f],scale:[1f,1f,1f]}}
-execute if score #takt sniffa_deko matches 24 run data merge entity @s {teleport_duration:3}
-execute if score #takt sniffa_deko matches 25 run tp @s ^ ^-0.143125 ^0.205
-execute if score #takt sniffa_deko matches 25 run data merge entity @s {start_interpolation:0,interpolation_duration:3,transformation:{left_rotation:{angle:0.6981317f,axis:[1f,0f,0f]},right_rotation:[0f,0f,0f,1f],translation:[0f,0f,0f],scale:[1f,1f,1f]}}
-execute if score #takt sniffa_deko matches 27 run data merge entity @s {teleport_duration:4}
-execute if score #takt sniffa_deko matches 28 run tp @s ^ ^-0.2075 ^0.269375
-execute if score #takt sniffa_deko matches 28 run data merge entity @s {start_interpolation:0,interpolation_duration:4,transformation:{left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f],translation:[0f,0f,0f],scale:[1f,1f,1f]}}

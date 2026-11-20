@@ -1,1 +1,0 @@
-function sniffa:scheinwerfer_ziel

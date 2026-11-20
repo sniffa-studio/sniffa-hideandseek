@@ -1,2 +1,0 @@
-execute if block ^ ^ ^ minecraft:barrier run setblock ^ ^ ^ minecraft:air strict
-execute if block ^ ^ ^-1 minecraft:barrier run setblock ^ ^ ^-1 minecraft:air strict

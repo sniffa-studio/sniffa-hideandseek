@@ -1,1 +1,0 @@
-$summon minecraft:item_display ~ ~ ~ {Tags:["sniffa_prop","sniffa_deko_teil","verbund_teil","verbund_neu"],Rotation:[$(dreh)f,0f],item:{id:"minecraft:stick",count:1,components:{"minecraft:item_model":"hideandseek:props/deko/$(art)_$(teil)"}}}

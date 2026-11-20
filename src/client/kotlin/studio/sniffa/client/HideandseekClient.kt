@@ -10,18 +10,8 @@ import studio.sniffa.client.map.MapOverlay
 import studio.sniffa.client.net.BorderSync
 import studio.sniffa.client.net.Handshake
 import studio.sniffa.client.net.RoundSync
-import studio.sniffa.client.light.Chimneys
-import studio.sniffa.client.light.FirRope
-import studio.sniffa.client.light.Embers
 import studio.sniffa.client.snow.Breath
-import studio.sniffa.client.snow.ColourGrade
 import studio.sniffa.client.snow.ShootingStars
-import studio.sniffa.client.light.FairyLights
-import studio.sniffa.client.light.Icicles
-import studio.sniffa.client.light.LampGlow
-import studio.sniffa.client.ui.deko.DekoKatalog
-import studio.sniffa.client.light.Spotlights
-import studio.sniffa.client.prop.Crows
 import studio.sniffa.client.prop.Props
 import studio.sniffa.client.radar.CompassRose
 import studio.sniffa.client.radar.HeatMap
@@ -65,18 +55,8 @@ object HideandseekClient : ClientModInitializer {
 		Footprints.install()
 		MapOverlay.install()
 		Props.install()
-		Crows.install()
-		Spotlights.install()
-		FairyLights.install()
-		LampGlow.install()
-		DekoKatalog.install()
-		Chimneys.install()
-		Icicles.install()
-		FirRope.install()
 		ShootingStars.install()
 		Breath.install()
-		Embers.install()
-		ColourGrade.install()
 		Cinema.install()
 	}
 }

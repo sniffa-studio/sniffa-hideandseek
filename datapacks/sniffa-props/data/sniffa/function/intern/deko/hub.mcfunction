@@ -1,6 +1,0 @@
-scoreboard players add #hub sniffa_deko 1
-execute if score #hub sniffa_deko matches 2.. run scoreboard players set #hub sniffa_deko 0
-execute if score #hub sniffa_deko matches 1 as @e[type=minecraft:item_display,tag=deko_hub] run data merge entity @s {start_interpolation:0,interpolation_duration:6,transformation:{translation:[0f,-0.55f,0f],left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f],scale:[1f,1f,1f]}}
-execute if score #hub sniffa_deko matches 0 as @e[type=minecraft:item_display,tag=deko_hub] run data merge entity @s {start_interpolation:0,interpolation_duration:18,transformation:{translation:[0f,0f,0f],left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f],scale:[1f,1f,1f]}}
-execute if score #hub sniffa_deko matches 1 as @e[type=minecraft:item_display,tag=deko_hub_klein] run data merge entity @s {start_interpolation:0,interpolation_duration:6,transformation:{translation:[0f,-0.2f,0f],left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f],scale:[1f,1f,1f]}}
-execute if score #hub sniffa_deko matches 0 as @e[type=minecraft:item_display,tag=deko_hub_klein] run data merge entity @s {start_interpolation:0,interpolation_duration:18,transformation:{translation:[0f,0f,0f],left_rotation:[0f,0f,0f,1f],right_rotation:[0f,0f,0f,1f],scale:[1f,1f,1f]}}
