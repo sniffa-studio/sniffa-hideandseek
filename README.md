@@ -16,7 +16,8 @@ NoRiskClient oder die Modrinth App. Da ist alles drin: die Mod, Simple Voice Cha
 
 1. Installiere den [Fabric Loader](https://fabricmc.net/use/installer/) für Minecraft 1.21.11.
 2. Lade `marguhl-hideandseek-<version>.jar` unter [Releases](https://github.com/sniffa-studio/sniffa-hideandseek/releases)
-   herunter und leg die Datei in deinen `mods`-Ordner. Mehr brauchst du nicht.
+   herunter und leg die Datei in deinen `mods`-Ordner. Dazu gehört die Bau-Mod **Sniffa Building**
+   (`sniffa-building-<version>.jar`), sie zeigt die Deko auf der Map. Ohne sie startet die Mod nicht.
 3. Starte Minecraft und tritt dem Event über den Titelbildschirm bei.
 
 Solange die Mod installiert ist, zeigt der Titelbildschirm das Event. Nach dem Event kannst du sie einfach wieder
