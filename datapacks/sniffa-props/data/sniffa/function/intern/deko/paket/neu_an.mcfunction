@@ -1,1 +1,0 @@
-$summon minecraft:item_display ~ ~ ~ {Tags:["sniffa_prop","sniffa_deko_teil","deko_teil_neu","deko_paket","paket_neu"],teleport_duration:40,Rotation:[$(dreh)f,0f],item:{id:"minecraft:stick",count:1,components:{"minecraft:item_model":"hideandseek:props/deko/paket_$(nr)"}}}
