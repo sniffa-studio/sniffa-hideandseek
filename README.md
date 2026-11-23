@@ -53,6 +53,11 @@ Ja. Der komplette Quellcode liegt hier offen, jeder kann nachlesen, was die Mod 
   [VirusTotal](https://www.virustotal.com) hoch.
 - Du kannst die Mod auch selbst aus diesem Code bauen: `./gradlew build` (Java 21).
 
+## Für das Team
+
+Jeder CI-Lauf legt die gebauten Jars 7 Tage lang im Silo-Bucket `sniffa-ci` ab (`sniffa-hideandseek/<run_id>/jars/`).
+Die Download-Links stehen in der Zusammenfassung des Laufs unter Actions.
+
 ## Fragen
 
 Auf [discord.sniffa.studio](https://discord.sniffa.studio) hilft dir das Team weiter.
