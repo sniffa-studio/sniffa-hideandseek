@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.components.AbstractWidget
 import net.minecraft.client.gui.components.Button
+import net.minecraft.client.gui.screens.ConfirmLinkScreen
 import net.minecraft.client.gui.screens.ConnectScreen
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.gui.screens.TitleScreen
@@ -24,8 +25,12 @@ object TitleScreenSkin {
 
     private const val EVENT_ADDRESS = "event.sniffa.studio"
 
+    private const val DISCORD = "https://discord.sniffa.studio"
+
     private const val OPTIONS = "menu.options"
     private const val QUIT = "menu.quit"
+
+    private val REPLAY_BUTTONS = setOf("flashback.open_replays", "replaymod.gui.replayviewer")
 
     private const val FULL_WIDTH = 240
     private const val GAP = 6
@@ -55,7 +60,7 @@ object TitleScreenSkin {
                 status(graphics, screen)
                 sign(graphics)
             }
-            ScreenEvents.remove(screen).register { EventStatus.forget() }
+            ScreenEvents.remove(screen).register { EventStatus.stop() }
         }
     }
 
@@ -71,22 +76,45 @@ object TitleScreenSkin {
         val anchorY = screen.height / 4 + 48
         var options: AbstractWidget? = null
         var quit: AbstractWidget? = null
+        val replays = mutableListOf<AbstractWidget>()
 
         for (widget in buttons) {
-            when (keyOf(widget)) {
+            val key = keyOf(widget)
+            when (key) {
                 OPTIONS -> options = widget
                 QUIT -> quit = widget
+                in REPLAY_BUTTONS -> replays += widget
             }
-            widget.visible = false
+            widget.visible = key in REPLAY_BUTTONS
         }
 
         buttons.add(
-            Button.builder(Component.literal("Join Event")) { connect(screen) }
+            Button.builder(Component.translatable("menu.hideandseek.join_event")) { connect(screen) }
                 .bounds(anchorX, anchorY, HALF_WIDTH, ROW_HEIGHT)
                 .build()
         )
         place(quit, anchorX + HALF_WIDTH + GAP, anchorY, HALF_WIDTH)
-        place(options, anchorX, anchorY + ROW_HEIGHT + ROW_GAP, FULL_WIDTH)
+        place(options, anchorX, anchorY + ROW_HEIGHT + ROW_GAP, HALF_WIDTH)
+        buttons.add(
+            Button.builder(Component.translatable("menu.hideandseek.discord")) {
+                ConfirmLinkScreen.confirmLinkNow(screen, DISCORD, true)
+            }
+                .bounds(anchorX + HALF_WIDTH + GAP, anchorY + ROW_HEIGHT + ROW_GAP, HALF_WIDTH, ROW_HEIGHT)
+                .build()
+        )
+
+        if (replays.isNotEmpty()) {
+            val pinReplays = {
+                replays.forEachIndexed { row, widget ->
+                    widget.setX(anchorX + FULL_WIDTH + GAP)
+                    widget.setY(anchorY + row * (ROW_HEIGHT + ROW_GAP) + (ROW_HEIGHT - widget.height) / 2)
+                    widget.visible = true
+                }
+            }
+            pinReplays()
+            ScreenEvents.afterTick(screen).register { pinReplays() }
+            ScreenEvents.beforeRender(screen).register { _, _, _, _, _ -> pinReplays() }
+        }
 
         statusY = anchorY + 2 * ROW_HEIGHT + ROW_GAP + STATUS_GAP
     }

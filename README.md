@@ -1,73 +1,63 @@
-# sniffa-hideandseek
+# Sniffa Hide & Seek
 
-The client mod for the Hide & Seek event - a Fabric mod for Minecraft 1.21.11, installed by hand
-by everyone taking part. It draws the ability wheel, the radar and the round display; the server
-half is sniffa-hideandseek-server, and without this mod that server will not let you in.
+Die Event-Mod für **Marguhls Hide & Seek**, gemacht von **jakubxyz** für [Sniffa Studio](https://sniffa.studio).
 
-## Installing (players)
+Ohne diese Mod kommst du nicht auf den Event-Server. Sie zeigt dir alles, was du im Event brauchst: das
+Fähigkeiten-Rad, Radar und Karte, die Border, deine Rolle und den Stand der Runde.
 
-1. Install the [Fabric Loader](https://fabricmc.net/use/installer/) for Minecraft 1.21.11.
-2. Put `hideandseek-1.0.0.jar` into your `mods` folder. Nothing else is needed: Fabric API, Fabric
-   Language Kotlin, GeckoLib and owo-lib are inside the jar.
-3. Start the game and press **Join Event** on the title screen.
+Minecraft Java 1.21.11 mit Fabric.
 
-The mod replaces the title screen: Singleplayer and Multiplayer are hidden while it is installed.
-Remove it after the event to get the normal menu back.
+## Installieren
 
-## Configuration
+**Am einfachsten:** Lade dir das Modpack auf [sniffa.studio/hs](https://sniffa.studio/hs) herunter, für den
+NoRiskClient oder die Modrinth App. Da ist alles drin: die Mod, Simple Voice Chat und ein paar Mods für mehr FPS.
 
-`config/hideandseek.properties` is written on first start.
+**Von Hand:**
 
-| Key | Default | Effect |
-|---|---|---|
-| `ping_event_server` | `true` | The title screen pings `event.sniffa.studio` to show whether the event is online. `false` turns that off. |
+1. Installiere den [Fabric Loader](https://fabricmc.net/use/installer/) für Minecraft 1.21.11.
+2. Lade `marguhl-hideandseek-<version>.jar` unter [Releases](https://github.com/sniffa-studio/sniffa-hideandseek/releases)
+   herunter und leg die Datei in deinen `mods`-Ordner. Mehr brauchst du nicht.
+3. Starte Minecraft und tritt dem Event über den Titelbildschirm bei.
 
-## How it works
+Solange die Mod installiert ist, zeigt der Titelbildschirm das Event. Nach dem Event kannst du sie einfach wieder
+löschen.
 
-The mod announces itself the moment it connects, and the server will not let anybody in who does
-not - that handshake is also the support tool, so people can check their setup days before a show
-instead of finding out on the evening.
+## Ist die Mod sicher?
 
-After that the server does the deciding and pushes down what changed: your role, your points, what
-is off cooldown. The mod only draws it. It never works anything out on its own, so two players
-never see two different rounds.
+Ja. Der komplette Quellcode liegt hier offen, jeder kann nachlesen, was die Mod macht.
 
-## Who talks to whom
+**Was die Mod macht**
 
-```mermaid
-flowchart LR
-    mod["sniffa-hideandseek<br/>Fabric client mod"]
-    server["sniffa-hideandseek-server<br/>Paper plugin"]
+- Sie zeigt an, was der Event-Server ihr schickt.
+- Beim Betreten des Event-Servers sagt sie dem Server ihre Version und welche Mods du installiert hast (nur die
+  Namen). So kann der Server Mods wie Freecam oder Cheat-Clients abweisen.
+- Auf dem Titelbildschirm schaut sie nach, ob das Event offen ist. Das ist dieselbe Abfrage, die Minecraft für jeden
+  Server in deiner Serverliste macht.
+- Der Discord-Knopf öffnet `discord.sniffa.studio` im Browser, erst nachdem du es bestätigt hast.
+- Hast du Iris, schaltet sie die Shader auf dem Event-Server aus und danach wieder an.
+- Sie speichert genau eine Datei: `config/hideandseek.properties`.
 
-    mod -- "handshake: I am here" --> server
-    server -- "role, points, cooldowns, border, zone" --> mod
-```
+**Was die Mod nicht macht**
 
-Plugin messages on our own channels, nothing else. The mod never asks - it is told, and only
-draws what it was told.
+- Sie lädt nichts aus dem Internet nach und startet keine Programme.
+- Sie liest keine anderen Dateien, keine Passwörter, keine Accounts.
+- Sie schickt nur dem Event-Server etwas, über deine normale Minecraft-Verbindung. Auf anderen Servern schickt sie
+  nichts.
 
-## Building
+**Selbst nachprüfen**
 
-```
-./gradlew build
-```
+- In jedem Release stehen die SHA-256-Prüfsummen. Vergleich sie mit deiner Datei, unter Windows mit
+  `certutil -hashfile marguhl-hideandseek-<version>.jar SHA256`.
+- Version 1.0.6 bei VirusTotal: [0 von 58 Virenscannern schlagen an](https://www.virustotal.com/gui/file/16cd36f361498668251b0230107516573f2a1a6326e80cad415e54ed84bcbb44).
+- Manche Virenscanner schlagen bei `.jar`-Dateien grundlos an. Wenn du unsicher bist, lad die Datei selbst bei
+  [VirusTotal](https://www.virustotal.com) hoch.
+- Du kannst die Mod auch selbst aus diesem Code bauen: `./gradlew build` (Java 21).
 
-The release jar is `build/libs/hideandseek-<version>.jar`. The version comes from
-`gradle.properties`. `./gradlew runClient` starts a development client.
+## Fragen
 
-## Releasing
+Auf [discord.sniffa.studio](https://discord.sniffa.studio) hilft dir das Team weiter.
 
-1. Raise `version` in `gradle.properties` and add the release to [CHANGELOG.md](CHANGELOG.md).
-2. Build the jar.
-3. Upload it to Modrinth as described in [MODRINTH.md](MODRINTH.md).
+## Lizenz
 
-## More
-
-- [STATUS.md](STATUS.md) - where the build stands, both halves, and why it is the way it is.
-- [CHANGELOG.md](CHANGELOG.md) - what changed in each release.
-- [MODRINTH.md](MODRINTH.md) - everything needed to publish on Modrinth.
-
-## License
-
-MIT, see [LICENSE](LICENSE). The icon and the Sniffa and Marguhl logos are excluded and may not be
-reused without permission.
+MIT, siehe [LICENSE](LICENSE). Das Icon und die Logos von Sniffa und Marguhl sind ausgenommen und dürfen nicht ohne
+Erlaubnis verwendet werden.

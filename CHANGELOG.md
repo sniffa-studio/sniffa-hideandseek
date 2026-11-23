@@ -1,5 +1,71 @@
 # Changelog
 
+## 1.0.6
+
+### Changed
+
+- The border shrinks and grows smoothly. It used to be redrawn in quarter-block steps, which made it and its pattern
+  jump while it moved.
+- With Iris installed, shaders are switched off while you are on the event server and back on when you leave, with a
+  short note in chat. The event's border, radar and camera do not work under shader packs.
+- When the server makes every use of an ability cost points, the wheel always shows the price and when the ability is
+  ready again, instead of "gekauft".
+
+## 1.0.5
+
+### Added
+
+- After a disconnect from the event a "Zurück zum Event" button takes you straight back in.
+- The mod tells the event server which mods are loaded, so it can turn away the ones the event does not allow.
+
+- A Discord button next to Options on the title screen opens discord.sniffa.studio.
+
+### Changed
+
+- The title screen shows the state of the event the server reports: when it opens, how many seats are left or that
+  it is full. It asks again every 20 seconds.
+- The ability wheel opens with Z (Y on a German keyboard) instead of G, which vanilla uses for Quick Actions. Both
+  keys sit in their own Hide & Seek category in the controls.
+- Menu buttons follow the game language, "Event beitreten" in German.
+- One word for one thing: GEFUNDEN when caught, "erfasst" when a radar spots you, "Fähigkeiten-Rad" everywhere,
+  "1 Block" instead of "1 Blöcke", "Sucher" in the role card.
+- The radar result sits above the action bar instead of on it, and the role card hides while F3 is open.
+- The wheel only mentions Q / E when there is a second page and explains itself in plainer words.
+
+### Fixed
+
+- After a reconnect the wheel knows which abilities were already bought (needs the event server from 2026-11-04).
+- The wheel no longer pretends to buy while the round is paused.
+- The wheel no longer lays itself out again on every frame.
+
+## 1.0.4
+
+### Added
+
+- At round start the camera orbits the platform and shows the seeker, and big moments of the finale play behind
+  letterbox bars.
+- The danger zone is drawn in the honeycomb of the border, beats and turns white hot at the end, with embers rising
+  along its wall.
+- The role card in the top left is a sliding glass panel with a phase chip, a glowing clock and live counters.
+
+### Changed
+
+- The border shows a calm aurora from afar and the honeycomb only near you.
+- Heat vision draws bodies as player-sized capsules with an outline and a scanning line.
+- The scan wave has a bright leading fringe and echo rings, and fades out past its range.
+- The ability wheel grows the focused wedge and flashes when an ability is bought; icons keep their size on hover.
+- Smoother compass, range, hot and cold, and map visuals.
+
+### Fixed
+
+- The own hand no longer shows while the camera flies.
+
+## 1.0.3
+
+### Added
+
+- At the end of a round the camera flies over the podium behind letterbox bars.
+
 ## 1.0.2
 
 ### Changed

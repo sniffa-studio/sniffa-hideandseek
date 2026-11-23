@@ -3,9 +3,9 @@
 	"id": "hideandseek",
 	"version": "${version}",
 	"name": "Sniffa Hide & Seek",
-	"description": "Client mod for the Sniffa Studio Hide & Seek event. Without it you cannot join the event server.",
+	"description": "Event-Mod für Marguhls Hide & Seek von jakubxyz für Sniffa Studio. Ohne sie kommst du nicht auf den Event-Server.",
 	"authors": [
-		"Sniffa Studio"
+		"jakubxyz"
 	],
 	"contact": {
 		"homepage": "https://sniffa.studio",

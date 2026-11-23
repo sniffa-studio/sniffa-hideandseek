@@ -9,9 +9,11 @@ import studio.sniffa.net.payload.BearingPayload
 import studio.sniffa.net.payload.BorderPayload
 import studio.sniffa.net.payload.ClockPayload
 import studio.sniffa.net.payload.CooldownPayload
+import studio.sniffa.net.payload.PricesPayload
 import studio.sniffa.net.payload.CrewPayload
 import studio.sniffa.net.payload.GlowPayload
 import studio.sniffa.net.payload.HandshakePayload
+import studio.sniffa.net.payload.ModsPayload
 import studio.sniffa.net.payload.MapMetaPayload
 import studio.sniffa.net.payload.MapNeedPayload
 import studio.sniffa.net.payload.MapSlicePayload
@@ -52,6 +54,7 @@ object Hideandseek : ModInitializer {
 
 	override fun onInitialize() {
 		PayloadTypeRegistry.playC2S().register(HandshakePayload.TYPE, HandshakePayload.CODEC)
+		PayloadTypeRegistry.playC2S().register(ModsPayload.TYPE, ModsPayload.CODEC)
 		PayloadTypeRegistry.playC2S().register(PurchaseRequestPayload.TYPE, PurchaseRequestPayload.CODEC)
 		PayloadTypeRegistry.playC2S().register(MapNeedPayload.TYPE, MapNeedPayload.CODEC)
 		PayloadTypeRegistry.playC2S().register(MapTeleportPayload.TYPE, MapTeleportPayload.CODEC)
@@ -74,6 +77,7 @@ object Hideandseek : ModInitializer {
 		PayloadTypeRegistry.playS2C().register(CrewPayload.TYPE, CrewPayload.CODEC)
 		PayloadTypeRegistry.playS2C().register(PropPayload.TYPE, PropPayload.CODEC)
 		PayloadTypeRegistry.playS2C().register(CooldownPayload.TYPE, CooldownPayload.CODEC)
+		PayloadTypeRegistry.playS2C().register(PricesPayload.TYPE, PricesPayload.CODEC)
 		PayloadTypeRegistry.playS2C().register(MapMetaPayload.TYPE, MapMetaPayload.CODEC)
 		PayloadTypeRegistry.playS2C().register(MapSlicePayload.TYPE, MapSlicePayload.CODEC)
 		PayloadTypeRegistry.playS2C().register(ZoneArmPayload.TYPE, ZoneArmPayload.CODEC)

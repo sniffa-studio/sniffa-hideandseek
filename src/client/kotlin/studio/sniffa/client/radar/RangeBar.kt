@@ -166,7 +166,7 @@ object RangeBar {
         if (alive <= 0f) return
 
         val font = client.font
-        val text = if (live) "$blocks Blöcke" else "niemand"
+        val text = if (live) studio.sniffa.client.ui.hud.blocks(blocks) else "niemand"
 
         var x = (graphics.guiWidth() - font.width(text)) / 2
         val y = TOP - 12

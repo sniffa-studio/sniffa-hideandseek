@@ -53,7 +53,7 @@ object CaughtScreen {
 
         graphics.fill(0, 0, width, height, Vignette.alpha(SHADE, fade))
 
-        val headline = "GEFANGEN"
+        val headline = "GEFUNDEN"
         graphics.pose().pushMatrix()
         graphics.pose().translate(width / 2f, height / 2f - HEADLINE_LIFT)
         graphics.pose().scale(HEADLINE_SCALE, HEADLINE_SCALE)

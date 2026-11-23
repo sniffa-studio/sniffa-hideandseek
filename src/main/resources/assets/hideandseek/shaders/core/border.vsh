@@ -13,7 +13,8 @@ out float distanceFromViewer;
 out float distanceToEye;
 
 void main() {
-    vec3 pos = Position + ModelOffset;
+    float scale = TextureMat[1][3] > 0.0 ? TextureMat[1][3] : 1.0;
+    vec3 pos = vec3(Position.x * scale, Position.y, Position.z * scale) + ModelOffset;
     gl_Position = ProjMat * ModelViewMat * vec4(pos, 1.0);
 
     wallCoord = UV0;

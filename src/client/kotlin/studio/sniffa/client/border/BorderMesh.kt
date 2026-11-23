@@ -13,10 +13,16 @@ class BorderMesh private constructor(
     val vertices: GpuBuffer,
     val indexCount: Int,
     val columns: Int,
-    private val ring: BorderZone.Ring,
+    val ring: BorderZone.Ring,
 ) : AutoCloseable {
 
     fun matches(other: BorderZone.Ring): Boolean = ring == other
+
+    fun scaleFor(other: BorderZone.Ring): Double? {
+        if (ring.centerX != other.centerX || ring.centerZ != other.centerZ || ring.radius <= 0.0) return null
+        val scale = other.radius / ring.radius
+        return if (scale in LEAST_SCALE..MOST_SCALE) scale else null
+    }
 
     override fun close() {
         vertices.close()
@@ -25,6 +31,10 @@ class BorderMesh private constructor(
     companion object {
 
         private const val SEGMENTS = 192
+
+        private const val LEAST_SCALE = 0.45
+
+        private const val MOST_SCALE = 2.2
 
         private const val TAU = 2.0 * Math.PI
 

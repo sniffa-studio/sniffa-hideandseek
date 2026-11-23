@@ -19,6 +19,8 @@ import studio.sniffa.client.ui.hud.ScanReadout
 import studio.sniffa.client.ui.hud.SpottedWarning
 import studio.sniffa.net.payload.ClockPayload
 import studio.sniffa.net.payload.CooldownPayload
+import studio.sniffa.net.payload.PricesPayload
+import studio.sniffa.client.state.ServerPrices
 import studio.sniffa.net.payload.CrewPayload
 import studio.sniffa.net.payload.GlowPayload
 import studio.sniffa.net.payload.MapMetaPayload
@@ -95,6 +97,10 @@ object RoundSync {
             AbilityCooldowns.accept(payload.secondsLeft)
         }
 
+        ClientPlayNetworking.registerGlobalReceiver(PricesPayload.TYPE) { payload, _ ->
+            ServerPrices.accept(payload.prices)
+        }
+
         ClientPlayNetworking.registerGlobalReceiver(PropPayload.TYPE) { payload, _ ->
             Props.accept(payload.kind, payload.x, payload.y, payload.z, payload.yaw, payload.seconds)
         }
@@ -140,6 +146,7 @@ object RoundSync {
             ScanTags.forget()
             Props.forget()
             AbilityCooldowns.forget()
+            ServerPrices.forget()
             MapTexture.forget()
             ScanReadout.forget()
             SpottedWarning.forget()

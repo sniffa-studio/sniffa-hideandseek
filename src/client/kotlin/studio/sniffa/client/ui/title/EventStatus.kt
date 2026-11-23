@@ -15,15 +15,20 @@ object EventStatus {
 
     private const val PATIENCE_MILLIS = 4_000L
 
+    private const val REFRESH_MILLIS = 20_000L
+
     @Volatile
     private var pinger: ServerStatusPinger? = null
     private var server: ServerData? = null
     private var startedAt = 0L
     @Volatile
     private var gaveUp = false
+    private var address: String? = null
+    private var lastLine: Component? = null
 
     fun refresh(address: String) {
         forget()
+        this.address = address
 
         val client = Minecraft.getInstance()
         val data = ServerData("Sniffa Event", address, ServerData.Type.OTHER)
@@ -51,15 +56,33 @@ object EventStatus {
 
     fun tick() {
         pinger?.tick()
+        val again = address ?: return
+        if (System.currentTimeMillis() - startedAt >= REFRESH_MILLIS) {
+            val keep = lastLine
+            refresh(again)
+            lastLine = keep
+        }
     }
 
     fun forget() {
         pinger?.removeAll()
         pinger = null
         server = null
+        lastLine = null
+    }
+
+    fun stop() {
+        forget()
+        address = null
     }
 
     fun line(): Component? {
+        val fresh = freshLine()
+        if (fresh != null) lastLine = fresh
+        return fresh ?: lastLine
+    }
+
+    private fun freshLine(): Component? {
         val data = server ?: return null
         val players = data.players
 
@@ -70,11 +93,21 @@ object EventStatus {
             return Component.literal("● Event offline").withStyle { it.withColor(RED) }
         }
 
+        val status = statusOf(data.motd.string)
         return Component.literal("● ")
-            .withStyle { it.withColor(GREEN) }
+            .withStyle { it.withColor(dotFor(status)) }
             .append(
-                Component.literal("${players.online()} / ${players.max()} online")
+                Component.literal(status ?: "${players.online()} / ${players.max()} online")
                     .withStyle { it.withColor(GREY) }
             )
+    }
+
+    fun statusOf(motd: String): String? =
+        motd.lines().getOrNull(1)?.trim()?.takeIf { it.isNotEmpty() }
+
+    private fun dotFor(status: String?): Int = when {
+        status == null || status.startsWith("Offen") -> GREEN
+        status.startsWith("Voll") -> RED
+        else -> GREY
     }
 }
