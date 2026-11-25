@@ -1,0 +1,7 @@
+{
+  "parent": "hideandseek:item/props/gutschein_karte",
+  "textures": {
+    "card": "hideandseek:item/props/gutschein_5",
+    "particle": "hideandseek:item/props/gutschein_5"
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "textures": {
+    "card": "hideandseek:item/props/gutschein_5",
+    "particle": "hideandseek:item/props/gutschein_5"
+  },
+  "elements": [
+    {
+      "name": "karte",
+      "from": [
+        0,
+        3,
+        7.75
+      ],
+      "to": [
+        16,
+        13,
+        8.25
+      ],
+      "faces": {
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            7.2727
+          ],
+          "texture": "#card",
+          "shade": false
+        },
+        "north": {
+          "uv": [
+            0,
+            7.2727,
+            16,
+            14.5455
+          ],
+          "texture": "#card",
+          "shade": false
+        },
+        "east": {
+          "uv": [
+            0,
+            14.6364,
+            0.25,
+            15.9091
+          ],
+          "texture": "#card",
+          "shade": false
+        },
+        "west": {
+          "uv": [
+            0,
+            14.6364,
+            0.25,
+            15.9091
+          ],
+          "texture": "#card",
+          "shade": false
+        },
+        "up": {
+          "uv": [
+            0,
+            14.6364,
+            16,
+            14.7264
+          ],
+          "texture": "#card",
+          "shade": false
+        },
+        "down": {
+          "uv": [
+            0,
+            14.6364,
+            16,
+            14.7264
+          ],
+          "texture": "#card",
+          "shade": false
+        }
+      }
+    }
+  ]
+}
