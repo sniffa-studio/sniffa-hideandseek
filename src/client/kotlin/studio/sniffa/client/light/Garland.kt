@@ -17,11 +17,11 @@ data class Garland(
 ) {
 
     enum class Palette(val colours: List<Vector3f>) {
-        BUNT(listOf(Vector3f(1f, 0.16f, 0.1f), Vector3f(0.2f, 1f, 0.3f), Vector3f(1f, 0.7f, 0.18f), Vector3f(0.25f, 0.45f, 1f))),
-        WARM(listOf(Vector3f(1f, 0.74f, 0.38f))),
-        KALT(listOf(Vector3f(0.7f, 0.86f, 1f))),
-        ROT_GRUEN(listOf(Vector3f(1f, 0.16f, 0.1f), Vector3f(0.2f, 1f, 0.3f))),
-        TANNE(listOf(Vector3f(1f, 0.74f, 0.38f))),
+        BUNT(listOf(Vector3f(1f, 0.24f, 0.1f), Vector3f(0.36f, 0.92f, 0.26f), Vector3f(1f, 0.6f, 0.14f), Vector3f(0.32f, 0.5f, 1f))),
+        WARM(listOf(Vector3f(1f, 0.62f, 0.27f))),
+        KALT(listOf(Vector3f(0.8f, 0.9f, 1f))),
+        ROT_GRUEN(listOf(Vector3f(1f, 0.24f, 0.1f), Vector3f(0.36f, 0.92f, 0.26f))),
+        TANNE(listOf(Vector3f(1f, 0.64f, 0.3f))),
     }
 
     sealed interface Shape {

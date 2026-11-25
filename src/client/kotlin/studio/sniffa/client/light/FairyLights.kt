@@ -147,7 +147,7 @@ object FairyLights {
 
         val wireValues = Matrix4f().zero().m00(WIRE_WIDTH)
         val bulbValues = Matrix4f().zero().m00(BULB_SIZE).m01(BULB_PUSH).m02(FADE_FROM).m03(SHOWN_WITHIN.toFloat())
-        val bulbTint = Vector4f(1f, 1f, 1f, BULB_GAIN)
+        val bulbTint = Vector4f(WarmLight.darkness(client), 1f, 1f, BULB_GAIN)
         for (mesh in lit.values) {
             val garland = mesh.garland
             if (!garland.within(camera.x, camera.y, camera.z, SHOWN_WITHIN)) continue
