@@ -16,6 +16,8 @@ object BorderPipeline {
 
     val SEAM: RenderPipeline = wall("seam", "core/borderseam", animated = true)
 
+    val FROST: RenderPipeline = wall("frost", "core/borderfrost", animated = true)
+
     private fun wall(name: String, fragment: String, animated: Boolean = false): RenderPipeline {
         val builder = RenderPipeline.builder()
             .withLocation(Hideandseek.id("pipeline/$name"))
@@ -40,5 +42,6 @@ object BorderPipeline {
         RenderPipelines.register(RING)
         RenderPipelines.register(ZONE)
         RenderPipelines.register(SEAM)
+        RenderPipelines.register(FROST)
     }
 }
