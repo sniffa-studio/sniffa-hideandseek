@@ -34,10 +34,10 @@ class AuroraMesh private constructor(
     companion object {
 
         private const val SEGMENTS = 160
-        private const val LENGTH_SHARE = 1.55
+        private const val LENGTH_SHARE = 1.1
         private const val INSIDE_SHARE = 0.9
         private const val FADE_FROM_SHARE = 0.72
-        private const val SWAY_SHARE = 0.09
+        private const val SWAY_SHARE = 0.06
         private const val RIPPLE_SHARE = 0.03
         private const val DOME_CLEARANCE = 14.0
         private const val SEED_SPACING = 10000.0
@@ -48,18 +48,18 @@ class AuroraMesh private constructor(
         private const val TAU = 2.0 * Math.PI
 
         private val BANDS = listOf(
-            Band(0.35, -0.38, 168.0, 64.0),
-            Band(1.15, -0.08, 178.0, 78.0),
-            Band(0.62, 0.2, 172.0, 70.0),
-            Band(1.9, 0.44, 184.0, 58.0),
+            Band(0.35, -0.38, 168.0, 38.0),
+            Band(1.15, -0.08, 178.0, 46.0),
+            Band(0.62, 0.2, 172.0, 42.0),
+            Band(1.9, 0.44, 184.0, 34.0),
         )
 
         private val ARCS = listOf(
-            Arc(0.2, 2.1, 1.45, 200.0, 120.0),
-            Arc(2.5, 1.9, 1.7, 215.0, 135.0),
-            Arc(4.3, 2.0, 1.55, 205.0, 125.0),
-            Arc(1.3, 1.6, 1.9, 225.0, 110.0),
-            Arc(3.6, 1.4, 2.05, 230.0, 100.0),
+            Arc(0.2, 1.4, 1.45, 200.0, 70.0),
+            Arc(2.5, 1.3, 1.7, 215.0, 80.0),
+            Arc(4.3, 1.35, 1.55, 205.0, 75.0),
+            Arc(1.3, 1.1, 1.9, 225.0, 65.0),
+            Arc(3.6, 1.0, 2.05, 230.0, 60.0),
         )
 
         private const val ARC_SEGMENTS = 120
