@@ -23,7 +23,7 @@ import kotlin.math.floor
 import kotlin.math.hypot
 import kotlin.math.sin
 
-class BorderSeam {
+class BorderSeam(private val rise: Float = 0f) {
 
     class Mesh(val vertices: GpuBuffer, val indexCount: Int, val reach: Double)
 
@@ -113,10 +113,10 @@ class BorderSeam {
             for ((from, to) in samples.zipWithNext()) {
                 if (from == null || to == null || !joined(from, to)) continue
 
-                builder.addVertex(from.x, from.ground, from.z).setUv(from.along, 0f)
-                builder.addVertex(to.x, to.ground, to.z).setUv(to.along, 0f)
-                builder.addVertex(to.x, to.ground + HEIGHT_BLOCKS.toFloat(), to.z).setUv(to.along, ACROSS)
-                builder.addVertex(from.x, from.ground + HEIGHT_BLOCKS.toFloat(), from.z).setUv(from.along, ACROSS)
+                builder.addVertex(from.x, from.ground, from.z).setUv(from.along, rise)
+                builder.addVertex(to.x, to.ground, to.z).setUv(to.along, rise)
+                builder.addVertex(to.x, to.ground + HEIGHT_BLOCKS.toFloat(), to.z).setUv(to.along, rise + ACROSS)
+                builder.addVertex(from.x, from.ground + HEIGHT_BLOCKS.toFloat(), from.z).setUv(from.along, rise + ACROSS)
 
                 builder.addVertex(from.inner.x.toFloat(), from.ground + LIFT, from.inner.z.toFloat()).setUv(from.along, -ACROSS)
                 builder.addVertex(to.inner.x.toFloat(), to.ground + LIFT, to.inner.z.toFloat()).setUv(to.along, -ACROSS)

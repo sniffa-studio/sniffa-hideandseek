@@ -27,8 +27,8 @@ void main() {
     float v = UV0.y;
 
     vec2 normal = Color.rg * 2.0 - 1.0;
-    float wave = sin(u * 0.035 + time * 0.35 + seed * 1.7) * 5.0
-               + sin(u * 0.012 - time * 0.2 + seed * 2.9) * 11.0;
+    float wave = sin(u * 0.035 + time * 0.35 + seed * 1.7) * 3.0
+               + sin(u * 0.012 - time * 0.2 + seed * 2.9) * 7.0;
     wave *= 0.6 + 0.4 * v;
 
     vec2 ground = Position.xz * scale + normal * wave * scale;

@@ -19,9 +19,9 @@ const float PERIOD_CELLS = 1.7320508;
 const float SHARD_CELLS = 7.8;
 const float SHARD_JITTER = 0.85;
 
-const float EDGE_PIXELS = 1.6;
+const float EDGE_PIXELS = 1.3;
 const float EDGE_CELLS = 0.035;
-const float EDGE_STRENGTH = 0.85;
+const float EDGE_STRENGTH = 0.75;
 const float EDGE_GLOW_CELLS = 0.03;
 const float EDGE_GLOW_STRENGTH = 0.32;
 
@@ -35,23 +35,23 @@ const float FROST_EDGE = 0.03;
 const float FROST_BELOW_FROM = 0.5;
 const float FROST_BELOW_TO = 6.0;
 const float FROST_BELOW = 0.35;
-const float FROST_STRENGTH = 0.24;
+const float FROST_STRENGTH = 0.3;
 
 const float SHIMMER_CELLS = 30.0;
 const float SHIMMER_CYCLES = 35.0;
-const float SHIMMER_WIDTH = 0.06;
-const float SHIMMER_STRENGTH = 0.5;
+const float SHIMMER_WIDTH = 0.12;
+const float SHIMMER_STRENGTH = 0.26;
 
-const float SPARKLE_SHARE = 0.22;
+const float SPARKLE_SHARE = 0.12;
 const float SPARKLE_CYCLES = 900.0;
 const float SPARKLE_PIXELS = 2.4;
-const float SPARKLE_STRENGTH = 1.6;
+const float SPARKLE_STRENGTH = 1.2;
 
 const float SNOW_CELLS = 0.55;
 const float SNOW_CYCLES = 260.0;
-const float SNOW_SHARE = 0.32;
+const float SNOW_SHARE = 0.16;
 const float SNOW_PIXELS = 1.3;
-const float SNOW_STRENGTH = 0.9;
+const float SNOW_STRENGTH = 0.7;
 
 const float LINES_NEAR_FROM = 10.0;
 const float LINES_NEAR_TO = 34.0;
@@ -62,12 +62,12 @@ const float BREATH_STRENGTH = 0.25;
 const float CREEP_CYCLES = 40.0;
 const float CREEP_SHRINK = 0.35;
 
-const float NEAR_BLOCKS = 6.0;
-const float NEAR_FADE = 56.0;
-const float NEAR_BOOST = 0.4;
+const float NEAR_BLOCKS = 3.0;
+const float NEAR_FADE = 40.0;
+const float NEAR_BOOST = 0.95;
 
 const float HOT_BLOCKS = 7.0;
-const float HOT_FROST = 0.3;
+const float HOT_FROST = 0.45;
 const float HOT_LIGHT = 1.6;
 
 const int RIPPLES = 3;
@@ -96,18 +96,14 @@ const float BEVEL_DARK = 0.35;
 const float CLEAR_FROM = 50.0;
 const float CLEAR_TO = 180.0;
 
-const float MILKY_SHARE = 0.3;
-const float MILKY_STRENGTH = 0.22;
-
-const float HAIRLINE_SHARE = 0.6;
-const float HAIRLINE_SCALE = 5.0;
-const float HAIRLINE_STRENGTH = 0.35;
+const float MILKY_SHARE = 0.18;
+const float MILKY_STRENGTH = 0.12;
 
 const float DEPTH_CELLS = 0.3;
 
 const float STREAK_WIDTH = 0.2;
 const float STREAK_CYCLES = 8.0;
-const float STREAK_STRENGTH = 0.14;
+const float STREAK_STRENGTH = 0.06;
 
 const float RIM_POWER = 2.6;
 const float RIM_STRENGTH = 0.32;
@@ -294,15 +290,6 @@ void main() {
     float seedMilky = hash(vec2(seed * 57.3, 3.7));
     float milky = smoothstep(1.0 - MILKY_SHARE, 1.0, seedMilky) * MILKY_STRENGTH * (0.6 + 0.4 * frostField) * legible;
 
-    float hairline = 0.0;
-    if (hash(vec2(seed * 31.1, 9.2)) < HAIRLINE_SHARE) {
-        vec3 hairFrom;
-        vec3 hairNormal;
-        vec4 hair = shards(p * HAIRLINE_SCALE + vec3(0.0, seed * 17.0, 0.0), time, 0.0, hairFrom, hairNormal);
-        float hairPixels = hair.x / max(perPixel * HAIRLINE_SCALE, 1.0e-6);
-        hairline = (1.0 - smoothstep(0.0, 1.0, hairPixels)) * HAIRLINE_STRENGTH * legible * close;
-    }
-
     float thickness = smoothstep(0.0, DEPTH_CELLS, toEdge);
 
     float streakPhase = dot(p, STREAK_DIRECTION) / 3.0 + seed * 0.3 - time * STREAK_CYCLES;
@@ -348,7 +335,7 @@ void main() {
     float clearing = 1.0 - smoothstep(CLEAR_FROM, CLEAR_TO, distanceToEye);
     float rime = ((frost + milky) * clearing + flash * 0.6) * strength;
     float glint = (edgeGlow * legible * drawn + shimmer + streak + rim) * (1.0 + lift) * strength;
-    float bright = (edge * legible * drawn * (1.0 + lift) + hairline + sparkle + flake + crack) * strength;
+    float bright = (edge * legible * drawn * (1.0 + lift) + sparkle + flake + crack) * strength;
 
     float total = glass + rime + glint + bright;
     if (total * ColorModulator.a < 0.004) {
