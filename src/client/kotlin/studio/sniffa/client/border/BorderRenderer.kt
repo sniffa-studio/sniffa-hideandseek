@@ -8,6 +8,7 @@ import java.util.Optional
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents
 import net.minecraft.client.Minecraft
 import net.minecraft.util.ARGB
+import net.minecraft.world.attribute.EnvironmentAttributes
 import net.minecraft.world.phys.Vec3
 import org.joml.Matrix4f
 import org.joml.Vector3f
@@ -28,6 +29,10 @@ object BorderRenderer {
     private const val ZONE_TINT = 0xFF9FD4FF.toInt()
 
     private const val FROST_RISE = 4f
+
+    private const val AURORA_DAY = 0.2f
+
+    private const val AURORA_NIGHT_GAIN = 2.2f
 
     private class Layer(val dome: Boolean) {
         var mesh: BorderMesh? = null
@@ -103,7 +108,16 @@ object BorderRenderer {
         if (current.indexCount == 0) return
         val values = Matrix4f().zero()
         values.m23(BorderMesh.DOME_BASE.toFloat())
-        pass(BorderPipeline.AURORA, current.vertices, current.indexCount, ring, 0xFFFFFF, camera, values, current.scaleFor(ring) ?: 1.0)
+        pass(BorderPipeline.AURORA, current.vertices, current.indexCount, ring, auroraTint(), camera, values, current.scaleFor(ring) ?: 1.0)
+    }
+
+    private fun auroraTint(): Int {
+        val client = Minecraft.getInstance()
+        val partial = client.deltaTracker.getGameTimeDeltaPartialTick(false)
+        val stars = client.gameRenderer.mainCamera().attributeProbe().getValue(EnvironmentAttributes.STAR_BRIGHTNESS, partial) as Float
+        val night = (stars * AURORA_NIGHT_GAIN).coerceIn(0f, 1f)
+        val level = (255f * (AURORA_DAY + (1f - AURORA_DAY) * night)).toInt()
+        return ARGB.color(255, level, level, level)
     }
 
     private fun zoneUniforms(columns: Int): Matrix4f {

@@ -13,20 +13,23 @@ out vec4 fragColor;
 
 const float SECONDS = 1200.0;
 
-const float STRENGTH = 0.6;
+const float STRENGTH = 0.62;
 
 const float RAY_WIDE = 0.22;
 const float RAY_FINE = 0.9;
 const float RAY_DRIFT_WIDE = 0.25;
 const float RAY_DRIFT_FINE = 0.6;
 
-const float BOTTOM_EDGE = 0.06;
-const float TOP_FALLOFF = 1.6;
-const float GLOW_NEAR_BOTTOM = 1.2;
+const float BOTTOM_EDGE = 0.2;
+const float TOP_FALLOFF = 2.2;
+const float GLOW_NEAR_BOTTOM = 1.0;
 
-const float FLICKER = 0.2;
-const float FLARE = 1.2;
+const float FLICKER = 0.12;
+const float FLARE = 0.4;
 const float FLARE_SHARPNESS = 30.0;
+
+const float SATURATION = 0.75;
+const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);
 
 const float FAR_FROM = 250.0;
 const float FAR_TO = 700.0;
@@ -54,7 +57,7 @@ void main() {
 
     float wide = noise1(u * RAY_WIDE + time * RAY_DRIFT_WIDE + bandSeed * 7.0);
     float fine = noise1(u * RAY_FINE - time * RAY_DRIFT_FINE + bandSeed * 3.0);
-    float rays = pow(wide, 2.2) * 0.7 + pow(fine, 4.0) * 0.6;
+    float rays = pow(wide, 2.2) * 0.6 + pow(fine, 4.0) * 0.4;
 
     float reach = 0.55 + 0.45 * wide;
     float bottom = smoothstep(0.0, BOTTOM_EDGE, v);
@@ -75,7 +78,8 @@ void main() {
 
     vec3 colour = mix(GREEN, TEAL, smoothstep(0.1, 0.45, v));
     colour = mix(colour, VIOLET, smoothstep(0.45, 0.9, v));
-    colour = mix(colour, PINK, (1.0 - smoothstep(0.0, 0.05, v)) * 0.6);
+    colour = mix(colour, PINK, (1.0 - smoothstep(0.0, 0.05, v)) * 0.3);
+    colour = mix(vec3(dot(colour, LUMA)), colour, SATURATION);
 
     fragColor = vec4(colour * ColorModulator.rgb, clamp(intensity, 0.0, 1.0));
 }
