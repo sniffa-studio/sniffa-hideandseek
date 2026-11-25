@@ -45,6 +45,32 @@ object ShaderGuard {
         if (switchShaders(true)) LOGGER.info("Turned shaders back on.")
     }
 
+    private val packProbe: (() -> Boolean)? by lazy { packProbe() }
+
+    val shaderPackActive: Boolean
+        get() = packProbe?.let {
+            try {
+                it()
+            } catch (failure: Throwable) {
+                false
+            }
+        } ?: false
+
+    private fun packProbe(): (() -> Boolean)? {
+        if (!FabricLoader.getInstance().isModLoaded("iris")) return null
+        val always: () -> Boolean = { true }
+        return try {
+            val api = Class.forName(API)
+            val instance = api.getMethod("getInstance").invoke(null)
+            val method = api.getMethod("isShaderPackInUse")
+            val probe: () -> Boolean = { method.invoke(instance) as Boolean }
+            probe
+        } catch (failure: Throwable) {
+            LOGGER.warn("Iris is loaded but its API could not be reached, soft deco light stays off: {}", failure.toString())
+            always
+        }
+    }
+
     private fun config(): Any? = try {
         val api = Class.forName(API)
         val instance = api.getMethod("getInstance").invoke(null)
