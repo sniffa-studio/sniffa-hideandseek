@@ -30,6 +30,7 @@ import studio.sniffa.net.payload.RadarPayload
 import studio.sniffa.net.payload.RolePayload
 import studio.sniffa.net.payload.RoundStatePayload
 import studio.sniffa.net.payload.SpottedPayload
+import studio.sniffa.net.payload.VoucherPayload
 import studio.sniffa.net.payload.ScanTagPayload
 import studio.sniffa.net.payload.ScanWavePayload
 import studio.sniffa.net.payload.SeekerStatePayload
@@ -76,6 +77,7 @@ object Hideandseek : ModInitializer {
 		PayloadTypeRegistry.clientboundPlay().register(TracksPayload.TYPE, TracksPayload.CODEC)
 		PayloadTypeRegistry.clientboundPlay().register(RolePayload.TYPE, RolePayload.CODEC)
 		PayloadTypeRegistry.clientboundPlay().register(SpottedPayload.TYPE, SpottedPayload.CODEC)
+		PayloadTypeRegistry.clientboundPlay().register(VoucherPayload.TYPE, VoucherPayload.CODEC)
 		PayloadTypeRegistry.clientboundPlay().register(GlowPayload.TYPE, GlowPayload.CODEC)
 		PayloadTypeRegistry.clientboundPlay().register(CrewPayload.TYPE, CrewPayload.CODEC)
 		PayloadTypeRegistry.clientboundPlay().register(PropPayload.TYPE, PropPayload.CODEC)
