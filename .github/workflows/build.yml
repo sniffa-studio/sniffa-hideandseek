@@ -35,7 +35,7 @@ jobs:
           path: build/libs/
           retention-days: 14
       - name: publish to the cdn
-        if: github.event_name == 'push' && env.CDN_UPLOAD_KEY != '' && env.CDN_UPLOAD_SECRET != '' && (github.ref == 'refs/heads/main' || env.CDN_PREVIEW_FOLDER != '')
+        if: github.event_name == 'push' && env.CDN_UPLOAD_KEY != '' && env.CDN_UPLOAD_SECRET != '' && (github.ref == 'refs/heads/main' || (github.ref == 'refs/heads/feat/christmas' && env.CDN_PREVIEW_FOLDER != ''))
         run: |
           set -euo pipefail
           jar=$(ls build/libs/*.jar | grep -v -- '-sources\.jar$' | head -n 1)
