@@ -44,7 +44,7 @@ object LampGlow {
     private const val FADE_FROM = 48f
     private const val FADE_TO = 64f
     private const val POOL_BOOST = 2f
-    private const val STALL_HALO_FROM = 0.2f
+    private const val MOST_HALOS = 64
 
     enum class Kind(val colour: Vector3f, val halo: Float, val reach: Float, val gain: Float, val flame: Flame) {
         LANTERN(Vector3f(1f, 0.6f, 0.26f), 1.5f, 5f, 1f, Flame.LANTERN),
@@ -168,7 +168,7 @@ object LampGlow {
                 placement.transformPosition(emitter.at, at)
                 val size = sqrt(emitter.area)
                 val gain = (0.3f + size * 1.4f).coerceIn(0.3f, 1f)
-                val halo = if (kind.stall && size < STALL_HALO_FROM) 0f else (0.3f + size * 1.3f).coerceIn(0.3f, 1.6f) * if (kind.flame == Flame.FIRE) 1.4f else 1f
+                val halo = if (kind.stall) 0f else (0.3f + size * 1.3f).coerceIn(0.3f, 1.6f) * if (kind.flame == Flame.FIRE) 1.4f else 1f
                 val reach = if (kind.stall) (2.6f + size * 4f).coerceIn(2.6f, 4.5f) else (3f + size * 6.5f).coerceIn(3f, 7.5f)
                 val colour = Vector3f(emitter.colour).mul(gain)
                 lamps += Lamp(at.x, at.y, at.z, colour, halo, reach, kind.flame, phaseOf((at.x * 16f).toInt(), (at.y * 16f).toInt(), (at.z * 16f).toInt()))
@@ -187,7 +187,7 @@ object LampGlow {
     private val CORNERS = arrayOf(floatArrayOf(-1f, -1f), floatArrayOf(1f, -1f), floatArrayOf(1f, 1f), floatArrayOf(-1f, 1f))
 
     private fun build(origin: BlockPos, all: List<Lamp>): Batch? {
-        val lamps = all.filter { it.halo > 0f }
+        val lamps = all.filter { it.halo > 0f }.sortedBy { it.x * it.x + it.y * it.y + it.z * it.z }.take(MOST_HALOS)
         if (lamps.isEmpty()) return null
         val format = DefaultVertexFormat.POSITION_TEX_COLOR
         val halos = ByteBufferBuilder(format.vertexSize * 4 * lamps.size).use { storage ->

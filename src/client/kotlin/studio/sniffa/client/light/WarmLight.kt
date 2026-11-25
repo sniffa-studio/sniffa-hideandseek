@@ -39,7 +39,7 @@ object WarmLight {
 
     private const val NEAR = 40.0
     private const val FADE_FROM = 28f
-    private const val MOST = 64
+    private const val MOST = 48
     private const val MERGE = 2.0
     private const val MOVE_REBUILD = 4.0
     private const val COLOUR_RANGE = 2f
