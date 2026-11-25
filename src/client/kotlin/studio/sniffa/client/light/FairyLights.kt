@@ -37,11 +37,11 @@ object FairyLights {
     private const val REFIT_EVERY_TICKS = 100
     private const val SHOWN_WITHIN = 160.0
     private const val FADE_FROM = 120f
-    private const val WIRE_WIDTH = 0.018f
+    private const val WIRE_WIDTH = 0.011f
     private const val BULB_SIZE = 0.5f
     private const val BULB_PUSH = 0.08f
     private const val BULB_GAIN = 1f
-    private val WIRE_COLOUR = Vector4f(0.06f, 0.1f, 0.06f, 1f)
+    private val WIRE_COLOUR = Vector4f(0.035f, 0.115f, 0.05f, 1f)
 
     private val lit = HashMap<Int, GarlandMesh>()
     private var ticks = 0

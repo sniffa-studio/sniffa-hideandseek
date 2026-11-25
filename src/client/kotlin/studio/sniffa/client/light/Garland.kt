@@ -47,7 +47,7 @@ data class Garland(
         private fun sample(steps: Int, drop: Float): List<Vector3f> = List(steps + 1) { at(it / steps.toFloat(), drop) }
 
         fun at(t: Float, drop: Float = sag): Vector3f {
-            val down = drop * 4f * t * (1f - t)
+            val down = drop * hang(t)
             return Vector3f(span.x * t, span.y * t - down, span.z * t)
         }
 
@@ -86,8 +86,8 @@ data class Garland(
         private const val END_ROOM = 0.3f
         private const val LONGEST = 64f
         private const val SHORTEST = 0.5f
-        private const val SAG_BASE = 0.12f
-        private const val SAG_SHARE = 0.045f
+        private const val SAG_BASE = 0.15f
+        private const val SAG_SHARE = 0.058f
         private const val WIDEST = 12f
 
         fun of(display: Display.ItemDisplay, stack: ItemStack, tree: Boolean): Garland? {
@@ -129,6 +129,11 @@ data class Garland(
             val lz = pz - pos.z
             return shape.toAabbs().any { it.contains(lx, ly, lz) }
         }
+
+        private const val STIFFNESS = 1.6f
+        private val STIFF_COSH = kotlin.math.cosh(STIFFNESS)
+
+        fun hang(t: Float): Float = (STIFF_COSH - kotlin.math.cosh(STIFFNESS * (2f * t - 1f))) / (STIFF_COSH - 1f)
 
         fun sagFor(span: Vector3f): Float {
             val flat = sqrt(span.x * span.x + span.z * span.z)
