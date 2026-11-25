@@ -39,6 +39,9 @@ import studio.sniffa.net.payload.RadarPayload
 import studio.sniffa.net.payload.RolePayload
 import studio.sniffa.net.payload.RoundStatePayload
 import studio.sniffa.net.payload.SpottedPayload
+import studio.sniffa.net.payload.VoucherPayload
+import studio.sniffa.client.light.VoucherPop
+import studio.sniffa.client.light.VoucherGlow
 import studio.sniffa.net.payload.ScanTagPayload
 import studio.sniffa.net.payload.ScanWavePayload
 import studio.sniffa.net.payload.SeekerStatePayload
@@ -72,6 +75,10 @@ object RoundSync {
 
         ClientPlayNetworking.registerGlobalReceiver(SpottedPayload.TYPE) { payload, _ ->
             SpottedWarning.show(payload.range)
+        }
+
+        ClientPlayNetworking.registerGlobalReceiver(VoucherPayload.TYPE) { payload, _ ->
+            if (payload.finder == 1) VoucherPop.show(payload.euros) else VoucherGlow.flash(payload.euros, payload.x, payload.y, payload.z)
         }
 
         ClientPlayNetworking.registerGlobalReceiver(RolePayload.TYPE) { payload, _ ->
