@@ -76,10 +76,10 @@ class GarlandMesh(
                 .setColor(slope.x * 0.5f + 0.5f, slope.y * 0.5f + 0.5f, slope.z * 0.5f + 0.5f, 1f)
         }
 
-        fun spots(path: List<Vector3f>): List<Vector3f> {
+        fun spots(path: List<Vector3f>, spacing: Float = BULB_SPACING): List<Vector3f> {
             var total = 0f
             for (index in 1 until path.size) total += path[index].distance(path[index - 1])
-            val count = floor(total / BULB_SPACING).toInt()
+            val count = floor(total / spacing).toInt()
             if (count <= 0) return emptyList()
             val gap = total / count
             val spots = ArrayList<Vector3f>(count)

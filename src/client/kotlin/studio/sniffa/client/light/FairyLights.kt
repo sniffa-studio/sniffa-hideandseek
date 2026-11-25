@@ -41,6 +41,9 @@ object FairyLights {
     private const val BULB_SIZE = 0.5f
     private const val BULB_PUSH = 0.08f
     private const val BULB_GAIN = 1f
+    private const val GLOW_SPACING = 2f
+    private const val GLOW_GAIN = 0.42f
+    private const val GLOW_REACH = 3.2f
     private val WIRE_COLOUR = Vector4f(0.035f, 0.115f, 0.05f, 1f)
 
     private val lit = HashMap<Int, GarlandMesh>()
@@ -82,6 +85,7 @@ object FairyLights {
     private fun forget() {
         lit.values.forEach { it.close() }
         lit.clear()
+        WarmLight.publish(WarmLight.Owner.CHAINS, emptyList())
     }
 
     private fun tick(client: Minecraft) {
@@ -94,6 +98,7 @@ object FairyLights {
     }
 
     private fun scan(level: ClientLevel) {
+        var changed = false
         val seen = HashSet<Int>()
         for (entity in level.entitiesForRendering()) {
             if (entity !is Display.ItemDisplay) continue
@@ -111,10 +116,25 @@ object FairyLights {
                 val middle = path[path.size / 2]
                 val sky = level.getMaxLocalRawBrightness(net.minecraft.core.BlockPos.containing(garland.x + middle.x, garland.y + middle.y, garland.z + middle.z)) / 15f
                 lit[entity.id] = GarlandMesh.build(garland, path, 0.42f + 0.58f * sky * kotlin.math.sqrt(sky))
+                changed = true
             }
         }
         val gone = lit.keys - seen
         for (id in gone) lit.remove(id)?.close()
+        if (changed || gone.isNotEmpty()) WarmLight.publish(WarmLight.Owner.CHAINS, glow())
+    }
+
+    private fun glow(): List<WarmLight.Source> {
+        val sources = ArrayList<WarmLight.Source>()
+        for (mesh in lit.values) {
+            val garland = mesh.garland
+            val colours = garland.palette.colours
+            GarlandMesh.spots(mesh.path, GLOW_SPACING).forEachIndexed { index, spot ->
+                val colour = Vector3f(colours[index % colours.size]).mul(GLOW_GAIN)
+                sources += WarmLight.Source(garland.x + spot.x, garland.y + spot.y - 0.1, garland.z + spot.z, colour, GLOW_REACH, Flame.STEADY, GarlandMesh.phaseOf(index))
+            }
+        }
+        return sources
     }
 
     private fun draw() {

@@ -19,6 +19,7 @@ import studio.sniffa.client.snow.ShootingStars
 import studio.sniffa.client.light.FairyLights
 import studio.sniffa.client.light.Icicles
 import studio.sniffa.client.light.LampGlow
+import studio.sniffa.client.light.WarmLight
 import studio.sniffa.client.ui.deko.DekoKatalog
 import studio.sniffa.client.light.Spotlights
 import studio.sniffa.client.prop.Crows
@@ -67,6 +68,7 @@ object HideandseekClient : ClientModInitializer {
 		Props.install()
 		Crows.install()
 		Spotlights.install()
+		WarmLight.install()
 		FairyLights.install()
 		LampGlow.install()
 		DekoKatalog.install()
