@@ -20,10 +20,12 @@ object BorderRenderer {
     private val roundBorder = Layer()
     private val dangerZone = Layer()
 
-    private val roundSeam = BorderSeam()
+    private val roundSeam = BorderSeam(FROST_RISE)
     private val zoneSeam = BorderSeam()
 
     private const val ZONE_TINT = 0xFFFC301E.toInt()
+
+    private const val FROST_RISE = 4f
 
     private class Layer {
         var mesh: BorderMesh? = null
@@ -54,7 +56,7 @@ object BorderRenderer {
                     BorderEffects.uniforms(ring, it.columns, camera)
                 }
                 roundSeam.meshFor(ring, camera)?.let { seam ->
-                    pass(BorderPipeline.SEAM, seam.vertices, seam.indexCount, ring, BorderZone.tint(), camera, roundSeam.uniforms(seam.reach, BorderZone.motion()), roundSeam.scaleFor(ring))
+                    pass(BorderPipeline.FROST, seam.vertices, seam.indexCount, ring, BorderZone.tint(), camera, roundSeam.uniforms(seam.reach, BorderZone.motion()), roundSeam.scaleFor(ring))
                 }
             }
 
