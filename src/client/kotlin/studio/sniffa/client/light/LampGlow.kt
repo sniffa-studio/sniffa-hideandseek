@@ -20,9 +20,7 @@ import net.minecraft.client.multiplayer.ClientLevel
 import net.minecraft.client.renderer.BindGroupLayouts
 import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.core.BlockPos
-import net.minecraft.core.Direction
 import net.minecraft.core.SectionPos
-import net.minecraft.core.component.DataComponents
 import net.minecraft.tags.BlockTags
 import net.minecraft.world.entity.Display
 import net.minecraft.world.level.block.Blocks
@@ -30,55 +28,50 @@ import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.state.properties.BlockStateProperties
 import net.minecraft.world.level.chunk.status.ChunkStatus
 import org.joml.Matrix4f
+import org.joml.Vector3d
 import org.joml.Vector3f
 import org.joml.Vector4f
 import studio.sniffa.Hideandseek
 import java.util.Optional
 import java.util.OptionalDouble
+import kotlin.math.sqrt
 
 object LampGlow {
 
     private const val SCAN_EVERY_TICKS = 40
     private const val REACH_CHUNKS = 4
-    private const val FLOOR_SEARCH = 6
-    private const val POOL_LIFT = 0.03f
+    private const val REACH = 64.0
     private const val FADE_FROM = 48f
     private const val FADE_TO = 64f
-    private val STREET_LAMP = Hideandseek.id("props/deko/laterne_kopf")
-    private const val STREET_LAMP_LIFT = 0.8f
+    private const val POOL_BOOST = 2f
+    private const val STALL_HALO_FROM = 0.2f
 
-    enum class Kind(val colour: Vector3f, val halo: Float, val pool: Float, val gain: Float) {
-        LANTERN(Vector3f(1f, 0.62f, 0.28f), 1.5f, 3.2f, 1f),
-        SOUL(Vector3f(0.35f, 0.8f, 1f), 1.3f, 2.8f, 0.85f),
-        CANDLE(Vector3f(1f, 0.68f, 0.32f), 0.8f, 1.8f, 0.6f),
-        FIRE(Vector3f(1f, 0.48f, 0.18f), 2.2f, 4f, 1f),
+    enum class Kind(val colour: Vector3f, val halo: Float, val reach: Float, val gain: Float, val flame: Flame) {
+        LANTERN(Vector3f(1f, 0.6f, 0.26f), 1.5f, 5f, 1f, Flame.LANTERN),
+        SOUL(Vector3f(0.35f, 0.8f, 1f), 1.3f, 4.5f, 0.85f, Flame.LANTERN),
+        CANDLE(Vector3f(1f, 0.64f, 0.3f), 0.8f, 3.2f, 0.6f, Flame.CANDLE),
+        FIRE(Vector3f(1f, 0.46f, 0.16f), 2.2f, 6.5f, 1f, Flame.FIRE),
     }
 
-    private class Lamp(val x: Float, val y: Float, val z: Float, val kind: Kind, val floor: Float?, val phase: Float)
+    private class Lamp(val x: Float, val y: Float, val z: Float, val colour: Vector3f, val halo: Float, val reach: Float, val flame: Flame, val phase: Float)
 
-    private class Batch(val originX: Int, val originY: Int, val originZ: Int, val halos: GpuBuffer?, val haloCount: Int, val pools: GpuBuffer?, val poolCount: Int) : AutoCloseable {
-        override fun close() {
-            halos?.close()
-            pools?.close()
-        }
+    private class Batch(val originX: Int, val originY: Int, val originZ: Int, val halos: GpuBuffer, val haloCount: Int) : AutoCloseable {
+        override fun close() = halos.close()
     }
 
     private var batch: Batch? = null
     private var ticks = 0
 
     @Volatile
-    var fires: List<org.joml.Vector3d> = emptyList()
+    var fires: List<Vector3d> = emptyList()
         private set
 
     private val ADDITIVE = BlendFunction(BlendFactor.ONE, BlendFactor.ONE, BlendFactor.ZERO, BlendFactor.ONE)
 
-    private val HALO: RenderPipeline = pipeline("lamp_halo", "core/lamphalo")
-    private val POOL: RenderPipeline = pipeline("lamp_pool", "core/lamppool")
-
-    private fun pipeline(name: String, shader: String): RenderPipeline = RenderPipeline.builder()
-        .withLocation(Hideandseek.id("pipeline/$name"))
-        .withVertexShader(Hideandseek.id(shader))
-        .withFragmentShader(Hideandseek.id(shader))
+    private val HALO: RenderPipeline = RenderPipeline.builder()
+        .withLocation(Hideandseek.id("pipeline/lamp_halo"))
+        .withVertexShader(Hideandseek.id("core/lamphalo"))
+        .withFragmentShader(Hideandseek.id("core/lamphalo"))
         .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
         .withBindGroupLayout(BindGroupLayouts.GLOBALS)
         .withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
@@ -90,7 +83,6 @@ object LampGlow {
 
     fun install() {
         RenderPipelines.register(HALO)
-        RenderPipelines.register(POOL)
         ClientTickEvents.END_CLIENT_TICK.register { client -> tick(client) }
         ClientPlayConnectionEvents.DISCONNECT.register { _, client -> client.execute { forget() } }
         LevelRenderEvents.END_MAIN.register(LevelRenderEvents.EndMain { draw() })
@@ -100,21 +92,28 @@ object LampGlow {
         batch?.close()
         batch = null
         fires = emptyList()
+        PropLights.forget()
+        WarmLight.publish(WarmLight.Owner.LAMPS, emptyList())
     }
 
     private fun tick(client: Minecraft) {
         val level = client.level
         if (level == null) {
-            forget()
+            if (batch != null) forget()
             return
         }
         if (++ticks % SCAN_EVERY_TICKS != 0) return
         val camera = client.gameRenderer.mainCamera().position()
         val origin = BlockPos.containing(camera.x, camera.y, camera.z)
         val lamps = scan(level, origin)
-        fires = lamps.filter { it.kind == Kind.FIRE }.map { org.joml.Vector3d(origin.x + it.x.toDouble(), origin.y + it.y.toDouble(), origin.z + it.z.toDouble()) }
+        fires = lamps.filter { it.flame == Flame.FIRE }.map { Vector3d(origin.x + it.x.toDouble(), origin.y + it.y.toDouble(), origin.z + it.z.toDouble()) }
+        props(client, level, origin, lamps)
         batch?.close()
         batch = build(origin, lamps)
+        WarmLight.publish(WarmLight.Owner.LAMPS, lamps.map {
+            val boost = if (it.flame == Flame.STEADY) 1f else POOL_BOOST
+            WarmLight.Source(origin.x + it.x.toDouble(), origin.y + it.y.toDouble(), origin.z + it.z.toDouble(), Vector3f(it.colour).mul(boost), it.reach, it.flame, it.phase)
+        })
     }
 
     fun kindOf(state: BlockState): Kind? = when {
@@ -125,9 +124,8 @@ object LampGlow {
         else -> null
     }
 
-    private fun scan(level: ClientLevel, origin: BlockPos): List<Lamp> {
+    private fun scan(level: ClientLevel, origin: BlockPos): MutableList<Lamp> {
         val lamps = ArrayList<Lamp>()
-        val pos = BlockPos.MutableBlockPos()
         val centreX = SectionPos.blockToSectionCoord(origin.x)
         val centreZ = SectionPos.blockToSectionCoord(origin.z)
         for (cx in centreX - REACH_CHUNKS..centreX + REACH_CHUNKS) for (cz in centreZ - REACH_CHUNKS..centreZ + REACH_CHUNKS) {
@@ -147,42 +145,35 @@ object LampGlow {
                         Kind.FIRE -> 0.6f
                         else -> if (hanging) 0.45f else 0.35f
                     }
-                    val floor = floorUnder(level, pos, bx, by, bz)
-                    lamps += Lamp((bx - origin.x) + 0.5f, (by - origin.y) + lift, (bz - origin.z) + 0.5f, kind, floor?.let { it - origin.y }, phaseOf(bx, by, bz))
+                    val colour = Vector3f(kind.colour).mul(kind.gain)
+                    lamps += Lamp((bx - origin.x) + 0.5f, (by - origin.y) + lift, (bz - origin.z) + 0.5f, colour, kind.halo, kind.reach, kind.flame, phaseOf(bx, by, bz))
                 }
             }
         }
-        streetLamps(level, origin, pos, lamps)
         return lamps
     }
 
-    private fun streetLamps(level: ClientLevel, origin: BlockPos, pos: BlockPos.MutableBlockPos, lamps: MutableList<Lamp>) {
+    private fun props(client: Minecraft, level: ClientLevel, origin: BlockPos, lamps: MutableList<Lamp>) {
+        val ox = origin.x.toDouble()
+        val oy = origin.y.toDouble()
+        val oz = origin.z.toDouble()
+        val at = Vector3f()
         for (entity in level.entitiesForRendering()) {
             if (entity !is Display.ItemDisplay) continue
-            val stack = entity.itemRenderState()?.itemStack() ?: continue
-            if (stack.get(DataComponents.ITEM_MODEL) != STREET_LAMP) continue
-            val at = entity.position()
-            val bx = BlockPos.containing(at.x, at.y + STREET_LAMP_LIFT, at.z)
-            val floor = floorUnder(level, pos, bx.x, bx.y, bx.z)
-            lamps += Lamp((at.x - origin.x).toFloat(), (at.y - origin.y).toFloat() + STREET_LAMP_LIFT, (at.z - origin.z).toFloat(), Kind.LANTERN, floor?.let { it - origin.y }, phaseOf(bx.x, bx.y, bx.z))
-        }
-    }
-
-    private fun floorUnder(level: ClientLevel, pos: BlockPos.MutableBlockPos, x: Int, y: Int, z: Int): Float? {
-        for (dy in 0..FLOOR_SEARCH) {
-            pos.set(x, y - dy, z)
-            val state = level.getBlockState(pos)
-            if (dy == 0) {
-                val own = state.getCollisionShape(level, pos)
-                if (!own.isEmpty && own.max(Direction.Axis.Y) < 0.5) return (y + own.max(Direction.Axis.Y)).toFloat()
-                continue
+            if (entity.distanceToSqr(ox, oy, oz) > REACH * REACH) continue
+            val kind = PropLights.of(client, entity)
+            if (kind.emitters.isEmpty()) continue
+            val placement = PropLights.placement(entity, ox, oy, oz) ?: continue
+            for (emitter in kind.emitters) {
+                placement.transformPosition(emitter.at, at)
+                val size = sqrt(emitter.area)
+                val gain = (0.3f + size * 1.4f).coerceIn(0.3f, 1f)
+                val halo = if (kind.stall && size < STALL_HALO_FROM) 0f else (0.3f + size * 1.3f).coerceIn(0.3f, 1.6f) * if (kind.flame == Flame.FIRE) 1.4f else 1f
+                val reach = if (kind.stall) (2.6f + size * 4f).coerceIn(2.6f, 4.5f) else (3f + size * 6.5f).coerceIn(3f, 7.5f)
+                val colour = Vector3f(emitter.colour).mul(gain)
+                lamps += Lamp(at.x, at.y, at.z, colour, halo, reach, kind.flame, phaseOf((at.x * 16f).toInt(), (at.y * 16f).toInt(), (at.z * 16f).toInt()))
             }
-            if (state.isAir || state.`is`(Blocks.BARRIER)) continue
-            val shape = state.getCollisionShape(level, pos)
-            if (shape.isEmpty) continue
-            return (y - dy + shape.max(Direction.Axis.Y)).toFloat()
         }
-        return null
     }
 
     private fun phaseOf(x: Int, y: Int, z: Int): Float {
@@ -195,35 +186,23 @@ object LampGlow {
 
     private val CORNERS = arrayOf(floatArrayOf(-1f, -1f), floatArrayOf(1f, -1f), floatArrayOf(1f, 1f), floatArrayOf(-1f, 1f))
 
-    private fun build(origin: BlockPos, lamps: List<Lamp>): Batch? {
+    private fun build(origin: BlockPos, all: List<Lamp>): Batch? {
+        val lamps = all.filter { it.halo > 0f }
         if (lamps.isEmpty()) return null
         val format = DefaultVertexFormat.POSITION_TEX_COLOR
         val halos = ByteBufferBuilder(format.vertexSize * 4 * lamps.size).use { storage ->
             val builder = BufferBuilder(storage, PrimitiveTopology.QUADS, format)
-            for (lamp in lamps) for (corner in CORNERS) {
-                builder.addVertex(lamp.x, lamp.y, lamp.z)
-                    .setUv(corner[0] * lamp.kind.halo, corner[1] * lamp.kind.halo)
-                    .setColor(lamp.kind.colour.x * lamp.kind.gain, lamp.kind.colour.y * lamp.kind.gain, lamp.kind.colour.z * lamp.kind.gain, lamp.phase)
+            for (lamp in lamps) {
+                val code = lamp.flame.ordinal + 1f + lamp.phase * 0.98f
+                for (corner in CORNERS) {
+                    builder.addVertex(lamp.x, lamp.y, lamp.z)
+                        .setUv(corner[0] * lamp.halo, corner[1] * code)
+                        .setColor(lamp.colour.x.coerceAtMost(1f), lamp.colour.y.coerceAtMost(1f), lamp.colour.z.coerceAtMost(1f), 1f)
+                }
             }
             builder.buildOrThrow().use { RenderSystem.getDevice().createBuffer({ "sniffa lamp halos" }, GpuBuffer.USAGE_VERTEX, it.vertexBuffer()) }
         }
-        val pooled = lamps.filter { it.floor != null }
-        val pools = if (pooled.isEmpty()) null else ByteBufferBuilder(format.vertexSize * 4 * pooled.size).use { storage ->
-            val builder = BufferBuilder(storage, PrimitiveTopology.QUADS, format)
-            for (lamp in pooled) {
-                val floor = lamp.floor!! + POOL_LIFT
-                val height = (lamp.y - floor).coerceAtLeast(0.2f)
-                val radius = lamp.kind.pool * (0.7f + 0.3f * height / FLOOR_SEARCH)
-                val strength = lamp.kind.gain / (1f + height * 0.35f)
-                for (corner in CORNERS) {
-                    builder.addVertex(lamp.x + corner[0] * radius, floor, lamp.z + corner[1] * radius)
-                        .setUv(corner[0], corner[1])
-                        .setColor(lamp.kind.colour.x * strength, lamp.kind.colour.y * strength, lamp.kind.colour.z * strength, lamp.phase)
-                }
-            }
-            builder.buildOrThrow().use { RenderSystem.getDevice().createBuffer({ "sniffa lamp pools" }, GpuBuffer.USAGE_VERTEX, it.vertexBuffer()) }
-        }
-        return Batch(origin.x, origin.y, origin.z, halos, lamps.size * 6, pools, pooled.size * 6)
+        return Batch(origin.x, origin.y, origin.z, halos, lamps.size * 6)
     }
 
     private fun draw() {
@@ -235,30 +214,15 @@ object LampGlow {
         val depth = target.depthTextureView ?: return
         val offset = Vector3f((batch.originX - camera.x).toFloat(), (batch.originY - camera.y).toFloat(), (batch.originZ - camera.z).toFloat())
         val values = Matrix4f().zero().m00(FADE_FROM).m01(FADE_TO)
-        val tint = Vector4f(1f, 1f, 1f, 1f)
-        batch.pools?.let { pass(POOL, it, batch.poolCount, offset, tint, values, colour, depth) }
-        batch.halos?.let { pass(HALO, it, batch.haloCount, offset, tint, values, colour, depth) }
-    }
-
-    private fun pass(
-        pipeline: RenderPipeline,
-        vertices: GpuBuffer,
-        indexCount: Int,
-        offset: Vector3f,
-        tint: Vector4f,
-        values: Matrix4f,
-        colour: com.mojang.blaze3d.textures.GpuTextureView,
-        depth: com.mojang.blaze3d.textures.GpuTextureView,
-    ) {
-        val transform = RenderSystem.getDynamicUniforms().writeTransform(RenderSystem.getModelViewMatrixCopy(), tint, offset, values)
+        val transform = RenderSystem.getDynamicUniforms().writeTransform(RenderSystem.getModelViewMatrixCopy(), Vector4f(1f, 1f, 1f, 1f), offset, values)
         val indices = RenderSystem.getSequentialBuffer(PrimitiveTopology.QUADS)
         RenderSystem.getDevice().createCommandEncoder().createRenderPass({ "sniffa lamp glow" }, colour, Optional.empty(), depth, OptionalDouble.empty()).use { pass ->
-            pass.setPipeline(pipeline)
+            pass.setPipeline(HALO)
             RenderSystem.bindDefaultUniforms(pass)
             pass.setUniform("DynamicTransforms", transform)
-            pass.setIndexBuffer(indices.getBuffer(indexCount), indices.type())
-            pass.setVertexBuffer(0, vertices.slice())
-            pass.drawIndexed(indexCount, 1, 0, 0, 0)
+            pass.setIndexBuffer(indices.getBuffer(batch.haloCount), indices.type())
+            pass.setVertexBuffer(0, batch.halos.slice())
+            pass.drawIndexed(batch.haloCount, 1, 0, 0, 0)
         }
     }
 }
