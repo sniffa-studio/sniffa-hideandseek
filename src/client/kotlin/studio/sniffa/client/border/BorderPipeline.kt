@@ -19,6 +19,8 @@ object BorderPipeline {
 
     val SEAM: RenderPipeline = wall("seam", "core/borderseam", animated = true)
 
+    val FROST: RenderPipeline = wall("frost", "core/borderfrost", animated = true)
+
     val AURORA: RenderPipeline = RenderPipeline.builder()
         .withLocation(Hideandseek.id("pipeline/aurora"))
         .withVertexShader(Hideandseek.id("core/aurora"))
@@ -56,6 +58,7 @@ object BorderPipeline {
         RenderPipelines.register(RING)
         RenderPipelines.register(ZONE)
         RenderPipelines.register(SEAM)
+        RenderPipelines.register(FROST)
         RenderPipelines.register(AURORA)
     }
 }
