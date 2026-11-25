@@ -15,13 +15,13 @@ out float strength;
 void main() {
     vec4 centre = ModelViewMat * vec4(Position + ModelOffset, 1.0);
     float distance = length(centre.xyz);
-    centre.xyz -= normalize(-centre.xyz) * 0.5;
+    centre.xyz -= normalize(-centre.xyz) * 0.4;
     centre.xy += UV0;
     gl_Position = ProjMat * centre;
 
     float seconds = GameTime * 1200.0;
     float phase = Color.a * 6.2831853;
-    float pulse = 0.82 + 0.18 * sin(seconds * 2.2 + phase);
+    float pulse = 0.72 + 0.28 * sin(seconds * 1.8 + phase);
     float fade = 1.0 - smoothstep(TextureMat[0].x, TextureMat[0].y, distance);
 
     corner = sign(UV0);
