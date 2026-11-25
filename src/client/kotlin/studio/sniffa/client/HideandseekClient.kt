@@ -21,6 +21,7 @@ import studio.sniffa.client.light.Icicles
 import studio.sniffa.client.light.LampGlow
 import studio.sniffa.client.ui.deko.DekoKatalog
 import studio.sniffa.client.light.Spotlights
+import studio.sniffa.client.light.VoucherGlow
 import studio.sniffa.client.prop.Crows
 import studio.sniffa.client.prop.Props
 import studio.sniffa.client.radar.CompassRose
@@ -76,6 +77,7 @@ object HideandseekClient : ClientModInitializer {
 		ShootingStars.install()
 		Breath.install()
 		Embers.install()
+		VoucherGlow.install()
 		ColourGrade.install()
 		Cinema.install()
 	}
