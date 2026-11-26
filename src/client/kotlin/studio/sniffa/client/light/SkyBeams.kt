@@ -138,13 +138,12 @@ object SkyBeams {
     }
 
     private fun ribbon(builder: BufferBuilder, dx: Float, dy: Float, dz: Float, flat: Float, sideX: Float, sideZ: Float, lower: Float, upper: Float, light: Light) {
-        val lowWidth = widthAt(flat, dy + lower)
-        val highWidth = widthAt(flat, dy + upper)
+        val width = widthAt(flat, dy + (lower + upper) * 0.5f)
         val share = light.height.toFloat()
-        vertex(builder, dx - sideX * lowWidth, dy + lower, dz - sideZ * lowWidth, -1f, lower, lower / share, light)
-        vertex(builder, dx + sideX * lowWidth, dy + lower, dz + sideZ * lowWidth, 1f, lower, lower / share, light)
-        vertex(builder, dx + sideX * highWidth, dy + upper, dz + sideZ * highWidth, 1f, upper, upper / share, light)
-        vertex(builder, dx - sideX * highWidth, dy + upper, dz - sideZ * highWidth, -1f, upper, upper / share, light)
+        vertex(builder, dx - sideX * width, dy + lower, dz - sideZ * width, -1f, lower, lower / share, light)
+        vertex(builder, dx + sideX * width, dy + lower, dz + sideZ * width, 1f, lower, lower / share, light)
+        vertex(builder, dx + sideX * width, dy + upper, dz + sideZ * width, 1f, upper, upper / share, light)
+        vertex(builder, dx - sideX * width, dy + upper, dz - sideZ * width, -1f, upper, upper / share, light)
     }
 
     private fun widthAt(flat: Float, rise: Float): Float = max(NARROWEST, sqrt(flat * flat + rise * rise) * WIDENING)
