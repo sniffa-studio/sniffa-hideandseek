@@ -23,6 +23,7 @@ import studio.sniffa.client.ui.deko.DekoKatalog
 import studio.sniffa.client.light.Spotlights
 import studio.sniffa.client.light.VoucherGlow
 import studio.sniffa.client.light.VoucherPop
+import studio.sniffa.client.ui.text.ChristmasTitle
 import studio.sniffa.client.prop.Crows
 import studio.sniffa.client.prop.Props
 import studio.sniffa.client.radar.CompassRose
@@ -80,6 +81,7 @@ object HideandseekClient : ClientModInitializer {
 		Embers.install()
 		VoucherGlow.install()
 		VoucherPop.install()
+		ChristmasTitle.install()
 		ColourGrade.install()
 		Cinema.install()
 	}
