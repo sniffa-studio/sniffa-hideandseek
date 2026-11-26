@@ -286,7 +286,7 @@ object AbilityCatalog {
     val SNOW_WALL = Ability(
         id = "snow_wall",
         displayName = "Schneewall",
-        description = "Hinter dir wächst eine Schneewand, drei Blöcke breit und hoch. Nach 4 Sekunden schmilzt sie wieder.",
+        description = "Hinter dir wächst eine Schneewand, 3 breit und 3 hoch. Nach 4 Sekunden schmilzt sie wieder.",
         side = Side.HIDER,
         cost = 4,
         cooldownSeconds = 45,
@@ -298,10 +298,10 @@ object AbilityCatalog {
     val LANTERN = Ability(
         id = "lantern",
         displayName = "Laterne",
-        description = "30 Sekunden lang trägst du eine Laterne. Ihr warmes Licht macht die Nacht um dich herum hell.",
+        description = "30 Sekunden lang trägst du eine warme Laterne. Sie leuchtet dir den Weg in dunkle Ecken.",
         side = Side.SEEKER,
         cost = 4,
-        cooldownSeconds = 75,
+        cooldownSeconds = 60,
         icon = Items.LANTERN,
         plannedModel = "Warme Laterne",
         sprite = Hideandseek.id("ability/laterne"),
