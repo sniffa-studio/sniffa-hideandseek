@@ -16,9 +16,10 @@ class WheelCentre(private val metrics: WheelMetrics) {
     private val segments = Radial.segmentsFor(360.0, metrics.hubRadius)
 
     fun draw(graphics: OwoUIGraphics, centerX: Int, centerY: Int, focused: Ability?, alpha: Float) {
-        graphics.drawRing(
-            centerX, centerY, 0.0, 360.0, segments, 0.0, metrics.hubRadius,
-            Radial.ink(Palette.HUB, alpha), Radial.ink(Palette.HUB, alpha),
+        WedgeMeshes.draw(
+            graphics, centerX, centerY,
+            listOf(WedgeMesh(0.0, 0.0, 360.0), WedgeMesh(metrics.hubRadius, 0.0, 360.0)),
+            segments, Radial.fade(Palette.HUB, alpha),
         )
 
         if (focused == null) idle(graphics, centerX, centerY, alpha) else describe(graphics, centerX, centerY, focused, alpha)

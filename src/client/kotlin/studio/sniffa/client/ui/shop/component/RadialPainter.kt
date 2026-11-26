@@ -17,8 +17,6 @@ class RadialPainter(
     private val flashes = FloatArray(slots)
     private var lastFrame = 0L
 
-    private val bands: List<Pair<Double, Double>> = bandsBetween(metrics.inner, metrics.outer)
-
     fun centreOf(index: Int): Double = FIRST_CENTRE + index * share
 
     fun indexAt(dx: Double, dy: Double): Int {
@@ -50,22 +48,16 @@ class RadialPainter(
     fun drawWedge(graphics: OwoUIGraphics, centerX: Int, centerY: Int, index: Int, alpha: Float) {
         val burn = intensity[index]
         val fill = Radial.blend(Radial.blend(Palette.WEDGE, Palette.WEDGE_HOVER, burn), Palette.ACCENT, flashes[index] * FLASH_STRENGTH)
-        for ((from, to) in bands) paint(graphics, centerX, centerY, index, from, to, fill, alpha)
-
-        if (burn > VISIBLE) {
-            for ((from, to) in bandsBetween(metrics.outer - metrics.accent, metrics.outer)) {
-                paint(graphics, centerX, centerY, index, from, to, Palette.ACCENT, alpha * burn)
-            }
-        }
+        paint(graphics, centerX, centerY, index, metrics.inner, metrics.outer - metrics.accent, fill, alpha)
+        val rim = Radial.blend(fill, Palette.ACCENT, burn)
+        paint(graphics, centerX, centerY, index, metrics.outer - metrics.accent, metrics.outer, rim, alpha)
     }
 
     fun drawCooldown(graphics: OwoUIGraphics, centerX: Int, centerY: Int, index: Int, progress: Float, alpha: Float) {
         val inner = metrics.inner
         val outer = inner + metrics.cooldownWidth
-        for ((from, to) in bandsBetween(inner, outer)) {
-            paint(graphics, centerX, centerY, index, from, to, Palette.COOLDOWN_TRACK, alpha)
-            paint(graphics, centerX, centerY, index, from, to, Palette.COOLDOWN_FILL, alpha, progress.toDouble())
-        }
+        paint(graphics, centerX, centerY, index, inner, outer, Palette.COOLDOWN_TRACK, alpha)
+        paint(graphics, centerX, centerY, index, inner, outer, Palette.COOLDOWN_FILL, alpha, progress.toDouble())
     }
 
     private fun paint(
@@ -80,16 +72,14 @@ class RadialPainter(
         sweep: Double = 1.0,
     ) {
         if (sweep <= 0.0) return
-        val radius = (from + to) / 2
-        val inset = Math.toDegrees((metrics.gap / 2 + cornerInset(radius)) / radius)
-        val start = centreOf(index) - share / 2 + inset
-        val end = centreOf(index) + share / 2 - inset
-        if (end <= start) return
-        val stop = start + (end - start) * sweep.coerceAtMost(1.0)
-        graphics.drawRing(
-            centerX, centerY, start, stop, Radial.segmentsFor(stop - start, to), from, to,
-            Radial.ink(colour, alpha), Radial.ink(colour, alpha),
-        )
+        val rows = edgesBetween(from, to).mapNotNull { radius ->
+            val inset = Math.toDegrees((metrics.gap / 2 + cornerInset(radius)) / radius)
+            val start = centreOf(index) - share / 2 + inset
+            val end = centreOf(index) + share / 2 - inset
+            if (end <= start) null else WedgeMesh(radius, start, start + (end - start) * sweep.coerceAtMost(1.0))
+        }
+        val span = rows.maxOfOrNull { it.end - it.start } ?: return
+        WedgeMeshes.draw(graphics, centerX, centerY, rows, Radial.segmentsFor(span, metrics.outer), Radial.fade(colour, alpha))
     }
 
     private fun cornerInset(radius: Double): Double {
@@ -100,7 +90,7 @@ class RadialPainter(
         return corner - sqrt((corner * corner - d * d).coerceAtLeast(0.0))
     }
 
-    private fun bandsBetween(from: Double, to: Double): List<Pair<Double, Double>> {
+    private fun edgesBetween(from: Double, to: Double): List<Double> {
         val edges = mutableListOf(from)
         var r = from
         while (r < to - 1e-6) {
@@ -108,7 +98,7 @@ class RadialPainter(
             r = minOf(to, r + if (nearEdge) FINE_STEP else COARSE_STEP)
             edges += r
         }
-        return edges.zipWithNext()
+        return edges
     }
 
     private companion object {
@@ -121,8 +111,6 @@ class RadialPainter(
         const val FLASH_EASE_SECONDS = 0.18
 
         const val FLASH_STRENGTH = 0.35f
-
-        const val VISIBLE = 0.02f
 
         const val FINE_STEP = 0.5
 
