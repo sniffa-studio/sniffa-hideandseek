@@ -52,7 +52,7 @@ vec4 shine_glow(int kind, float alpha) {
     if (kind == TITLE_RED) glow = vec3(1.0, 0.157, 0.251);
     if (kind == TITLE_XMAS) glow = vec3(1.0, 0.227, 0.29);
     if (kind == TITLE_WINNER) glow = vec3(0.949, 0.722, 0.29);
-    return vec4(glow, alpha * 0.7);
+    return vec4(glow, alpha * 0.3);
 }
 
 vec3 shine_colour(int kind, vec3 base, vec2 frag, vec2 screen, vec2 texel, float seconds) {

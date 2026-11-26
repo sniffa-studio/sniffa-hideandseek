@@ -73,16 +73,8 @@ object ShineText {
                 for (offset in RING) {
                     graphics.pose().pushMatrix()
                     graphics.pose().translate(offset[0], offset[1])
-                    graphics.text(font, glyph, 0, 0, argb(style.glow, strength * 0.16f), false)
+                    graphics.text(font, glyph, 0, 0, argb(style.glow, strength * 0.06f), false)
                     graphics.pose().popMatrix()
-                }
-                if (style == Style.XMAS) {
-                    for (offset in RING) {
-                        graphics.pose().pushMatrix()
-                        graphics.pose().translate(offset[0] * 2f, offset[1] * 2f)
-                        graphics.text(font, glyph, 0, 0, argb(style.glow, strength * 0.11f), false)
-                        graphics.pose().popMatrix()
-                    }
                 }
                 graphics.text(font, glyph, 0, 0, argb(style.colour, strength), true)
                 if (bounce) burst(graphics, advance, font.lineHeight.toFloat(), since - BOUNCE_IN_MILLIS * 0.55f, alpha)
