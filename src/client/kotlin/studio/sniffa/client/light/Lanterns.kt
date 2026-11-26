@@ -23,6 +23,7 @@ import net.minecraft.client.renderer.BindGroupLayouts
 import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
+import net.minecraft.world.entity.HumanoidArm
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.level.ClipContext
 import net.minecraft.world.level.block.RenderShape
@@ -54,6 +55,9 @@ object Lanterns {
     private const val GLOW_GAIN = 0.2f
     private const val HALO_SIZE = 0.55f
     private const val FACE_LIFT = 0.004
+    private const val HAND_SIDE = 0.36
+    private const val HAND_AHEAD = 0.08
+    private const val HAND_LOW = 0.38
     private val FULL = AABB(0.0, 0.0, 0.0, 1.0, 1.0, 1.0)
     private val WARM = Vector3f(1f, 0.66f, 0.32f)
 
@@ -150,11 +154,12 @@ object Lanterns {
     private fun lampOf(player: Player, partial: Float): Vec3 {
         val at = player.getPosition(partial)
         val yaw = Math.toRadians(player.getPreciseBodyRotation(partial).toDouble())
-        val rightX = -cos(yaw)
-        val rightZ = -sin(yaw)
+        val side = if (player.mainArm == HumanoidArm.RIGHT) 1.0 else -1.0
+        val handX = cos(yaw) * side
+        val handZ = sin(yaw) * side
         val forwardX = -sin(yaw)
         val forwardZ = cos(yaw)
-        return Vec3(at.x + rightX * 0.42 + forwardX * 0.15, at.y + 0.95, at.z + rightZ * 0.42 + forwardZ * 0.15)
+        return Vec3(at.x + handX * HAND_SIDE + forwardX * HAND_AHEAD, at.y + HAND_LOW, at.z + handZ * HAND_SIDE + forwardZ * HAND_AHEAD)
     }
 
     private fun rebuild(level: ClientLevel, glow: Glow, lamp: Vec3, centre: BlockPos, range: Double) {
