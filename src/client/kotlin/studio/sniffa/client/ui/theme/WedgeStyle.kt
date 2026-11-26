@@ -7,5 +7,7 @@ data class WedgeStyle(
     val innerHot: Int,
     val outerHot: Int,
 
+    val frost: Int,
+
     val halo: Int,
 )

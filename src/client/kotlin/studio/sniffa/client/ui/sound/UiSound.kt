@@ -20,6 +20,17 @@ object UiSound {
         )
     }
 
+    fun wedgeUnfolded(index: Int, count: Int) {
+        val share = if (count > 1) index.toFloat() / (count - 1) else 0f
+        Minecraft.getInstance().soundManager.play(
+            SimpleSoundInstance.forUI(
+                SoundEvents.UI_BUTTON_CLICK.value(),
+                PITCH_UNFOLD_LOW + (PITCH_UNFOLD_HIGH - PITCH_UNFOLD_LOW) * share,
+                VOLUME_UNFOLD,
+            )
+        )
+    }
+
     fun purchased() {
         Minecraft.getInstance().soundManager.play(
             SimpleSoundInstance.forUI(SoundEvents.PLAYER_LEVELUP, PITCH_PURCHASE, VOLUME_PURCHASE)
@@ -53,6 +64,10 @@ object UiSound {
     private const val PITCH_DENIED = 0.9f
 
     private const val MINIMUM_GAP_NANOS = 40_000_000L
+
+    private const val VOLUME_UNFOLD = 0.06f
+    private const val PITCH_UNFOLD_LOW = 1.5f
+    private const val PITCH_UNFOLD_HIGH = 2.0f
 
     private const val VOLUME_PURCHASE = 0.45f
     private const val PITCH_PURCHASE = 1.3f

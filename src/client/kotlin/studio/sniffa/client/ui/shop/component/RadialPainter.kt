@@ -6,41 +6,54 @@ import studio.sniffa.client.ui.theme.Palette
 import studio.sniffa.client.ui.theme.Spacing
 import studio.sniffa.client.ui.theme.WedgeStyle
 import studio.sniffa.client.ui.theme.WheelMetrics
-import kotlin.math.acos
-import kotlin.math.ceil
+import kotlin.math.PI
+import kotlin.math.roundToInt
+import kotlin.math.sin
 
 class RadialPainter(
     private val slots: Int,
     private val metrics: WheelMetrics,
-    private val firstCentreDegrees: Double,
-    private val gapDegrees: Double,
 ) {
+
+    val share: Double = 360.0 / slots
+
+    private val half = (share - Spacing.WEDGE_GAP_DEGREES) / 2
 
     private val intensity = FloatArray(slots)
     private val flashes = FloatArray(slots)
     private var lastFrame = 0L
 
-    private val wedgeFrom = DoubleArray(slots)
-    private val wedgeTo = DoubleArray(slots)
-
-    private val wedgeSegments: Int
+    private val segments = Radial.segmentsFor(share, metrics.outer + metrics.pop)
 
     private val edgeInk = Color.ofArgb(Palette.WEDGE_EDGE)
-    private val trackInk = Color.ofArgb(Palette.WHEEL_TRACK)
-    private val shadeInk = Color.ofArgb(Palette.COOLDOWN_SHADE)
 
-    private val innerEdge = metrics.inner
+    private val stagger = if (slots > 1) (OPEN_MILLIS - UNFOLD_MILLIS) / (slots - 1) else 0f
 
-    init {
-        val share = 360.0 / slots
-        for (index in 0 until slots) {
-            val from = firstCentreDegrees + index * share - share / 2 + gapDegrees / 2
-            wedgeFrom[index] = from
-            wedgeTo[index] = from + share - gapDegrees
-        }
+    fun centreOf(index: Int): Double = FIRST_CENTRE + index * share
 
-        wedgeSegments = segmentsFor(share - gapDegrees, metrics.outer + metrics.haloWidth)
+    fun indexAt(dx: Double, dy: Double): Int {
+        val offset = Radial.degreesOf(dx, dy) - FIRST_CENTRE
+        return Math.floorMod((offset / share).roundToInt(), slots)
     }
+
+    fun burn(index: Int): Float = intensity[index]
+
+    fun flash(index: Int) {
+        if (index in flashes.indices) flashes[index] = 1f
+    }
+
+    fun startOf(index: Int): Float = index * stagger
+
+    fun unfold(index: Int, openedMillis: Float): Float =
+        ((openedMillis - startOf(index)) / UNFOLD_MILLIS).coerceIn(0f, 1f)
+
+    fun reach(unfold: Float): Float {
+        val u = unfold - 1f
+        return 1f + (OVERSHOOT + 1f) * u * u * u + OVERSHOOT * u * u
+    }
+
+    fun outerOf(index: Int, unfold: Float): Double =
+        metrics.inner + metrics.depth * reach(unfold) + metrics.pop * intensity[index]
 
     fun advance(active: Int?) {
         val now = System.nanoTime()
@@ -57,144 +70,166 @@ class RadialPainter(
         }
     }
 
-    fun flash(index: Int) {
-        if (index in flashes.indices) flashes[index] = 1f
-    }
-
     fun drawWedge(
         graphics: OwoUIGraphics,
         centerX: Int,
         centerY: Int,
         index: Int,
         style: WedgeStyle,
-        cooling: Float,
+        unfold: Float,
+        seconds: Double,
     ) {
-        val from = wedgeFrom[index]
-        val to = wedgeTo[index]
+        val centre = centreOf(index)
+        val from = centre - half
+        val to = centre + half
         val burn = intensity[index]
         val flash = flashes[index] * FLASH_STRENGTH
-        val outer = metrics.outer + metrics.haloWidth * POP_SHARE * burn
+        val outer = outerOf(index, unfold)
+        val inner = metrics.inner
+        val alpha = unfold
+
+        val innerInk = Radial.blend(Radial.blend(style.innerIdle, style.innerHot, burn), FLASH, flash)
+        val outerInk = Radial.blend(Radial.blend(style.outerIdle, style.outerHot, burn), FLASH, flash)
 
         graphics.drawRing(
-            centerX, centerY,
-            from, to,
-            wedgeSegments,
-            innerEdge, outer,
-            trackInk, trackInk,
+            centerX, centerY, from, to, segments, inner, outer,
+            Color.ofArgb(Radial.fade(innerInk, alpha)), Color.ofArgb(Radial.fade(outerInk, alpha)),
         )
 
+        val band = (outer - inner) * FROST_BAND
         graphics.drawRing(
-            centerX, centerY,
-            from, to,
-            wedgeSegments,
-            innerEdge, outer,
-            Color.ofArgb(blend(blend(style.innerIdle, style.innerHot, burn), FLASH, flash)),
-            Color.ofArgb(blend(blend(style.outerIdle, style.outerHot, burn), FLASH, flash)),
+            centerX, centerY, from, to, segments, outer - band, outer,
+            Radial.CLEAR, Color.ofArgb(Radial.fade(style.frost, alpha)),
         )
 
-        drawCooldown(graphics, centerX, centerY, from, to, cooling, outer)
+        frost(graphics, centerX, centerY, index, from, outer, style, alpha)
+        sparkles(graphics, centerX, centerY, index, from, outer, alpha, seconds)
+        contour(graphics, centerX, centerY, from, to, outer, alpha)
 
-        drawContour(graphics, centerX, centerY, from, to, outer)
-
-        if (burn > INVISIBLE || flash > INVISIBLE) {
+        val halo = Radial.blend(Radial.blend(0, style.halo, burn), FLASH_HALO, flash)
+        if ((halo ushr 24) > 2) {
             graphics.drawRing(
-                centerX, centerY,
-                from, to,
-                wedgeSegments,
-                outer, outer + metrics.haloWidth,
-                Color.ofArgb(blend(blend(TRANSPARENT, style.halo, burn), FLASH_HALO, flash)), TRANSPARENT_INK,
+                centerX, centerY, from, to, segments, outer, outer + metrics.pop * HALO_REACH,
+                Color.ofArgb(Radial.fade(halo, alpha)), Radial.CLEAR,
             )
         }
     }
 
-    private fun drawCooldown(
+    private fun frost(
+        graphics: OwoUIGraphics,
+        centerX: Int,
+        centerY: Int,
+        index: Int,
+        from: Double,
+        outer: Double,
+        style: WedgeStyle,
+        alpha: Float,
+    ) {
+        val inner = metrics.inner + EDGE_MARGIN
+        val span = outer - EDGE_MARGIN - inner
+        if (span <= 0) return
+        for (speck in 0 until FROST_SPECKS) {
+            val seed = index * 97 + speck * 13
+            val along = 0.08 + 0.84 * Radial.hash(seed)
+            val out = Radial.hash(seed + 5).let { it * it }
+            val radius = outer - EDGE_MARGIN - span * out
+            val degrees = from + along * half * 2
+            val x = Radial.x(centerX, degrees, radius).toInt()
+            val y = Radial.y(centerY, degrees, radius).toInt()
+            val strength = 0.35f + 0.65f * Radial.hash(seed + 9)
+            graphics.fill(x, y, x + 1, y + 1, Radial.fade(style.frost, alpha * strength))
+        }
+    }
+
+    private fun sparkles(
+        graphics: OwoUIGraphics,
+        centerX: Int,
+        centerY: Int,
+        index: Int,
+        from: Double,
+        outer: Double,
+        alpha: Float,
+        seconds: Double,
+    ) {
+        for (spark in 0 until SPARKLES) {
+            val seed = index * 31 + spark * 7 + 3
+            val period = SPARKLE_PERIOD * (0.8 + 0.5 * Radial.hash(seed + 1))
+            val phase = ((seconds / period + Radial.hash(seed + 2)) % 1.0).toFloat()
+            if (phase > SPARKLE_SHARE) continue
+            val shine = sin(PI * phase / SPARKLE_SHARE).toFloat() * alpha
+            val along = 0.15 + 0.7 * Radial.hash(seed + 3)
+            val radius = metrics.inner + (outer - metrics.inner) * (0.55 + 0.35 * Radial.hash(seed + 4))
+            val degrees = from + along * half * 2
+            val x = Radial.x(centerX, degrees, radius).toInt()
+            val y = Radial.y(centerY, degrees, radius).toInt()
+            graphics.fill(x, y, x + 1, y + 1, Radial.opaque(SPARKLE_CORE, shine * 0.85f))
+            if (shine > 0.6f) {
+                val arm = Radial.opaque(SPARKLE_ARM, (shine - 0.6f) * 1.1f)
+                graphics.fill(x - 1, y, x, y + 1, arm)
+                graphics.fill(x + 1, y, x + 2, y + 1, arm)
+                graphics.fill(x, y - 1, x + 1, y, arm)
+                graphics.fill(x, y + 1, x + 1, y + 2, arm)
+            }
+        }
+    }
+
+    private fun contour(
         graphics: OwoUIGraphics,
         centerX: Int,
         centerY: Int,
         from: Double,
         to: Double,
-        cooling: Float,
         outer: Double,
+        alpha: Float,
     ) {
-        if (cooling <= INVISIBLE) return
+        val ink = Color.ofArgb(Radial.fade(Palette.WEDGE_EDGE, alpha))
+        graphics.drawRing(centerX, centerY, from, to, segments, outer - metrics.rim, outer, ink, ink)
 
-        val covered = (to - from) * cooling.coerceIn(0f, 1f).toDouble()
-        graphics.drawRing(
-            centerX, centerY,
-            to - covered, to,
-            segmentsFor(covered, outer),
-            innerEdge, outer,
-            shadeInk, shadeInk,
-        )
+        val rim = Color.ofArgb(Radial.fade(RIM_LIGHT, alpha))
+        graphics.drawRing(centerX, centerY, from, to, segments, outer - metrics.rim * 2, outer - metrics.rim, rim, rim)
+
+        val span = Math.toDegrees(metrics.rim / ((metrics.inner + outer) / 2.0))
+        graphics.drawRing(centerX, centerY, from, from + span, 1, metrics.inner, outer, ink, ink)
+        graphics.drawRing(centerX, centerY, to - span, to, 1, metrics.inner, outer, ink, ink)
     }
 
-    private fun drawContour(
-        graphics: OwoUIGraphics,
-        centerX: Int,
-        centerY: Int,
-        from: Double,
-        to: Double,
-        outer: Double,
-    ) {
-        graphics.drawRing(
-            centerX, centerY,
-            from, to,
-            wedgeSegments,
-            outer - metrics.rim, outer,
-            edgeInk, edgeInk,
-        )
+    companion object {
+        const val OPEN_MILLIS = 250f
 
-        val span = Math.toDegrees(metrics.rim / ((metrics.inner + metrics.outer) / 2.0))
+        const val UNFOLD_MILLIS = 110f
 
-        graphics.drawRing(
-            centerX, centerY, from, from + span, EDGE_SEGMENTS,
-            innerEdge, outer, edgeInk, edgeInk,
-        )
-        graphics.drawRing(
-            centerX, centerY, to - span, to, EDGE_SEGMENTS,
-            innerEdge, outer, edgeInk, edgeInk,
-        )
-    }
+        private const val FIRST_CENTRE = 90.0
 
-    private fun segmentsFor(spanDegrees: Double, radius: Double): Int {
-        val widest = 2 * acos((1.0 - FLATNESS / radius).coerceIn(-1.0, 1.0))
-        return ceil(Math.toRadians(spanDegrees) / widest).toInt().coerceAtLeast(1)
-    }
+        private const val OVERSHOOT = 1.2f
 
-    private fun blend(from: Int, to: Int, amount: Float): Int {
-        val t = amount.coerceIn(0f, 1f)
-        return (channel(from, to, t, 24) shl 24) or
-            (channel(from, to, t, 16) shl 16) or
-            (channel(from, to, t, 8) shl 8) or
-            channel(from, to, t, 0)
-    }
+        private const val NANOS_PER_SECOND = 1_000_000_000.0
 
-    private fun channel(from: Int, to: Int, t: Float, shift: Int): Int {
-        val a = (from shr shift) and 0xFF
-        val b = (to shr shift) and 0xFF
-        return (a + (b - a) * t).toInt().coerceIn(0, 255)
-    }
+        private const val FLASH_EASE_SECONDS = 0.18
 
-    private companion object {
-        const val INVISIBLE = 0.01f
+        private const val FLASH_STRENGTH = 0.55f
 
-        const val TRANSPARENT = 0x00000000
-        val TRANSPARENT_INK: Color = Color.ofArgb(TRANSPARENT)
+        private const val FLASH = 0xFFFFFFFF.toInt()
 
-        const val FLATNESS = 0.12
+        private const val FLASH_HALO = 0x99FFFFFF.toInt()
 
-        const val EDGE_SEGMENTS = 1
+        private const val HALO_REACH = 1.6
 
-        const val NANOS_PER_SECOND = 1_000_000_000.0
+        private const val FROST_BAND = 0.28
 
-        const val POP_SHARE = 0.55
+        private const val FROST_SPECKS = 16
 
-        const val FLASH_EASE_SECONDS = 0.18
+        private const val EDGE_MARGIN = 2.5
 
-        const val FLASH_STRENGTH = 0.65f
+        private const val SPARKLES = 2
 
-        const val FLASH = 0xFFFFFFFF.toInt()
+        private const val SPARKLE_PERIOD = 2.8
 
-        const val FLASH_HALO = 0xB3FFFFFF.toInt()
+        private const val SPARKLE_SHARE = 0.16f
+
+        private const val SPARKLE_CORE = 0xFFFFFF
+
+        private const val SPARKLE_ARM = 0xB8E4FA
+
+        private const val RIM_LIGHT = 0x30DDF2FF
     }
 }
