@@ -17,7 +17,8 @@
 		"CinemaHandMixin",
 		"StormCloudsMixin",
 		"VoucherTitleMixin",
-		"ChristmasTitleMixin"
+		"ChristmasTitleMixin",
+		"NightFloorMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

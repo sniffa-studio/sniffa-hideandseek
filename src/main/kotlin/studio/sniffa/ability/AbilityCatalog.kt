@@ -283,12 +283,37 @@ object AbilityCatalog {
         sprite = Hideandseek.id("ability/eierpunsch"),
     )
 
+    val SNOW_WALL = Ability(
+        id = "snow_wall",
+        displayName = "Schneewall",
+        description = "Hinter dir wächst eine Schneewand, 3 breit und 3 hoch. Nach 4 Sekunden schmilzt sie wieder.",
+        side = Side.HIDER,
+        cost = 4,
+        cooldownSeconds = 45,
+        icon = Items.SNOW_BLOCK,
+        plannedModel = "Wand aus Schneeblöcken",
+        sprite = Hideandseek.id("ability/schneewall"),
+    )
+
+    val LANTERN = Ability(
+        id = "lantern",
+        displayName = "Laterne",
+        description = "30 Sekunden lang trägst du eine warme Laterne. Sie leuchtet dir den Weg in dunkle Ecken.",
+        side = Side.SEEKER,
+        cost = 4,
+        cooldownSeconds = 60,
+        icon = Items.LANTERN,
+        plannedModel = "Warme Laterne",
+        sprite = Hideandseek.id("ability/laterne"),
+    )
+
     val SEEKER_ABILITIES: List<Ability> = listOf(
         RADAR,
         HO_HO_HO,
         FOOTPRINTS,
         SLED_DOG,
         MISTLETOE,
+        LANTERN,
         ICE_BALL,
         GRINCH,
         REINDEER_SPRINT,
@@ -305,6 +330,7 @@ object AbilityCatalog {
         SNOWBALL,
         EGGNOG,
         BLACK_ICE,
+        SNOW_WALL,
         SNOW_CLOUD,
         DECOY,
         SHRINK,

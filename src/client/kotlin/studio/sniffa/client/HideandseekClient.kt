@@ -20,6 +20,8 @@ import studio.sniffa.client.light.FairyLights
 import studio.sniffa.client.light.Icicles
 import studio.sniffa.client.light.LampGlow
 import studio.sniffa.client.ui.deko.DekoKatalog
+import studio.sniffa.client.light.SkyBeams
+import studio.sniffa.client.light.Lanterns
 import studio.sniffa.client.light.Spotlights
 import studio.sniffa.client.light.VoucherGlow
 import studio.sniffa.client.light.VoucherPop
@@ -81,6 +83,8 @@ object HideandseekClient : ClientModInitializer {
 		Embers.install()
 		VoucherGlow.install()
 		VoucherPop.install()
+		SkyBeams.install()
+		Lanterns.install()
 		ChristmasTitle.install()
 		ColourGrade.install()
 		Cinema.install()
