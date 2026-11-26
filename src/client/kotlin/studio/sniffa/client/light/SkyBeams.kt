@@ -64,6 +64,7 @@ object SkyBeams {
     }
 
     fun accept(id: Int, x: Double, y: Double, z: Double, argb: Int, on: Boolean) {
+        watchLevel(Minecraft.getInstance())
         if (!on) {
             lights.remove(id)
             return

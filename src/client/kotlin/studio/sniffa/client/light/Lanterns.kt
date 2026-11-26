@@ -103,6 +103,7 @@ object Lanterns {
 
     fun accept(uuid: String, millis: Int) {
         val id = runCatching { UUID.fromString(uuid) }.getOrNull() ?: return
+        watchLevel(Minecraft.getInstance())
         glows.remove(id)?.close()
         if (millis <= 0) return
         val now = System.currentTimeMillis()
@@ -115,13 +116,17 @@ object Lanterns {
         seenLevel = null
     }
 
-    private fun tick(client: Minecraft) {
+    private fun watchLevel(client: Minecraft) {
         val level = client.level
-        if (level !== seenLevel) {
-            glows.values.forEach { it.close() }
-            glows.clear()
-            seenLevel = level
-        }
+        if (level === seenLevel) return
+        glows.values.forEach { it.close() }
+        glows.clear()
+        seenLevel = level
+    }
+
+    private fun tick(client: Minecraft) {
+        watchLevel(client)
+        val level = client.level
         if (level == null || glows.isEmpty()) return
         val now = System.currentTimeMillis()
         val over = glows.filterValues { now >= it.until }.keys
