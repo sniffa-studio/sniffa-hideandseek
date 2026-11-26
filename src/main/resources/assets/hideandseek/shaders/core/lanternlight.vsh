@@ -9,6 +9,7 @@ in vec4 Color;
 out vec3 local;
 out vec3 surfaceNormal;
 out vec3 fromEye;
+out float visible;
 
 void main() {
     vec3 pos = Position + ModelOffset;
@@ -16,4 +17,5 @@ void main() {
     local = Position;
     surfaceNormal = Color.rgb * 2.0 - 1.0;
     fromEye = pos;
+    visible = Color.a;
 }
