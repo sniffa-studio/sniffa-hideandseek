@@ -44,22 +44,26 @@ import kotlin.math.sin
 
 object Lanterns {
 
-    private const val RANGE = 9.0
-    private const val OWN_RANGE = 11.0
+    private const val RANGE = 12.0
+    private const val OWN_RANGE = 12.0
     private const val AHEAD = 16f
-    private const val REBUILD_TICKS = 6
-    private const val MOST_FACES = 8_000
+    private const val REBUILD_TICKS = 8
+    private const val MOST_FACES = 12_000
     private const val FADE_IN_MILLIS = 400L
     private const val FADE_OUT_MILLIS = 900L
-    private const val LIFT_GAIN = 3.0f
-    private const val GLOW_GAIN = 0.2f
-    private const val HALO_SIZE = 0.55f
+    private const val LIFT_GAIN = 2.0f
+    private const val GLOW_GAIN = 0.54f
+    private const val HALO_SIZE = 0.42f
+    private const val HALO_GAIN = 0.85f
+    private const val SOURCE_LIFT = 0.9f
+    private const val SHADOW_LIFT = 0.5
     private const val FACE_LIFT = 0.004
     private const val HAND_SIDE = 0.36
     private const val HAND_AHEAD = 0.08
     private const val HAND_LOW = 0.38
     private val FULL = AABB(0.0, 0.0, 0.0, 1.0, 1.0, 1.0)
-    private val WARM = Vector3f(1f, 0.66f, 0.32f)
+    private val WARM = Vector3f(1f, 0.76f, 0.44f)
+    private val CANDLE = Vector3f(1f, 0.67f, 0.3f)
 
     private class Glow(val until: Long, val started: Long) {
         var mesh: GpuBuffer? = null
@@ -81,7 +85,7 @@ object Lanterns {
     private val ADDITIVE = BlendFunction(BlendFactor.ONE, BlendFactor.ONE, BlendFactor.ZERO, BlendFactor.ONE)
     private val LIFT: RenderPipeline = pipeline("lantern_lift", "core/lanternlight", BlendFunction(BlendFactor.DST_COLOR, BlendFactor.ONE, BlendFactor.ZERO, BlendFactor.ONE), DefaultVertexFormat.POSITION_COLOR)
     private val GLOW: RenderPipeline = pipeline("lantern_glow", "core/lanternlight", ADDITIVE, DefaultVertexFormat.POSITION_COLOR)
-    private val HALO: RenderPipeline = pipeline("lantern_halo", "core/lamphalo", ADDITIVE, DefaultVertexFormat.POSITION_TEX_COLOR)
+    private val HALO: RenderPipeline = pipeline("lantern_halo", "core/lanternhalo", ADDITIVE, DefaultVertexFormat.POSITION_TEX_COLOR)
 
     private fun pipeline(name: String, shader: String, blend: BlendFunction, format: VertexFormat): RenderPipeline = RenderPipeline.builder()
         .withLocation(Hideandseek.id("pipeline/$name"))
@@ -162,12 +166,16 @@ object Lanterns {
         return Vec3(at.x + handX * HAND_SIDE + forwardX * HAND_AHEAD, at.y + HAND_LOW, at.z + handZ * HAND_SIDE + forwardZ * HAND_AHEAD)
     }
 
+    private class Face(val box: AABB, val side: Direction, val seen: Float)
+
     private fun rebuild(level: ClientLevel, glow: Glow, lamp: Vec3, centre: BlockPos, range: Double) {
         glow.close()
         glow.origin = centre
         glow.builtAt = centre
+        val eye = Vec3(lamp.x, lamp.y + SHADOW_LIFT, lamp.z)
         val reach = range.toInt()
-        val boxes = ArrayList<Pair<AABB, Direction>>()
+        val faces = ArrayList<Face>()
+        val corners = HashMap<Long, FloatArray>()
         val pos = BlockPos.MutableBlockPos()
         val next = BlockPos.MutableBlockPos()
         val limit = range * range
@@ -185,25 +193,65 @@ object Lanterns {
                 val faceX = pos.x + 0.5 + side.stepX * 0.5
                 val faceY = pos.y + 0.5 + side.stepY * 0.5
                 val faceZ = pos.z + 0.5 + side.stepZ * 0.5
-                val towards = (lamp.x - faceX) * side.stepX + (lamp.y - faceY) * side.stepY + (lamp.z - faceZ) * side.stepZ
+                val towards = (eye.x - faceX) * side.stepX + (eye.y - faceY) * side.stepY + (eye.z - faceZ) * side.stepZ
                 if (towards <= 0.0) continue
-                if (!seen(level, lamp, pos, side, faceX, faceY, faceZ)) continue
+                val seen = if (seen(level, eye, pos, side, faceX, faceY, faceZ)) 1f else 0f
                 for (part in shape.toAabbs().ifEmpty { listOf(FULL) }) {
-                    boxes += part.move(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble()) to side
+                    val box = part.move(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble())
+                    faces += Face(box, side, seen)
+                    eachCorner(box, side) { x, y, z ->
+                        val sum = corners.getOrPut(cornerKey(centre, x, y, z, side)) { FloatArray(2) }
+                        sum[0] += seen
+                        sum[1] += 1f
+                    }
                 }
-                if (boxes.size >= MOST_FACES) break@outer
+                if (faces.size >= MOST_FACES) break@outer
             }
         }
-        if (boxes.isEmpty()) return
+        val lit = faces.filter { face ->
+            var any = false
+            eachCorner(face.box, face.side) { x, y, z -> if (shade(corners, centre, x, y, z, face.side) > 0f) any = true }
+            any
+        }
+        if (lit.isEmpty()) return
         val format = DefaultVertexFormat.POSITION_COLOR
-        ByteBufferBuilder(format.vertexSize * 4 * boxes.size).use { storage ->
+        ByteBufferBuilder(format.vertexSize * 4 * lit.size).use { storage ->
             val builder = BufferBuilder(storage, PrimitiveTopology.QUADS, format)
-            for ((box, side) in boxes) face(builder, centre, box, side)
+            for (face in lit) face(builder, centre, face.box, face.side, corners)
             builder.buildOrThrow().use { mesh ->
                 glow.mesh = RenderSystem.getDevice().createBuffer({ "sniffa lantern" }, GpuBuffer.USAGE_VERTEX, mesh.vertexBuffer())
-                glow.indexCount = boxes.size * 6
+                glow.indexCount = lit.size * 6
             }
         }
+    }
+
+    private inline fun eachCorner(box: AABB, side: Direction, action: (Double, Double, Double) -> Unit) {
+        when (side.axis) {
+            Direction.Axis.Y -> {
+                val y = if (side == Direction.UP) box.maxY else box.minY
+                action(box.minX, y, box.minZ); action(box.maxX, y, box.minZ); action(box.maxX, y, box.maxZ); action(box.minX, y, box.maxZ)
+            }
+            Direction.Axis.Z -> {
+                val z = if (side == Direction.SOUTH) box.maxZ else box.minZ
+                action(box.minX, box.minY, z); action(box.maxX, box.minY, z); action(box.maxX, box.maxY, z); action(box.minX, box.maxY, z)
+            }
+            Direction.Axis.X -> {
+                val x = if (side == Direction.EAST) box.maxX else box.minX
+                action(x, box.minY, box.minZ); action(x, box.minY, box.maxZ); action(x, box.maxY, box.maxZ); action(x, box.maxY, box.minZ)
+            }
+        }
+    }
+
+    private fun cornerKey(origin: BlockPos, x: Double, y: Double, z: Double, side: Direction): Long {
+        val qx = Math.round((x - origin.x) * 16.0) + 512
+        val qy = Math.round((y - origin.y) * 16.0) + 512
+        val qz = Math.round((z - origin.z) * 16.0) + 512
+        return (qx shl 23) or (qy shl 13) or (qz shl 3) or side.ordinal.toLong()
+    }
+
+    private fun shade(corners: HashMap<Long, FloatArray>, origin: BlockPos, x: Double, y: Double, z: Double, side: Direction): Float {
+        val sum = corners[cornerKey(origin, x, y, z, side)] ?: return 0f
+        return if (sum[1] > 0f) sum[0] / sum[1] else 0f
     }
 
     private fun seen(level: ClientLevel, lamp: Vec3, pos: BlockPos, side: Direction, x: Double, y: Double, z: Double): Boolean {
@@ -213,25 +261,19 @@ object Lanterns {
         return (hit as BlockHitResult).blockPos == pos
     }
 
-    private fun face(builder: BufferBuilder, origin: BlockPos, box: AABB, side: Direction) {
+    private fun face(builder: BufferBuilder, origin: BlockPos, box: AABB, side: Direction, corners: HashMap<Long, FloatArray>) {
         val r = side.stepX * 0.5f + 0.5f
         val g = side.stepY * 0.5f + 0.5f
         val b = side.stepZ * 0.5f + 0.5f
-        val x0 = (box.minX - origin.x).toFloat()
-        val y0 = (box.minY - origin.y).toFloat()
-        val z0 = (box.minZ - origin.z).toFloat()
-        val x1 = (box.maxX - origin.x).toFloat()
-        val y1 = (box.maxY - origin.y).toFloat()
-        val z1 = (box.maxZ - origin.z).toFloat()
-        val l = FACE_LIFT.toFloat()
-        fun v(x: Float, y: Float, z: Float) = builder.addVertex(x, y, z).setColor(r, g, b, 1f)
-        when (side) {
-            Direction.UP -> { v(x0, y1 + l, z0); v(x1, y1 + l, z0); v(x1, y1 + l, z1); v(x0, y1 + l, z1) }
-            Direction.DOWN -> { v(x0, y0 - l, z0); v(x0, y0 - l, z1); v(x1, y0 - l, z1); v(x1, y0 - l, z0) }
-            Direction.NORTH -> { v(x0, y0, z0 - l); v(x1, y0, z0 - l); v(x1, y1, z0 - l); v(x0, y1, z0 - l) }
-            Direction.SOUTH -> { v(x0, y0, z1 + l); v(x0, y1, z1 + l); v(x1, y1, z1 + l); v(x1, y0, z1 + l) }
-            Direction.WEST -> { v(x0 - l, y0, z0); v(x0 - l, y1, z0); v(x0 - l, y1, z1); v(x0 - l, y0, z1) }
-            Direction.EAST -> { v(x1 + l, y0, z0); v(x1 + l, y0, z1); v(x1 + l, y1, z1); v(x1 + l, y1, z0) }
+        val l = FACE_LIFT
+        val px = side.stepX * l
+        val py = side.stepY * l
+        val pz = side.stepZ * l
+        val points = ArrayList<DoubleArray>(4)
+        eachCorner(box, side) { x, y, z -> points += doubleArrayOf(x, y, z) }
+        for (p in points) {
+            builder.addVertex((p[0] - origin.x + px).toFloat(), (p[1] - origin.y + py).toFloat(), (p[2] - origin.z + pz).toFloat())
+                .setColor(r, g, b, shade(corners, origin, p[0], p[1], p[2], side))
         }
     }
 
@@ -268,6 +310,7 @@ object Lanterns {
                 values.m01((lamp.y - glow.origin.y).toFloat())
                 values.m02((lamp.z - glow.origin.z).toFloat())
                 values.m03(rangeOf(player).toFloat())
+                values.m21(SOURCE_LIFT)
                 if (mine && firstPerson) {
                     val look = camera.forwardVector()
                     values.m10(look.x())
@@ -275,7 +318,7 @@ object Lanterns {
                     values.m12(look.z())
                     values.m20(AHEAD)
                 }
-                val tint = Vector4f(WARM.x * fade, WARM.y * fade, WARM.z * fade, 1f)
+                val tint = Vector4f(CANDLE.x * fade, CANDLE.y * fade, CANDLE.z * fade, 1f)
                 pass(LIFT, mesh, glow.indexCount, offset, tint, Matrix4f(values).m13(LIFT_GAIN), colour, depth)
                 pass(GLOW, mesh, glow.indexCount, offset, tint, Matrix4f(values).m13(GLOW_GAIN), colour, depth)
             }
@@ -293,7 +336,7 @@ object Lanterns {
             val y = (lamp.y - eye.y).toFloat()
             val z = (lamp.z - eye.z).toFloat()
             for (corner in CORNERS) {
-                builder.addVertex(x, y, z).setUv(corner[0] * HALO_SIZE, corner[1] * HALO_SIZE).setColor(WARM.x * fade, WARM.y * fade, WARM.z * fade, 0.3f)
+                builder.addVertex(x, y, z).setUv(corner[0] * HALO_SIZE, corner[1] * HALO_SIZE).setColor(WARM.x * fade * HALO_GAIN, WARM.y * fade * HALO_GAIN, WARM.z * fade * HALO_GAIN, 0.3f)
             }
             builder.buildOrThrow().use { built ->
                 RenderSystem.getDevice().createBuffer({ "sniffa lantern halo" }, GpuBuffer.USAGE_VERTEX, built.vertexBuffer()).use { vertices ->

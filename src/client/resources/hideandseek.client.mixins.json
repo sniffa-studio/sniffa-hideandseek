@@ -19,7 +19,8 @@
 		"VoucherTitleMixin",
 		"ChristmasTitleMixin",
 		"NightFloorMixin",
-		"HeldLanternHandMixin"
+		"HeldLanternHandMixin",
+		"RenderTypeAccess"
 	],
 	"injectors": {
 		"defaultRequire": 1
