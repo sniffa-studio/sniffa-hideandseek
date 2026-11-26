@@ -14,31 +14,46 @@ object Palette {
 
     const val GOLD = 0xFFF2C65A.toInt()
 
+    const val ICE = 0xFFB8E4FA.toInt()
+
+    const val SOFT_RED = 0xFFF07A7A.toInt()
+
     const val WHEEL_TRACK = 0x8C0A1222.toInt()
 
-    const val WEDGE_IDLE_INNER = 0x8C0A1222.toInt()
-    const val WEDGE_IDLE_OUTER = 0x1A0A1222
+    const val WEDGE_IDLE_INNER = 0xB00C1A2E.toInt()
+    const val WEDGE_IDLE_OUTER = 0x8C21405E.toInt()
 
-    const val WEDGE_ACTIVE_INNER = 0xB3C8102E.toInt()
-    const val WEDGE_ACTIVE_OUTER = 0x73C8102E
+    const val WEDGE_ACTIVE_INNER = 0xC06A1428.toInt()
+    const val WEDGE_ACTIVE_OUTER = 0xA8C8203A.toInt()
 
-    const val WEDGE_LOCKED_INNER = 0x8C141820.toInt()
-    const val WEDGE_LOCKED_OUTER = 0x1A141820
+    const val WEDGE_LOCKED_INNER = 0xA0141820.toInt()
+    const val WEDGE_LOCKED_OUTER = 0x7A2A303C
 
-    const val COOLDOWN_SHADE = 0xB3050812.toInt()
+    const val WEDGE_DENIED_INNER = 0xB0262C38.toInt()
+    const val WEDGE_DENIED_OUTER = 0x8C4A5262.toInt()
 
-    const val WEDGE_DENIED_INNER = 0x8C3A4250.toInt()
-    const val WEDGE_DENIED_OUTER = 0x593A4250
+    const val FROST = 0x40DDF2FF
+    const val FROST_DENIED = 0x26C8CED8
 
     const val WEDGE_EDGE = 0x59050812
 
-    const val GLOW_HALO = 0x4DE8B33A
+    const val GLOW_HALO = 0x40E8B33A
 
-    const val GLOW_HALO_DENIED = 0x33808A99
+    const val GLOW_HALO_DENIED = 0x26808A99
 
-    const val DOT_ACTIVE = 0xFFE8B33A.toInt()
+    const val COOLDOWN_SHADE = 0xB0050812.toInt()
 
-    const val DOT_IDLE = 0x55707C90
+    const val ICON_DIMMED = 0xC09AA4B4.toInt()
+
+    const val BADGE = 0xC80A0F1C.toInt()
+
+    const val HUB_INNER = 0xD80A1222.toInt()
+    const val HUB_OUTER = 0xC0142440.toInt()
+    const val HUB_RIM = 0x40B8E4FA
+
+    const val WREATH_BASE = 0xF0123A30.toInt()
+
+    val BULBS = intArrayOf(0xFF4A5A, 0xFFC94A, 0x6BE07A, 0x8FD8FF)
 
     const val SCRIM = 0x40000000
 
@@ -47,6 +62,7 @@ object Palette {
         outerIdle = WEDGE_IDLE_OUTER,
         innerHot = WEDGE_ACTIVE_INNER,
         outerHot = WEDGE_ACTIVE_OUTER,
+        frost = FROST,
         halo = GLOW_HALO,
     )
 
@@ -55,6 +71,7 @@ object Palette {
         outerIdle = WEDGE_LOCKED_OUTER,
         innerHot = WEDGE_DENIED_INNER,
         outerHot = WEDGE_DENIED_OUTER,
+        frost = FROST_DENIED,
         halo = GLOW_HALO_DENIED,
     )
 }
