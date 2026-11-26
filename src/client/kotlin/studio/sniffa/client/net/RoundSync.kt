@@ -48,6 +48,8 @@ import studio.sniffa.net.payload.SeekerStatePayload
 import studio.sniffa.net.payload.ZoneArmPayload
 import studio.sniffa.net.payload.ZonePayload
 import studio.sniffa.client.zone.DangerZone
+import studio.sniffa.client.light.SkyBeams
+import studio.sniffa.net.payload.BeamPayload
 
 object RoundSync {
 
@@ -154,6 +156,10 @@ object RoundSync {
 
         ClientPlayNetworking.registerGlobalReceiver(ZonePayload.TYPE) { payload, _ ->
             DangerZone.accept(payload.x, payload.z, payload.radius, payload.secondsLeft)
+        }
+
+        ClientPlayNetworking.registerGlobalReceiver(BeamPayload.TYPE) { payload, _ ->
+            SkyBeams.accept(payload.id, payload.x, payload.y, payload.z, payload.argb, payload.on != 0)
         }
 
         ClientPlayConnectionEvents.DISCONNECT.register { _, _ ->

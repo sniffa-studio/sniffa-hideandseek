@@ -6,6 +6,8 @@ import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.resources.Identifier
 import org.slf4j.LoggerFactory
 import studio.sniffa.net.payload.BearingPayload
+import studio.sniffa.net.payload.BeamPayload
+import studio.sniffa.net.payload.LanternPayload
 import studio.sniffa.net.payload.TracksPayload
 import studio.sniffa.net.payload.BorderPayload
 import studio.sniffa.net.payload.ClockPayload
@@ -94,6 +96,8 @@ object Hideandseek : ModInitializer {
 		PayloadTypeRegistry.clientboundPlay().register(CinemaPayload.TYPE, CinemaPayload.CODEC)
 		PayloadTypeRegistry.clientboundPlay().register(IntroPayload.TYPE, IntroPayload.CODEC)
 		PayloadTypeRegistry.clientboundPlay().register(MomentPayload.TYPE, MomentPayload.CODEC)
+		PayloadTypeRegistry.clientboundPlay().register(BeamPayload.TYPE, BeamPayload.CODEC)
+		PayloadTypeRegistry.clientboundPlay().register(LanternPayload.TYPE, LanternPayload.CODEC)
 
 		Cues.install()
 
