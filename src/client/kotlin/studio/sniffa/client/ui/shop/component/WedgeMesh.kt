@@ -48,9 +48,9 @@ object WedgeMeshes {
                 val far = rows[row + 1]
                 for (step in 0 until segments) {
                     vertex(consumer, near, step)
-                    vertex(consumer, far, step)
-                    vertex(consumer, far, step + 1)
                     vertex(consumer, near, step + 1)
+                    vertex(consumer, far, step + 1)
+                    vertex(consumer, far, step)
                 }
             }
         }
