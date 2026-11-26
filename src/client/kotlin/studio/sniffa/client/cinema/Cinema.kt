@@ -1,5 +1,6 @@
 package studio.sniffa.client.cinema
 
+import studio.sniffa.client.ui.text.ShineText
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.minecraft.client.Minecraft
@@ -81,7 +82,7 @@ object Cinema {
 
     private class Key(val at: Long, val shot: Shot?, val linear: Boolean = false)
 
-    private class Caption(val at: Long, val name: String, val detail: String, val colour: Int)
+    private class Caption(val at: Long, val name: String, val detail: String, val colour: Int, val shine: ShineText.Style? = null)
 
     private class Film(
         val startedAt: Long,
@@ -143,7 +144,8 @@ object Cinema {
             keys += Key(leave, shot)
             shot = close(place)
             keys += Key(maxOf(leave + 1, reveal + ARRIVE_AFTER_REVEAL_MILLIS), shot)
-            captions += Caption(reveal, payload.names[place], payload.details.getOrElse(place) { "" }, PLACE_COLOURS[place])
+            captions += Caption(reveal, payload.names[place], payload.details.getOrElse(place) { "" }, PLACE_COLOURS[place],
+                if (place == 0) ShineText.Style.GOLD else null)
         }
         val held = keys.last().at + HOLD_WINNER_MILLIS
         keys += Key(held, shot)
@@ -187,7 +189,7 @@ object Cinema {
         keys += Key(leaveSeeker, pushedIn)
         keys += Key(maxOf(leaveSeeker + 1, length), null)
 
-        val captions = listOf(Caption(atSeeker - TO_SEEKER_MILLIS / 2, payload.seeker, SEEKS, SEEKER_RED))
+        val captions = listOf(Caption(atSeeker - TO_SEEKER_MILLIS / 2, payload.seeker, SEEKS, SEEKER_RED, ShineText.Style.RED))
         film = Film(System.currentTimeMillis(), keys, captions, ROUND_OPENS, keys.last().at, true, BAR_SHARE)
     }
 
@@ -284,8 +286,13 @@ object Cinema {
 
         val font = Minecraft.getInstance().font
         if (playing.title.isNotEmpty()) {
-            graphics.text(font, playing.title, (width - font.width(playing.title)) / 2, (bar - font.lineHeight) / 2,
-                Vignette.alpha(if (festive) TRIM else Palette.GOLD, amount), false)
+            if (playing.title == CEREMONY || playing.title == ROUND_OPENS) {
+                ShineText.drawCentred(graphics, font, playing.title, width / 2f, (bar - font.lineHeight) / 2f,
+                    if (playing.title == CEREMONY) ShineText.Style.GOLD else ShineText.Style.XMAS, amount, now, stagger = true)
+            } else {
+                graphics.text(font, playing.title, (width - font.width(playing.title)) / 2, (bar - font.lineHeight) / 2,
+                    Vignette.alpha(if (festive) TRIM else Palette.GOLD, amount), false)
+            }
         }
 
         val caption = playing.captions.lastOrNull { it.at <= now } ?: return
@@ -293,11 +300,13 @@ object Cinema {
         val scale = if (playing.moves) CAPTION_SCALE else 1f
         val centreY = height - bar / 2f
 
+        val since = now - caption.at
         if (caption.detail.isEmpty()) {
-            drawScaled(graphics, caption.name, centreY, scale, Vignette.alpha(caption.colour, shown))
+            drawScaled(graphics, caption.name, centreY, scale, Vignette.alpha(caption.colour, shown), caption.shine, shown, since)
             return
         }
-        drawScaled(graphics, caption.name, centreY - font.lineHeight * 0.45f * scale, scale, Vignette.alpha(caption.colour, shown))
+        drawScaled(graphics, caption.name, centreY - font.lineHeight * 0.45f * scale, scale, Vignette.alpha(caption.colour, shown),
+            caption.shine, shown, since)
         drawScaled(graphics, caption.detail, centreY + font.lineHeight * 0.55f * scale, 1f, Vignette.alpha(Palette.TEXT, shown))
     }
 
@@ -333,12 +342,25 @@ object Cinema {
         }
     }
 
-    private fun drawScaled(graphics: GuiGraphicsExtractor, text: String, centreY: Float, scale: Float, colour: Int) {
+    private fun drawScaled(
+        graphics: GuiGraphicsExtractor,
+        text: String,
+        centreY: Float,
+        scale: Float,
+        colour: Int,
+        shine: ShineText.Style? = null,
+        alpha: Float = 1f,
+        since: Long = 0L,
+    ) {
         val font = Minecraft.getInstance().font
         graphics.pose().pushMatrix()
         graphics.pose().translate(graphics.guiWidth() / 2f, centreY)
         graphics.pose().scale(scale, scale)
-        graphics.text(font, text, -font.width(text) / 2, -font.lineHeight / 2, colour, true)
+        if (shine != null) {
+            ShineText.drawCentred(graphics, font, text, 0f, -font.lineHeight / 2f, shine, alpha, since)
+        } else {
+            graphics.text(font, text, -font.width(text) / 2, -font.lineHeight / 2, colour, true)
+        }
         graphics.pose().popMatrix()
     }
 

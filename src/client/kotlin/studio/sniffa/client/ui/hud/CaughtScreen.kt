@@ -9,6 +9,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.renderer.RenderPipelines
 import net.minecraft.resources.Identifier
 import studio.sniffa.client.ui.theme.Palette
+import studio.sniffa.client.ui.text.ShineText
 import studio.sniffa.net.payload.CaughtPayload
 import kotlin.math.sin
 import kotlin.random.Random
@@ -96,7 +97,7 @@ object CaughtScreen {
         graphics.pose().pushMatrix()
         graphics.pose().translate(width / 2f, height / 2f - HEADLINE_LIFT)
         graphics.pose().scale(HEADLINE_SCALE, HEADLINE_SCALE)
-        graphics.text(font, headline, -font.width(headline) / 2, -font.lineHeight / 2, Vignette.alpha(RED, fade), true)
+        ShineText.draw(graphics, font, headline, -font.width(headline) / 2f, -font.lineHeight / 2f, ShineText.Style.RED, fade, elapsed)
         graphics.pose().popMatrix()
 
         val lineY = height / 2 + 4

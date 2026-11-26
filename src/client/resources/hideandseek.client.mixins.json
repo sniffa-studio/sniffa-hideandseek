@@ -15,7 +15,8 @@
 		"CinemaHudMixin",
 		"CinemaCrowdMixin",
 		"CinemaHandMixin",
-		"StormCloudsMixin"
+		"StormCloudsMixin",
+		"VoucherTitleMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

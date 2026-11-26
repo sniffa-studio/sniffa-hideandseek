@@ -11,7 +11,10 @@ import studio.sniffa.ability.Ability
 import studio.sniffa.client.state.ShopSession
 import studio.sniffa.client.ui.theme.Palette
 import studio.sniffa.client.ui.theme.Spacing
+import studio.sniffa.client.ui.text.ShineText
 import net.minecraft.network.chat.Component as McText
+
+private const val SHINE_HEADER = (0xFF shl 24) or ShineText.SHINE_GOLD
 
 class WheelDetail : FlowLayout(
     Sizing.fixed(Spacing.DETAIL_WIDTH),
@@ -57,7 +60,7 @@ class WheelDetail : FlowLayout(
 
         if (ability == null) {
             title.text(McText.literal("${ShopSession.points} Punkte"))
-            title.color(Color.ofArgb(if (ShopSession.known) Palette.GOLD else Palette.ERROR))
+            title.color(Color.ofArgb(if (ShopSession.known) SHINE_HEADER else Palette.ERROR))
             body.text(
                 McText.literal(
                     if (!ShopSession.known) "Noch keine Punkte  ·  warte auf die Runde"
@@ -78,7 +81,7 @@ class WheelDetail : FlowLayout(
             else -> "$price Punkte"
         }
         title.text(McText.literal("${ability.displayName}  —  $label"))
-        title.color(Color.ofArgb(if (available) Palette.GOLD else Palette.ERROR))
+        title.color(Color.ofArgb(if (available) SHINE_HEADER else Palette.ERROR))
         body.text(
             McText.literal(
                 when {

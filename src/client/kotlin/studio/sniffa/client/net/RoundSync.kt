@@ -78,7 +78,7 @@ object RoundSync {
         }
 
         ClientPlayNetworking.registerGlobalReceiver(VoucherPayload.TYPE) { payload, _ ->
-            if (payload.finder == 1) VoucherPop.show(payload.euros) else VoucherGlow.flash(payload.euros, payload.x, payload.y, payload.z)
+            if (payload.finder >= 1) VoucherPop.show(payload.euros, payload.finder == 2) else VoucherGlow.flash(payload.euros, payload.x, payload.y, payload.z)
         }
 
         ClientPlayNetworking.registerGlobalReceiver(RolePayload.TYPE) { payload, _ ->
