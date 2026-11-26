@@ -19,6 +19,9 @@
 		"VoucherTitleMixin",
 		"ChristmasTitleMixin",
 		"NightFloorMixin",
+		"WinterSkyMixin",
+		"WinterFogMixin",
+		"WinterCloudsMixin",
 		"HeldLanternHandMixin",
 		"RenderTypeAccess"
 	],

@@ -17,6 +17,7 @@ import studio.sniffa.client.light.Embers
 import studio.sniffa.client.snow.Breath
 import studio.sniffa.client.snow.ColourGrade
 import studio.sniffa.client.snow.ShootingStars
+import studio.sniffa.client.snow.WinterSky
 import studio.sniffa.client.light.FairyLights
 import studio.sniffa.client.light.Icicles
 import studio.sniffa.client.light.LampGlow
@@ -80,6 +81,7 @@ object HideandseekClient : ClientModInitializer {
 		Icicles.install()
 		FirRope.install()
 		ShootingStars.install()
+		WinterSky.install()
 		Breath.install()
 		Embers.install()
 		VoucherGlow.install()
