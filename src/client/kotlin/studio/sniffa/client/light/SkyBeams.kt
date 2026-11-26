@@ -33,8 +33,8 @@ object SkyBeams {
     private const val SEGMENTS = 28
     private const val SKY = 480.0
     private const val SHORTEST = 160.0
-    private const val NARROWEST = 0.5f
-    private const val WIDENING = 0.006f
+    private const val NARROWEST = 0.7f
+    private const val WIDENING = 0.008f
 
     private class Light(val x: Double, val y: Double, val z: Double, val red: Float, val green: Float, val blue: Float) {
         val height: Double = max(SKY - y, SHORTEST)
