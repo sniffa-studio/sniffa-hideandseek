@@ -10,8 +10,6 @@ object Radial {
 
     private const val FLATNESS = 0.12
 
-    val CLEAR: Color = Color.ofArgb(0)
-
     fun x(centerX: Number, degrees: Double, radius: Double): Double =
         centerX.toDouble() - cos(Math.toRadians(degrees)) * radius
 
@@ -25,12 +23,12 @@ object Radial {
         return ceil(Math.toRadians(spanDegrees) / widest).toInt().coerceAtLeast(1)
     }
 
+    fun ink(argb: Int, alpha: Float = 1f): Color = Color.ofArgb(fade(argb, alpha))
+
     fun fade(argb: Int, alpha: Float): Int {
         val a = ((argb ushr 24) * alpha.coerceIn(0f, 1f)).toInt().coerceIn(0, 255)
         return (a shl 24) or (argb and 0xFFFFFF)
     }
-
-    fun opaque(rgb: Int, alpha: Float): Int = ((alpha.coerceIn(0f, 1f) * 255f).toInt() shl 24) or (rgb and 0xFFFFFF)
 
     fun blend(from: Int, to: Int, amount: Float): Int {
         val t = amount.coerceIn(0f, 1f)
@@ -38,14 +36,6 @@ object Radial {
             (channel(from, to, t, 16) shl 16) or
             (channel(from, to, t, 8) shl 8) or
             channel(from, to, t, 0)
-    }
-
-    fun hash(seed: Int): Float {
-        var h = seed * 0x27d4eb2d
-        h = h xor (h ushr 15)
-        h *= 0x2c1b3c6d
-        h = h xor (h ushr 12)
-        return (h and 0xFFFF) / 65535f
     }
 
     private fun channel(from: Int, to: Int, t: Float, shift: Int): Int {

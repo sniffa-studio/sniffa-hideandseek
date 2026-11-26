@@ -2,8 +2,6 @@ package studio.sniffa.client.ui.theme
 
 object Spacing {
 
-    const val WEDGE_GAP_DEGREES = 2.0
-
     const val LOCKUP_HEIGHT = 12
 
     const val MARK_WIDTH = (
@@ -17,8 +15,6 @@ object Spacing {
     const val MARK_GAP = 4
 
     const val HINT_HEIGHT = 9
-
-    const val GLOW_EASE_SECONDS = 0.07
 
     const val SECTION_GAP = 8
 

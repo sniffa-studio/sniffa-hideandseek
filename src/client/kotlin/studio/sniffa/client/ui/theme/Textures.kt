@@ -11,14 +11,9 @@ object Textures {
 
     val MARGUHL: Identifier = Hideandseek.id("textures/ui/marguhl.png")
 
-    val SPRIGS: List<Identifier> = listOf(Hideandseek.id("wheel/sprig_a"), Hideandseek.id("wheel/sprig_b"))
+    val POINT: Identifier = Hideandseek.id("hud/star")
 
-    val BULB_GLASS: Identifier = Hideandseek.id("wheel/bulb_glass")
-
-    val BULB_CAP: Identifier = Hideandseek.id("wheel/bulb_cap")
-
-    const val BULB_WIDTH = 5
-    const val BULB_HEIGHT = 8
+    const val POINT_SIZE = 9
 
     const val MARGUHL_SOURCE_SIZE = 256
 
