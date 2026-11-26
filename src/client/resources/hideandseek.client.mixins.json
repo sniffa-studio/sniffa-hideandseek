@@ -18,7 +18,8 @@
 		"StormCloudsMixin",
 		"VoucherTitleMixin",
 		"ChristmasTitleMixin",
-		"NightFloorMixin"
+		"NightFloorMixin",
+		"HeldLanternHandMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

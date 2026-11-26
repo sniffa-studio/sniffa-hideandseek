@@ -11,6 +11,7 @@ import studio.sniffa.client.net.BorderSync
 import studio.sniffa.client.net.Handshake
 import studio.sniffa.client.net.RoundSync
 import studio.sniffa.client.light.Chimneys
+import studio.sniffa.client.light.HeldLantern
 import studio.sniffa.client.light.FirRope
 import studio.sniffa.client.light.Embers
 import studio.sniffa.client.snow.Breath
@@ -85,6 +86,7 @@ object HideandseekClient : ClientModInitializer {
 		VoucherPop.install()
 		SkyBeams.install()
 		Lanterns.install()
+		HeldLantern.install()
 		ChristmasTitle.install()
 		ColourGrade.install()
 		Cinema.install()
