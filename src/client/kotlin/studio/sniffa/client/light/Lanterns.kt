@@ -55,7 +55,7 @@ object Lanterns {
     private const val HALO_SIZE = 0.55f
     private const val FACE_LIFT = 0.004
     private val FULL = AABB(0.0, 0.0, 0.0, 1.0, 1.0, 1.0)
-    private val WARM = Vector3f(1f, 0.7f, 0.38f)
+    private val WARM = Vector3f(1f, 0.66f, 0.32f)
 
     private class Glow(val until: Long, val started: Long) {
         var mesh: GpuBuffer? = null
