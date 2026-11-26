@@ -145,7 +145,7 @@ object Cinema {
             shot = close(place)
             keys += Key(maxOf(leave + 1, reveal + ARRIVE_AFTER_REVEAL_MILLIS), shot)
             captions += Caption(reveal, payload.names[place], payload.details.getOrElse(place) { "" }, PLACE_COLOURS[place],
-                if (place == 0) ShineText.Style.GOLD else null)
+                if (place == 0) ShineText.Style.WINNER else null)
         }
         val held = keys.last().at + HOLD_WINNER_MILLIS
         keys += Key(held, shot)
@@ -288,7 +288,8 @@ object Cinema {
         if (playing.title.isNotEmpty()) {
             if (playing.title == CEREMONY || playing.title == ROUND_OPENS) {
                 ShineText.drawCentred(graphics, font, playing.title, width / 2f, (bar - font.lineHeight) / 2f,
-                    if (playing.title == CEREMONY) ShineText.Style.GOLD else ShineText.Style.XMAS, amount, now, stagger = true)
+                    if (playing.title == CEREMONY) ShineText.Style.WINNER else ShineText.Style.XMAS, amount, now,
+                    stagger = true, bounce = playing.title == ROUND_OPENS)
             } else {
                 graphics.text(font, playing.title, (width - font.width(playing.title)) / 2, (bar - font.lineHeight) / 2,
                     Vignette.alpha(if (festive) TRIM else Palette.GOLD, amount), false)
